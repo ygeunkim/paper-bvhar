@@ -1,0 +1,23 @@
+---
+output: 
+  bookdown::github_document2:
+    number_sections: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  comment = "#>",
+  collapse = TRUE,
+  out.width = "70%",
+  fig.align = "center",
+  fig.width = 6,
+  fig.asp = .618,
+  echo = FALSE
+  )
+options(digits = 3)
+```
+
+# Bayesian Vector Autoregressive Heterogeneous Modeling
+
+This is a repo for researching Bayesian VHAR.
+
