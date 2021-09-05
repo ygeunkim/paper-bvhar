@@ -8,10 +8,10 @@ set.seed(1)
 #---------------------------------------------
 mts_dim <- 15
 # sig <- c(.00003, .00002, .00015, .00001, .00025, .00005, .00035, .00004, .00045, .00002)
-sig <- runif(mts_dim, 0, .00005)
+sig <- runif(mts_dim, .00001, .000045)
 lam <- .1
 delta <- rep(.1, mts_dim)
-var_lag <- 10
+var_lag <- 22
 # Make as function----------------------------
 sim_process <- function(var_lag, mts_dim, num_train, num_test, sigma, lamda, delta) {
   if (mts_dim != length(sigma)) stop("Length of sigma should be the same as mts_dim")
@@ -26,7 +26,7 @@ sim_process <- function(var_lag, mts_dim, num_train, num_test, sigma, lamda, del
     VAR_COEF,
     var_lag,
     diag(mts_dim),
-    matrix(0L, nrow = bvar_lag, ncol = mts_dim)
+    matrix(0L, nrow = var_lag, ncol = mts_dim)
   )
   colnames(y_var) <- paste("asset", sprintf(1:mts_dim, fmt = "%02d"), sep = "_")
   y_var
@@ -60,21 +60,21 @@ y_medium %>%
 y_small_split <- divide_ts(y_small, num_test)
 y_medium_split <- divide_ts(y_medium, num_test)
 y_large_split <- divide_ts(y_large, num_test)
-# Save SMALL----------------------------------
+# # Save SMALL----------------------------------
 # y_small_split$train %>%
 #   as.data.frame() %>%
 #   write_csv(file = "data/processed/varsim_small_train.csv")
 # y_small_split$test %>%
 #   as.data.frame() %>%
 #   write_csv(file = "data/processed/varsim_small_test.csv")
-# Save MEDIUM--------------------------------
+# # Save MEDIUM--------------------------------
 # y_medium_split$train %>%
 #   as.data.frame() %>%
 #   write_csv(file = "data/processed/varsim_medium_train.csv")
 # y_medium_split$test %>%
 #   as.data.frame() %>%
 #   write_csv(file = "data/processed/varsim_medium_test.csv")
-# Save LARGE---------------------------------
+# # Save LARGE---------------------------------
 # y_large_split$train %>%
 #   as.data.frame() %>%
 #   write_csv(file = "data/processed/varsim_large_train.csv")
