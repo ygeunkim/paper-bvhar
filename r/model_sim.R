@@ -1,30 +1,30 @@
 library(tidyverse)
 library(bvhar)
 #---------------------------------------------
-y_train <- read_csv("data/processed/varsim_train.csv")
-y_test <- read_csv("data/processed/varsim_test.csv")
-num_test <- nrow(y_test)
+medium_train <- read_csv("data/processed/varsim_medium_train.csv")
+medium_test <- read_csv("data/processed/varsim_medium_test.csv")
+num_test <- nrow(medium_test)
 # VAR-----------------------------------------
 doMC::registerDoMC(16)
-choose_var(y_train, 25, TRUE)
+choose_var(medium_train, 25, TRUE)
 var_lag <- 2
-fit_var <- var_lm(y_train, var_lag)
+fit_var <- var_lm(medium_train, var_lag)
 pred_var <- predict(fit_var, num_test)
-mse_var <- mse(pred_var, y_test)
+mse_var <- mse(pred_var, medium_test)
 # VHAR----------------------------------------
-fit_vhar <- vhar_lm(y_train)
+fit_vhar <- vhar_lm(medium_train)
 pred_vhar <- predict(fit_vhar, num_test)
-mse_vhar <- mse(pred_vhar, y_test)
+mse_vhar <- mse(pred_vhar, medium_test)
 # BVAR----------------------------------------
-sig <- apply(y_train, 2, sd)
+sig <- apply(medium_train, 2, sd)
 lam <- .5
-del <- rep(.1, ncol(y_train))
-fit_bvar <- bvar_minnesota(y_train, var_lag, sig, lam, del)
+del <- rep(.1, ncol(medium_train))
+fit_bvar <- bvar_minnesota(medium_train, var_lag, sig, lam, del)
 pred_bvar <- predict(fit_bvar, num_test)
-mse_bvar <- mse(pred_bvar, y_test)
+mse_bvar <- mse(pred_bvar, medium_test)
 # BVHAR: VAR-type-----------------------------
 fit_bvhar_v1 <- bvhar_minnesota(
-  y_train,
+  medium_train,
   type = "VAR",
   sigma = sig,
   lambda = lam,
@@ -32,13 +32,13 @@ fit_bvhar_v1 <- bvhar_minnesota(
   eps = 1e-04
 )
 pred_bvhar_v1 <- predict(fit_bvhar_v1, num_test)
-mse_bvhar_v1 <- mse(pred_bvhar_v1, y_test)
+mse_bvhar_v1 <- mse(pred_bvhar_v1, medium_test)
 # BVHAR: HAR-type-----------------------------
-daily <- rep(.1, ncol(y_train))
-weekly <- rep(.05, ncol(y_train))
-monthly <- rep(.01, ncol(y_train))
+daily <- rep(.1, ncol(medium_train))
+weekly <- rep(.05, ncol(medium_train))
+monthly <- rep(.03, ncol(medium_train))
 fit_bvhar_v2 <- bvhar_minnesota(
-  y_train,
+  medium_train,
   type = "VHAR",
   sigma = sig,
   lambda = lam,
@@ -48,7 +48,7 @@ fit_bvhar_v2 <- bvhar_minnesota(
   eps = 1e-04
 )
 pred_bvhar_v2 <- predict(fit_bvhar_v2, num_test)
-mse_bvhar_v2 <- mse(pred_bvhar_v2, y_test)
+mse_bvhar_v2 <- mse(pred_bvhar_v2, medium_test)
 # Plot the loss-------------------------------
 list(
   pred_var,
@@ -57,6 +57,6 @@ list(
   pred_bvhar_v1,
   pred_bvhar_v2
 ) %>% 
-  plot_loss(y = y_test) +
+  plot_loss(y = medium_test) +
   theme_minimal() +
   scale_y_log10()
