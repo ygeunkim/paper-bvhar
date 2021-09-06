@@ -3,74 +3,48 @@ library(bvhar)
 set.seed(1)
 # VAR(5)--------------------------------------
 # small: 3-dim
-# medium: 7-dim
-# large: 15-dim
+# medium: 5-dim
+# large: 10-dim
 #---------------------------------------------
-mts_dim <- 15
+mts_dim <- 10
 small_dim <- 3
-medium_dim <- 7
-# sigma = diag(sig)
+medium_dim <- 5
 sig <- runif(mts_dim, .00001, .000045)
-# lambda: shrinkage hyperparameter
-lam_small <- .05
-lam_medium <- .1
-lam_large <- .1
-# delta: white noise (0) vs random walk (1: litterman)
+lam <- .1
 delta <- rep(.1, mts_dim)
-# p: VAR order
 var_lag <- 22
-# numbers: train + test
-num_train <- 5000
-num_test <- 100
+num_train <- 3000
+num_test <- 50
 # Make as function----------------------------
-sim_process <- function(N, burnin, var_lag, mts_dim, sigma, lambda, delta) {
+sim_stable_process <- function(var_lag, mts_dim, num_train, num_test, sigma, lamda, delta) {
   if (mts_dim != length(sigma)) stop("Length of sigma should be the same as mts_dim")
   if (mts_dim != length(delta)) stop("Length of delta should be the same as mts_dim")
   # coefficients-----------------
-  BVAR_SIM <- sim_mncoef(var_lag, sigma, lambda, delta)
+  BVAR_SIM <- sim_mncoef(var_lag, sigma, lamda, delta)
   VAR_COEF <- BVAR_SIM$coefficients
   VAR_SIG <- BVAR_SIM$covmat
   # Generate VAR-----------------
-  y_var <- sim_var(
-    N,
+  y_var <- sim_stable_var(
+    num_train + num_test,
     VAR_COEF,
     var_lag,
-    diag(sigma),
-    matrix(0L, nrow = var_lag, ncol = mts_dim)
+    diag(mts_dim)
   )
   colnames(y_var) <- paste("asset", sprintf(1:mts_dim, fmt = "%02d"), sep = "_")
-  y_var[-seq_len(burnin),]
+  y_var
 }
 # SMALL MEDIUM LARGE--------------------------
 set.seed(1)
-y_small <- sim_process(
-  N = num_train + num_test + 1000,
-  burnin = 1000,
-  var_lag = var_lag, 
-  mts_dim = small_dim, 
-  sigma = sig[1:small_dim], 
-  lambda = lam_small, 
-  delta = delta[1:small_dim]
+y_small <- sim_stable_process(
+  var_lag, small_dim, num_train, num_test, sig[1:small_dim], lam, delta[1:small_dim]
 )
 set.seed(1)
-y_medium <- sim_process(
-  N = num_train + num_test + 1000,
-  burnin = 1000,
-  var_lag = var_lag, 
-  mts_dim = medium_dim, 
-  sigma = sig[1:medium_dim], 
-  lambda = lam_medium, 
-  delta = delta[1:medium_dim]
+y_medium <- sim_stable_process(
+  var_lag, medium_dim, num_train, num_test, sig[1:medium_dim], lam, delta[1:medium_dim]
 )
 set.seed(1)
-y_large <- sim_process(
-  N = num_train + num_test + 1000,
-  burnin = 1000,
-  var_lag = var_lag, 
-  mts_dim = mts_dim, 
-  sigma = sig, 
-  lambda = lam_large, 
-  delta = delta
+y_large <- sim_stable_process(
+  var_lag, mts_dim, num_train, num_test, sig, lam, delta
 )
 # Plot----------------------------------------
 y_medium %>% 
@@ -91,21 +65,22 @@ y_large_split <- divide_ts(y_large, num_test)
 # # Save SMALL----------------------------------
 # y_small_split$train %>%
 #   as.data.frame() %>%
-#   write_csv(file = "data/processed/varsim_small_train.csv")
+#   write_csv(file = "data/processed/varsim_stable_small_train.csv")
 # y_small_split$test %>%
 #   as.data.frame() %>%
-#   write_csv(file = "data/processed/varsim_small_test.csv")
+#   write_csv(file = "data/processed/varsim_stable_small_test.csv")
 # # Save MEDIUM--------------------------------
 # y_medium_split$train %>%
 #   as.data.frame() %>%
-#   write_csv(file = "data/processed/varsim_medium_train.csv")
+#   write_csv(file = "data/processed/varsim_stable_medium_train.csv")
 # y_medium_split$test %>%
 #   as.data.frame() %>%
-#   write_csv(file = "data/processed/varsim_medium_test.csv")
+#   write_csv(file = "data/processed/varsim_stable_medium_test.csv")
 # # Save LARGE---------------------------------
 # y_large_split$train %>%
 #   as.data.frame() %>%
-#   write_csv(file = "data/processed/varsim_large_train.csv")
+#   write_csv(file = "data/processed/varsim_stable_large_train.csv")
 # y_large_split$test %>%
 #   as.data.frame() %>%
-#   write_csv(file = "data/processed/varsim_large_test.csv")
+#   write_csv(file = "data/processed/varsim_stable_large_test.csv")
+
