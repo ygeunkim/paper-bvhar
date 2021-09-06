@@ -1,0 +1,298 @@
+---
+title: "Modeling Simulation Data"
+subtitle: "`r params$data_tr` and `r params$data_te`"
+author: "Young Geun Kim"
+date: "`r format(Sys.time(), '%d %b, %Y')`"
+output: 
+  bookdown::html_document2:
+    toc: true
+params:
+  data_tr:
+    label: "Input train dataset:"
+    value: ../data/processed/vharsim_medium_train.csv
+    input: file
+  data_te:
+    label: "Input test dataset:"
+    value: ../data/processed/vharsim_medium_test.csv
+    input: file
+  var_lag:
+    label: "Lag of VAR:"
+    value: 3
+    input: slider
+    min: 1
+    max: 25
+    step: 1
+  bvar_del:
+    label: "delta of BVAR:"
+    value: .1
+    input: numeric
+  bvar_lam:
+    label: "lambda of BVAR:"
+    value: .1
+    input: numeric
+  bvar_lag:
+    label: "Lag of BVAR"
+    value: 3
+    input: slider
+    min: 1
+    max: 25
+    step: 1
+  bvhar_del:
+    label: "delta of BVHAR:"
+    value: .1
+    input: numeric
+  bvhar_lam:
+    label: "lambda of BVHAR:"
+    value: .1
+    input: numeric
+  daily_del:
+    label: "Daily delta:"
+    value: .1
+    input: numeric
+  weekly_del:
+    label: "Weekly delta:"
+    value: .05
+    input: numeric
+  monthly_del:
+    label: "Monthly delta:"
+    value: .03
+    input: numeric
+  predplot_cut:
+    label: "Prediction plot x label from:"
+    value: 2000
+    input: slider
+    min: 1
+    max: 4000
+    step: 100
+knit:
+  (function(inputFile, encoding) {
+    rmarkdown::render(input = inputFile, encoding = encoding, output_dir = "../docs/results", params = "ask")
+  })
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  comment = "#>",
+  collapse = TRUE,
+  out.width = "70%",
+  fig.align = "center",
+  fig.width = 6,
+  fig.asp = .618,
+  fig.pos = "H"
+  )
+knitr::knit_hooks$set(
+  document = function(x) {
+    sub("\\usepackage[]{color}", "\\usepackage{xcolor}", x, fixed = TRUE)
+  }
+)
+options(digits = 3)
+plot_cut <- params$predplot_cut
+```
+
+```{r}
+library(tidyverse)
+library(bvhar)
+```
+
+# Dataset
+
+## Import
+
+```{r, message=FALSE}
+y_train <- read_csv(params$data_tr)
+y_test <- read_csv(params$data_te)
+(num_test <- nrow(y_test))
+```
+
+```{r, echo=FALSE}
+y_train %>% 
+  mutate(train = TRUE) %>% 
+  bind_rows(y_test %>% mutate(train = FALSE)) %>% 
+  mutate(id = 1:n()) %>% 
+  pivot_longer(-c(id, train), names_to = "asset", values_to = "value") %>% 
+  ggplot(aes(x = id, y = value)) +
+  geom_path(aes(colour = train), show.legend = FALSE) +
+  facet_grid(asset ~ ., scales = "free_y") +
+  labs(
+    x = element_blank(),
+    y = element_blank()
+  )
+```
+
+# Models
+
+## VAR
+
+```{r}
+(var_lag <- params$var_lag)
+```
+
+```{r}
+fit_var <- var_lm(y_train, var_lag)
+pred_var <- predict(fit_var, num_test)
+(mse_var <- mse(pred_var, y_test))
+```
+
+```{r}
+autoplot(pred_var, x_cut = plot_cut)
+```
+
+## VHAR
+
+```{r}
+fit_vhar <- vhar_lm(y_train)
+pred_vhar <- predict(fit_vhar, num_test)
+(mse_vhar <- mse(pred_vhar, y_test))
+```
+
+```{r}
+autoplot(pred_vhar, x_cut = plot_cut)
+```
+
+## BVAR
+
+### Shrinkage hyperparameter
+
+```{r}
+(lam <- params$bvar_lam)
+```
+
+### delta
+
+White noise ($\delta_i = 0$) versus random walk ($\delta_i = 1$, Litterman):
+
+```{r}
+(del <- rep(params$bvar_del, ncol(y_train)))
+```
+
+### sigma
+
+$\Sigma_e = diag(\sigma_1, \ldots, \sigma_m)$: use sd of each variable.
+
+```{r}
+(sig <- apply(y_train, 2, sd))
+```
+
+### fit
+
+```{r}
+(bvar_lag <- params$bvar_lag)
+```
+
+```{r}
+fit_bvar <- bvar_minnesota(y_train, bvar_lag, sig, lam, del)
+pred_bvar <- predict(fit_bvar, num_test)
+(mse_bvar <- mse(pred_bvar, y_test))
+```
+
+```{r}
+autoplot(pred_bvar, x_cut = plot_cut)
+```
+
+## BVHAR
+
+### Shrinkage hyperparameter
+
+```{r}
+(lam_bvhar <- params$bvhar_lam)
+```
+
+### delta
+
+White noise ($\delta_i = 0$) versus random walk ($\delta_i = 1$, Litterman):
+
+```{r}
+(del_bvhar <- rep(params$bvhar_del, ncol(y_train)))
+```
+
+### sigma
+
+$\Sigma_e = diag(\sigma_1, \ldots, \sigma_m)$: use sd of each variable.
+
+```{r}
+(sig_bvhar <- apply(y_train, 2, sd))
+```
+
+### VAR-type BVHAR
+
+```{r}
+fit_bvhar_v1 <- bvhar_minnesota(
+  y_train,
+  type = "VAR",
+  sigma = sig_bvhar,
+  lambda = lam_bvhar,
+  delta = del_bvhar,
+  eps = 1e-04
+)
+pred_bvhar_v1 <- predict(fit_bvhar_v1, num_test)
+(mse_bvhar_v1 <- mse(pred_bvhar_v1, y_test))
+```
+
+```{r}
+autoplot(pred_bvhar_v1, x_cut = plot_cut)
+```
+
+### For HAR-type BVHAR
+
+$\delta_i$ for every daily, weekly, monthly matrix
+
+```{r}
+(daily <- rep(params$daily_del, ncol(y_train)))
+(weekly <- rep(params$weekly_del, ncol(y_train)))
+(monthly <- rep(params$monthly_del, ncol(y_train)))
+```
+
+### HAR-type BVHAR
+
+```{r}
+fit_bvhar_v2 <- bvhar_minnesota(
+  y_train,
+  type = "VHAR",
+  sigma = sig_bvhar,
+  lambda = lam_bvhar,
+  daily = daily,
+  weekly = weekly,
+  monthly = monthly,
+  eps = 1e-04
+)
+pred_bvhar_v2 <- predict(fit_bvhar_v2, num_test)
+(mse_bvhar_v2 <- mse(pred_bvhar_v2, y_test))
+```
+
+```{r}
+autoplot(pred_bvhar_v2, x_cut = plot_cut)
+```
+
+## Compare
+
+### Mean of mse
+
+```{r}
+list(
+  VAR = pred_var,
+  VHAR = pred_vhar,
+  BVAR = pred_bvar,
+  BVHAR1 = pred_bvhar_v1,
+  BVHAR2 = pred_bvhar_v2
+) %>% 
+  lapply(function(PRED) mse(PRED, y = y_test) %>% mean()) %>% 
+  unlist() %>% 
+  sort()
+```
+
+### Plot
+
+```{r}
+list(
+  pred_var,
+  pred_vhar,
+  pred_bvar,
+  pred_bvhar_v1,
+  pred_bvhar_v2
+) %>% 
+  plot_loss(y = y_test) +
+  theme_minimal() +
+  scale_y_log10()
+```
+
+
