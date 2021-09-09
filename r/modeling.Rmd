@@ -1,72 +1,77 @@
 ---
 title: "Modeling Simulation Data"
-subtitle: "`r params$data_tr` and `r params$data_te`"
+subtitle: "`r params$size` `r params$simulation`"
 author: "Young Geun Kim"
 date: "`r format(Sys.time(), '%d %b, %Y')`"
 output: 
   bookdown::html_document2:
     toc: true
 params:
-  data_tr:
-    label: "Input train dataset:"
-    value: ../data/processed/vharsim_medium_train.csv
-    input: file
-  data_te:
-    label: "Input test dataset:"
-    value: ../data/processed/vharsim_medium_test.csv
-    input: file
+  simulation:
+    label: "Simulation model:"
+    value: vhar
+    choices: [vhar, var]
+  size:
+    label: "Simulation size:"
+    value: medium
+    choices: [small, medium, large]
   var_lag:
     label: "Lag of VAR:"
-    value: 3
+    value: 5
     input: slider
     min: 1
     max: 25
     step: 1
   bvar_del:
     label: "delta of BVAR:"
-    value: .1
+    value: .3
     input: numeric
   bvar_lam:
     label: "lambda of BVAR:"
-    value: .1
+    value: .6
     input: numeric
   bvar_lag:
     label: "Lag of BVAR"
-    value: 3
+    value: 5
     input: slider
     min: 1
     max: 25
     step: 1
   bvhar_del:
     label: "delta of BVHAR:"
-    value: .1
+    value: .3
     input: numeric
   bvhar_lam:
     label: "lambda of BVHAR:"
-    value: .1
+    value: .6
     input: numeric
   daily_del:
     label: "Daily delta:"
-    value: .1
+    value: .9
     input: numeric
   weekly_del:
     label: "Weekly delta:"
-    value: .05
+    value: .8
     input: numeric
   monthly_del:
     label: "Monthly delta:"
-    value: .03
+    value: .7
     input: numeric
   predplot_cut:
     label: "Prediction plot x label from:"
-    value: 2000
+    value: 3000
     input: slider
     min: 1
     max: 4000
     step: 100
 knit:
   (function(inputFile, encoding) {
-    rmarkdown::render(input = inputFile, encoding = encoding, output_dir = "../docs/results", params = "ask")
+    rmarkdown::render(
+      input = inputFile,
+      output_dir = "../docs/results", 
+      params = "ask", 
+      encoding = encoding
+    )
   })
 ---
 
@@ -99,8 +104,25 @@ library(bvhar)
 ## Import
 
 ```{r, message=FALSE}
-y_train <- read_csv(params$data_tr)
-y_test <- read_csv(params$data_te)
+# Train data set----------------------------
+tr_file <- 
+  str_c(
+    "../data/processed/",
+    params$simulation,
+    "sim"
+  ) %>% 
+  str_c(params$size, "train.csv", sep = "_")
+# Test data set----------------------------
+te_file <- 
+  str_c(
+    "../data/processed/",
+    params$simulation,
+    "sim"
+  ) %>% 
+  str_c(params$size, "test.csv", sep = "_")
+# Import-----------------------------------
+y_train <- read_csv(tr_file)
+y_test <- read_csv(te_file)
 (num_test <- nrow(y_test))
 ```
 
