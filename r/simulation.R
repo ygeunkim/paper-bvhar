@@ -1,77 +1,74 @@
 library(tidyverse)
 library(bvhar)
 set.seed(1)
-# VAR(5)--------------------------------------
-# small: 3-dim
-# medium: 7-dim
-# large: 15-dim
+# Simulate VAR--------------------------------
+# Order: 25
+# Use coefficient from fitting oxfordman.csv
+# small: DJI, IXIC, RUT, SPX, AORD
+# medium: add KS11, N225, SSEC, HSI
+# large: add BFX, FCHI, FTMIB, FTSE, IBEX, SSMI
 #---------------------------------------------
-mts_dim <- 15
-small_dim <- 3
-medium_dim <- 7
-# sigma = diag(sig)
-sig <- runif(mts_dim, .00001, .000045)
-# lambda: shrinkage hyperparameter
-lam_small <- .05
-lam_medium <- .1
-lam_large <- .1
-# delta: white noise (0) vs random walk (1: litterman)
-delta <- rep(.1, mts_dim)
+small_asset <- c("DJI", "IXIC", "RUT", "SPX", "AORD")
+medium_asset <- c(small_asset, c("KS11", "N225", "SSEC", "HSI"))
+large_asset <- c(medium_asset, c("BFX", "FCHI", "FTMIB", "FTSE", "IBEX", "SSMI"))
+oxfordman <- read_csv("data/processed/oxfordman.csv")
 # p: VAR order
-var_lag <- 22
+var_lag <- 25
+# define coefficients-------------------------
+small_fit <- 
+  oxfordman %>% 
+  select(all_of(small_asset)) %>% 
+  var_lm(., var_lag)
+medium_fit <- 
+  oxfordman %>% 
+  select(all_of(medium_asset)) %>% 
+  var_lm(., var_lag)
+large_fit <- 
+  oxfordman %>% 
+  select(all_of(large_asset)) %>% 
+  var_lm(., var_lag)
+# Generate------------------------------------
+# Train: 5000
+# Test: 100
+# Burn-in: 1000
+#---------------------------------------------
 # numbers: train + test
 num_train <- 5000
 num_test <- 100
-# Make as function----------------------------
-sim_process <- function(N, burnin, var_lag, mts_dim, sigma, lambda, delta) {
-  if (mts_dim != length(sigma)) stop("Length of sigma should be the same as mts_dim")
-  if (mts_dim != length(delta)) stop("Length of delta should be the same as mts_dim")
-  # coefficients-----------------
-  BVAR_SIM <- sim_mncoef(var_lag, sigma, lambda, delta)
-  VAR_COEF <- BVAR_SIM$coefficients
-  VAR_SIG <- BVAR_SIM$covmat
-  # Generate VAR-----------------
-  y_var <- sim_var(
-    N,
-    VAR_COEF,
-    var_lag,
-    diag(sigma),
-    matrix(0L, nrow = var_lag, ncol = mts_dim)
-  )
-  colnames(y_var) <- paste("asset", sprintf(1:mts_dim, fmt = "%02d"), sep = "_")
-  y_var[-seq_len(burnin),]
-}
-# SMALL MEDIUM LARGE--------------------------
+num_burin <- 50
+# SMALL---------------------------------------
 set.seed(1)
-y_small <- sim_process(
-  N = num_train + num_test + 1000,
-  burnin = 1000,
-  var_lag = var_lag, 
-  mts_dim = small_dim, 
-  sigma = sig[1:small_dim], 
-  lambda = lam_small, 
-  delta = delta[1:small_dim]
+y_small <- sim_var(
+  num_train + num_test,
+  num_burin,
+  coef(small_fit),
+  var_lag,
+  small_fit$covmat,
+  matrix(0L, nrow = var_lag, ncol = length(small_asset))
 )
+colnames(y_small) <- paste("asset", sprintf(1:length(small_asset), fmt = "%02d"), sep = "_")
+# MEDIUM--------------------------------------
 set.seed(1)
-y_medium <- sim_process(
-  N = num_train + num_test + 1000,
-  burnin = 1000,
-  var_lag = var_lag, 
-  mts_dim = medium_dim, 
-  sigma = sig[1:medium_dim], 
-  lambda = lam_medium, 
-  delta = delta[1:medium_dim]
+y_medium <- sim_var(
+  num_train + num_test,
+  num_burin,
+  coef(medium_fit),
+  var_lag,
+  medium_fit$covmat,
+  matrix(0L, nrow = var_lag, ncol = length(medium_asset))
 )
+colnames(y_medium) <- paste("asset", sprintf(1:length(medium_asset), fmt = "%02d"), sep = "_")
+# LARGE---------------------------------------
 set.seed(1)
-y_large <- sim_process(
-  N = num_train + num_test + 1000,
-  burnin = 1000,
-  var_lag = var_lag, 
-  mts_dim = mts_dim, 
-  sigma = sig, 
-  lambda = lam_large, 
-  delta = delta
+y_large <- sim_var(
+  num_train + num_test,
+  num_burin,
+  coef(large_fit),
+  var_lag,
+  large_fit$covmat,
+  matrix(0L, nrow = var_lag, ncol = length(large_asset))
 )
+colnames(y_large) <- paste("asset", sprintf(1:length(large_asset), fmt = "%02d"), sep = "_")
 # Plot----------------------------------------
 y_medium %>% 
   as.data.frame() %>% 

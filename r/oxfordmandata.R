@@ -2,19 +2,23 @@ library(tidyverse)
 #----------------------------------
 # About assets: https://realized.oxford-man.ox.ac.uk/data/assets
 # About realized measures: https://realized.oxford-man.ox.ac.uk/documentation/estimators
-# Use oxfordman RV5 as starting value of simulation
-# VAR(p): only need p
-# VHAR: 22
-# From March 2015
+# Rdata file
+# data: matrix (transposed)
+# date: from 2010-01-04 to 2019-11-15
+# assets: see the list in the above link
 #----------------------------------
-oxfordman <- read_csv("data/raw/oxfordmanrealizedvolatilityindices.csv")
-oxfordman <- 
-  oxfordman %>% 
-  select(Date, Symbol, rv5) %>% # rv5
-  mutate(Symbol = str_remove(Symbol, pattern = "^.")) %>% 
-  filter(Date > "2015-03-01", Date < "2021-09-01") %>% # from March 2015
-  pivot_wider(id_cols = Date, names_from = "Symbol", values_from = "rv5") %>%  # each column is asset
-  arrange(Date)
+load("data/raw/rk2010.Rdata", rv <- new.env())
+ls.str(rv)
+rk2010 <- 
+  rv$data %>% 
+  t() %>% 
+  as_tibble() %>% 
+  add_column(Date = rv$date, .before = 1) %>% 
+  filter(between(
+    Date,
+    lubridate::as_date("2014-01-06"),
+    lubridate::as_date("2019-11-15")
+  ))
 # save-----------------------------
-oxfordman %>% 
+rk2010 %>% 
   write_csv(file = "data/processed/oxfordman.csv")
