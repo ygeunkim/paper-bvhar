@@ -39,7 +39,7 @@ y_small <- sim_vhar(
   num_train + num_test,
   num_burin,
   coef(small_fit),
-  small_fit$covmat,
+  diag(small_fit$covmat) %>% diag(),
   matrix(0L, nrow = 22L, ncol = length(small_asset))
 )
 colnames(y_small) <- paste("asset", sprintf(1:length(small_asset), fmt = "%02d"), sep = "_")
@@ -49,7 +49,7 @@ y_medium <- sim_vhar(
   num_train + num_test,
   num_burin,
   coef(medium_fit),
-  medium_fit$covmat,
+  diag(medium_fit$covmat) %>% diag(),
   matrix(0L, nrow = 22L, ncol = length(medium_asset))
 )
 colnames(y_medium) <- paste("asset", sprintf(1:length(medium_asset), fmt = "%02d"), sep = "_")
@@ -59,7 +59,7 @@ y_large <- sim_vhar(
   num_train + num_test,
   num_burin,
   coef(large_fit),
-  large_fit$covmat,
+  diag(large_fit$covmat) %>% diag(),
   matrix(0L, nrow = 22L, ncol = length(large_asset))
 )
 colnames(y_large) <- paste("asset", sprintf(1:length(large_asset), fmt = "%02d"), sep = "_")

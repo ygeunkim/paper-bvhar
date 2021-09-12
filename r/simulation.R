@@ -43,7 +43,7 @@ y_small <- sim_var(
   num_burin,
   coef(small_fit),
   var_lag,
-  small_fit$covmat,
+  diag(small_fit$covmat) %>% diag(),
   matrix(0L, nrow = var_lag, ncol = length(small_asset))
 )
 colnames(y_small) <- paste("asset", sprintf(1:length(small_asset), fmt = "%02d"), sep = "_")
@@ -54,7 +54,7 @@ y_medium <- sim_var(
   num_burin,
   coef(medium_fit),
   var_lag,
-  medium_fit$covmat,
+  diag(medium_fit$covmat) %>% diag(),
   matrix(0L, nrow = var_lag, ncol = length(medium_asset))
 )
 colnames(y_medium) <- paste("asset", sprintf(1:length(medium_asset), fmt = "%02d"), sep = "_")
@@ -65,7 +65,7 @@ y_large <- sim_var(
   num_burin,
   coef(large_fit),
   var_lag,
-  large_fit$covmat,
+  diag(large_fit$covmat) %>% diag(),
   matrix(0L, nrow = var_lag, ncol = length(large_asset))
 )
 colnames(y_large) <- paste("asset", sprintf(1:length(large_asset), fmt = "%02d"), sep = "_")
