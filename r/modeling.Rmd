@@ -1,6 +1,6 @@
 ---
 title: "Modeling Simulation Data"
-subtitle: "`r params$size` `r params$simulation`"
+subtitle: "`r params$size`-`r params$simulation` data"
 author: "Young Geun Kim"
 date: "`r format(Sys.time(), '%d %b, %Y')`"
 output: 
@@ -29,9 +29,13 @@ params:
     min: 1
     max: 25
     step: 1
+  include_mean:
+    label: "Include constant term?"
+    value: FALSE
+    input: checkbox
   bvar_del:
     label: "delta of BVAR:"
-    value: .6
+    value: .1
     input: numeric
   bvar_lam:
     label: "lambda of BVAR:"
@@ -46,7 +50,7 @@ params:
     step: 1
   bvhar_del:
     label: "delta of BVHAR:"
-    value: .6
+    value: .1
     input: numeric
   bvhar_lam:
     label: "lambda of BVHAR:"
@@ -54,15 +58,15 @@ params:
     input: numeric
   daily_del:
     label: "Daily delta:"
-    value: .3
+    value: .2
     input: numeric
   weekly_del:
     label: "Weekly delta:"
-    value: .2
+    value: .1
     input: numeric
   monthly_del:
     label: "Monthly delta:"
-    value: .1
+    value: .05
     input: numeric
   predplot_cut:
     label: "Prediction plot x label from:"
@@ -91,7 +95,7 @@ knitr::opts_chunk$set(
   fig.width = 6,
   fig.asp = .618,
   fig.pos = "H"
-  )
+)
 knitr::knit_hooks$set(
   document = function(x) {
     sub("\\usepackage[]{color}", "\\usepackage{xcolor}", x, fixed = TRUE)
@@ -172,7 +176,11 @@ y_train %>%
 ```
 
 ```{r}
-fit_var <- var_lm(y_train, var_lag)
+(include_mean <- params$include_mean)
+```
+
+```{r}
+fit_var <- var_lm(y_train, var_lag, include_mean = include_mean)
 pred_var <- predict(fit_var, num_test)
 (mse_var <- mse(pred_var, y_test))
 ```
@@ -180,33 +188,26 @@ pred_var <- predict(fit_var, num_test)
 ## VHAR
 
 ```{r}
-fit_vhar <- vhar_lm(y_train)
+fit_vhar <- vhar_lm(y_train, include_mean = include_mean)
 pred_vhar <- predict(fit_vhar, num_test)
 (mse_vhar <- mse(pred_vhar, y_test))
 ```
 
 ## BVAR
 
-### Shrinkage hyperparameter
+### Minnesota prior specification
+
+- Shrinkage hyperparameter
+- delta: White noise ($\delta_i = 0$) versus random walk ($\delta_i = 1$, Litterman)
+- sigma: $\Sigma_e = diag(\sigma_1, \ldots, \sigma_m)$: use sd of each variable
 
 ```{r}
-(lam <- params$bvar_lam)
-```
-
-### delta
-
-White noise ($\delta_i = 0$) versus random walk ($\delta_i = 1$, Litterman):
-
-```{r}
-(del <- rep(params$bvar_del, ncol(y_train)))
-```
-
-### sigma
-
-$\Sigma_e = diag(\sigma_1, \ldots, \sigma_m)$: use sd of each variable.
-
-```{r}
-(sig <- apply(y_train, 2, sd))
+(bvar_spec <- set_bvar(
+  sigma = apply(y_train, 2, sd),
+  lambda = params$bvar_lam,
+  delta = rep(params$bvar_del, ncol(y_train)),
+  eps = 1e-04
+))
 ```
 
 ### fit
@@ -216,73 +217,50 @@ $\Sigma_e = diag(\sigma_1, \ldots, \sigma_m)$: use sd of each variable.
 ```
 
 ```{r}
-fit_bvar <- bvar_minnesota(y_train, bvar_lag, sig, lam, del)
+fit_bvar <- bvar_minnesota(y_train, bvar_lag, bayes_spec = bvar_spec, include_mean = include_mean)
 pred_bvar <- predict(fit_bvar, num_test)
 (mse_bvar <- mse(pred_bvar, y_test))
 ```
 
 ## BVHAR
 
-### Shrinkage hyperparameter
-
-```{r}
-(lam_bvhar <- params$bvhar_lam)
-```
-
-### delta
-
-White noise ($\delta_i = 0$) versus random walk ($\delta_i = 1$, Litterman):
-
-```{r}
-(del_bvhar <- rep(params$bvhar_del, ncol(y_train)))
-```
-
-### sigma
-
-$\Sigma_e = diag(\sigma_1, \ldots, \sigma_m)$: use sd of each variable.
-
-```{r}
-(sig_bvhar <- apply(y_train, 2, sd))
-```
-
 ### VAR-type BVHAR
 
 ```{r}
-fit_bvhar_v1 <- bvhar_minnesota(
-  y_train,
-  type = "VAR",
-  sigma = sig_bvhar,
-  lambda = lam_bvhar,
-  delta = del_bvhar,
+(bvhar_spec_v1 <- set_bvhar(
+  sigma = apply(y_train, 2, sd),
+  lambda = params$bvhar_lam,
+  delta = rep(params$bvhar_del, ncol(y_train)),
   eps = 1e-04
-)
+))
+```
+
+```{r}
+fit_bvhar_v1 <- bvhar_minnesota(y_train, bayes_spec = bvhar_spec_v1, include_mean = include_mean)
 pred_bvhar_v1 <- predict(fit_bvhar_v1, num_test)
 (mse_bvhar_v1 <- mse(pred_bvhar_v1, y_test))
 ```
 
-### For HAR-type BVHAR
+### HAR-type BVHAR
 
 $\delta_i$ for every daily, weekly, monthly matrix
 
 ```{r}
-(daily <- rep(params$daily_del, ncol(y_train)))
-(weekly <- rep(params$weekly_del, ncol(y_train)))
-(monthly <- rep(params$monthly_del, ncol(y_train)))
+(bvhar_spec_v2 <- set_weight_bvhar(
+  sigma = apply(y_train, 2, sd),
+  lambda = params$bvhar_lam,
+  eps = 1e-04,
+  daily = rep(params$daily_del, ncol(y_train)),
+  weekly = rep(params$weekly_del, ncol(y_train)),
+  monthly = rep(params$monthly_del, ncol(y_train))
+))
 ```
+
 
 ### HAR-type BVHAR
 
 ```{r}
-fit_bvhar_v2 <- bvhar_minnesota(
-  y_train,
-  type = "VHAR",
-  sigma = sig_bvhar,
-  lambda = lam_bvhar,
-  daily = daily,
-  weekly = weekly,
-  monthly = monthly,
-  eps = 1e-04
-)
+fit_bvhar_v2 <- bvhar_minnesota(y_train, bayes_spec = bvhar_spec_v2, include_mean = include_mean)
 pred_bvhar_v2 <- predict(fit_bvhar_v2, num_test)
 (mse_bvhar_v2 <- mse(pred_bvhar_v2, y_test))
 ```
@@ -293,9 +271,9 @@ pred_bvhar_v2 <- predict(fit_bvhar_v2, num_test)
 
 ```{r}
 autoplot(pred_var, x_cut = plot_cut, ci_alpha = .6, type = "wrap") +
-  # autolayer(pred_vhar, ci_alpha = .5) +
+  autolayer(pred_vhar, ci_alpha = .5) +
   autolayer(pred_bvar, ci_alpha = .4) +
-  # autolayer(pred_bvhar_v1, ci_alpha = .3) +
+  autolayer(pred_bvhar_v1, ci_alpha = .3) +
   autolayer(pred_bvhar_v2, ci_alpha = .2) +
   theme(legend.position = "bottom") +
   scale_colour_viridis_d() +
@@ -319,7 +297,7 @@ list(
   sort()
 ```
 
-Average over *key variables*, i.e. first 5 ones:
+Average over *key variables* (in small set), i.e. first 5 ones:
 
 ```{r}
 list(
