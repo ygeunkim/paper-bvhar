@@ -34,32 +34,38 @@ num_train <- 5000
 num_test <- 100
 num_burin <- 50
 # SMALL---------------------------------------
+small_coef <- coef(small_fit)[-small_fit$df,]
+small_var <- diag(small_fit$covmat) %>% diag()
 set.seed(1)
 y_small <- sim_vhar(
   num_train + num_test,
   num_burin,
-  coef(small_fit),
-  diag(small_fit$covmat) %>% diag(),
+  small_coef,
+  small_var,
   matrix(0L, nrow = 22L, ncol = length(small_asset))
 )
 colnames(y_small) <- paste("asset", sprintf(1:length(small_asset), fmt = "%02d"), sep = "_")
 # MEDIUM--------------------------------------
+medium_coef <- coef(medium_fit)[-medium_fit$df,]
+medium_var <- diag(medium_fit$covmat) %>% diag()
 set.seed(1)
 y_medium <- sim_vhar(
   num_train + num_test,
   num_burin,
-  coef(medium_fit),
-  diag(medium_fit$covmat) %>% diag(),
+  medium_coef,
+  medium_var,
   matrix(0L, nrow = 22L, ncol = length(medium_asset))
 )
 colnames(y_medium) <- paste("asset", sprintf(1:length(medium_asset), fmt = "%02d"), sep = "_")
 # LARGE---------------------------------------
+large_coef <- coef(large_fit)[-large_fit$df,]
+large_var <- diag(large_fit$covmat) %>% diag()
 set.seed(1)
 y_large <- sim_vhar(
   num_train + num_test,
   num_burin,
-  coef(large_fit),
-  diag(large_fit$covmat) %>% diag(),
+  large_coef,
+  large_var,
   matrix(0L, nrow = 22L, ncol = length(large_asset))
 )
 colnames(y_large) <- paste("asset", sprintf(1:length(large_asset), fmt = "%02d"), sep = "_")
