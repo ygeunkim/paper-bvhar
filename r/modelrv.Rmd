@@ -1,0 +1,404 @@
+---
+title: "Oxfordman Data"
+author: "Young Geun Kim"
+date: "`r format(Sys.time(), '%d %b, %Y')`"
+output: 
+  bookdown::html_document2:
+    toc: true
+knit:
+  (function(inputFile, encoding) {
+    rmarkdown::render(
+      input = inputFile,
+      output_dir = "../docs/results", 
+      encoding = encoding
+    )
+  })
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  comment = "#>",
+  collapse = TRUE,
+  out.width = "70%",
+  fig.align = "center",
+  fig.width = 6,
+  fig.asp = .618,
+  fig.pos = "H"
+)
+knitr::knit_hooks$set(
+  document = function(x) {
+    sub("\\usepackage[]{color}", "\\usepackage{xcolor}", x, fixed = TRUE)
+  }
+)
+options(digits = 3)
+```
+
+```{r}
+library(tidyverse)
+library(bvhar)
+```
+
+# Dataset
+
+## Oxford-man
+
+```{r}
+oxfordman_long
+```
+
+- Use log of realized kernel variance: `bvhar::oxfordman_rk`
+- Out-of-sample: 20
+
+```{r}
+h <- 20
+oxfordman_eval <- divide_ts(oxfordman_rk, h)
+oxfordman_train <- oxfordman_eval$train
+oxfordman_test <- oxfordman_eval$test
+```
+
+## Plot
+
+```{r}
+oxfordman_long %>% 
+  ggplot(aes(x = DATE, y = rk_parzen)) +
+  geom_path(aes(colour = Symbol), show.legend = FALSE) +
+  geom_vline(xintercept = lubridate::as_date("2019-12-02"))
+```
+
+```{r}
+oxfordman_long %>% 
+  ggplot(aes(sample = rk_parzen)) +
+  stat_qq_line() +
+  stat_qq(size = .1) +
+  facet_wrap(Symbol ~ ., scales = "free_y") +
+  theme(axis.text = element_blank())
+```
+
+<!-- ## Problems -->
+
+<!-- ### Unstability -->
+
+<!-- In fact, VAR and VHAR is unstable. -->
+<!-- For example, let p = 3. -->
+
+<!-- ```{r} -->
+<!-- Y0 <- build_y0(as.matrix(oxfordman_train), 3, 4) -->
+<!-- X0 <- build_design(as.matrix(oxfordman_train), 3) -->
+<!-- tryCatch( -->
+<!--   qr.solve(t(X0) %*% X0), -->
+<!--   error = function(e) cat("R cannot compute (X0^T X0)^(-1)") -->
+<!-- ) -->
+<!-- ``` -->
+
+<!-- ### Subsetting -->
+
+<!-- Let's exclude some variables (Asset lists: [https://realized.oxford-man.ox.ac.uk/data/assets](https://realized.oxford-man.ox.ac.uk/data/assets)) -->
+
+<!-- ```{r} -->
+<!-- names(oxfordman_train) -->
+<!-- ``` -->
+
+<!-- Some assets might be overlapped. -->
+
+<!-- - FTMIB and FTSE -->
+<!-- - GSPTSE and SPX -->
+
+# Analysis
+
+## VAR
+
+```{r}
+fit_var <- var_lm(oxfordman_train, 3, include_mean = FALSE)
+pred_var <- predict(fit_var, h)
+(mse_var <- mse(pred_var, oxfordman_test))
+```
+
+```{r}
+mean(mse_var)
+```
+
+## VHAR
+
+```{r}
+fit_vhar <- vhar_lm(oxfordman_train, include_mean = FALSE)
+pred_vhar <- predict(fit_vhar, h)
+(mse_vhar <- mse(pred_vhar, oxfordman_test))
+```
+
+```{r}
+mean(mse_vhar)
+```
+
+```{r}
+list(pred_var, pred_vhar) %>% 
+  plot_loss(y = oxfordman_test) +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
+```
+
+## BVAR
+
+```{r}
+m <- ncol(oxfordman_train)
+sig <- apply(oxfordman_train, 2, sd)
+lam <- .7
+del <- rep(.3, m)
+#----------------------------------
+(bvar_spec <- set_bvar(
+  sigma = sig,
+  lambda = lam,
+  delta = del
+))
+```
+
+```{r}
+fit_bvar <- bvar_minnesota(oxfordman_train, 3, bayes_spec = bvar_spec, include_mean = FALSE)
+pred_bvar <- predict(fit_bvar, h)
+(mse_bvar <- mse(pred_bvar, oxfordman_test))
+```
+
+```{r}
+mean(mse_bvar)
+```
+
+```{r}
+list(pred_vhar, pred_bvar) %>% 
+  plot_loss(y = oxfordman_test) +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
+```
+
+## BVHAR
+
+### VAR-type
+
+```{r}
+sig <- apply(oxfordman_train, 2, sd)
+lam <- .3
+del <- rep(.2, m)
+#----------------------------------
+(bvhar_spec_v1 <- set_bvhar(
+  sigma = sig,
+  lambda = lam,
+  delta = del
+))
+```
+
+
+```{r}
+fit_bvhar_v1 <- bvhar_minnesota(oxfordman_train, bayes_spec = bvhar_spec_v1, include_mean = FALSE)
+pred_bvhar_v1 <- predict(fit_bvhar_v1, h)
+(mse_bvhar_v1 <- mse(pred_bvhar_v1, oxfordman_test))
+```
+
+```{r}
+mean(mse_bvhar_v1)
+```
+
+```{r}
+list(pred_vhar, pred_bvhar_v1) %>% 
+  plot_loss(y = oxfordman_test) +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
+```
+
+### VHAR-type
+
+```{r}
+sig <- apply(oxfordman_train, 2, sd)
+lam <- .1
+wt_day <- rep(.8, m)
+wt_week <- rep(.5, m)
+wt_month <- rep(.4, m)
+(bvhar_spec_v2 <- set_weight_bvhar(
+  sigma = sig,
+  lambda = lam,
+  daily = wt_day,
+  weekly = wt_week,
+  monthly = wt_month
+))
+```
+
+```{r}
+fit_bvhar_v2 <- bvhar_minnesota(oxfordman_train, bayes_spec = bvhar_spec_v2, include_mean = FALSE)
+pred_bvhar_v2 <- predict(fit_bvhar_v2, h)
+(mse_bvhar_v2 <- mse(pred_bvhar_v2, oxfordman_test))
+mean(mse_bvhar_v2)
+```
+
+```{r}
+list(
+  pred_vhar, 
+  pred_bvhar_v1,
+  pred_bvhar_v2
+) %>% 
+  plot_loss(y = oxfordman_test) +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
+```
+
+```{r}
+list(
+  VAR = pred_var,
+  VHAR = pred_vhar,
+  BVAR = pred_bvar,
+  BVHAR1 = pred_bvhar_v1,
+  BVHAR2 = pred_bvhar_v2
+) %>% 
+  lapply(function(PRED) mse(PRED, y = oxfordman_test) %>% mean()) %>% 
+  unlist() %>% 
+  sort()
+```
+
+```{r}
+list(
+  VAR = pred_var,
+  VHAR = pred_vhar,
+  BVAR = pred_bvar,
+  BVHAR1 = pred_bvhar_v1,
+  BVHAR2 = pred_bvhar_v2
+) %>% 
+  lapply(function(PRED) mse(PRED, y = oxfordman_test)[-17] %>% mean()) %>% 
+  unlist() %>% 
+  sort()
+```
+
+```{r}
+autoplot(pred_var, x_cut = 1750, ci_alpha = .7, alpha_scale = .2, type = "wrap") +
+  autolayer(pred_vhar, ci_alpha = .5, alpha_scale = .2) +
+  # autolayer(pred_bvar, ci_alpha = .3, alpha_scale = .2) +
+  # autolayer(pred_bvhar_v1, ci_alpha = .2, alpha_scale = .2) +
+  autolayer(pred_bvhar_v2, ci_alpha = .1, alpha_scale = .2) +
+  theme(
+    legend.position = "bottom",
+    axis.text = element_blank()
+  )
+```
+
+# Energy Consumption Data
+
+```{r}
+est_energy
+```
+
+
+```{r}
+est_energy %>% 
+  mutate(id = 1:n()) %>% 
+  pivot_longer(-id, names_to = "region", values_to = "rk") %>% 
+  ggplot(aes(x = id, y = rk)) +
+  geom_path(aes(colour = region), show.legend = FALSE) +
+  theme_minimal()
+```
+
+Without `DEOK` (Daytok power and light componay),
+
+```{r}
+est_energy %>% 
+  mutate(id = 1:n()) %>% 
+  select(-DEOK) %>% 
+  pivot_longer(-id, names_to = "region", values_to = "rk") %>% 
+  ggplot(aes(x = id, y = rk)) +
+  geom_path(aes(colour = region), show.legend = FALSE) +
+  theme_minimal()
+```
+
+```{r}
+est_eval <- 
+  est_energy %>% 
+  # select(-DEOK) %>% 
+  divide_ts(30)
+est_train <- est_eval$train
+est_test <- est_eval$test
+```
+
+## Models
+
+### VAR
+
+```{r}
+energy_var <- var_lm(est_train, 3)
+pred_energy_var <- predict(energy_var, h)
+mse_energy_var <- mse(pred_energy_var, est_test)
+mean(mse_energy_var)
+```
+
+### VHAR
+
+```{r}
+energy_vhar <- vhar_lm(est_train)
+pred_energy_vhar <- predict(energy_vhar, h)
+mse_energy_vhar <- mse(pred_energy_vhar, est_test)
+mean(mse_energy_vhar)
+```
+
+### BVAR
+
+```{r}
+bvar_spec2 <- set_bvar(
+  sigma = apply(est_train, 2, sd),
+  lambda = .3,
+  delta = rep(.7, ncol(est_train))
+)
+# fit------------------------------
+energy_bvar <- bvar_minnesota(est_train, 3, bvar_spec2)
+pred_energy_bvar <- predict(energy_bvar, h)
+mse_energy_bvar <- mse(pred_energy_bvar, est_test)
+mean(mse_energy_bvar)
+```
+
+### BVHAR VAR-type
+
+```{r}
+bvhar_spec_var <- set_bvhar(
+  sigma = apply(est_train, 2, sd),
+  lambda = .2,
+  delta = rep(.7, ncol(est_train))
+)
+# fit------------------------------
+energy_bvhar_v1 <- bvhar_minnesota(est_train, bvhar_spec_var)
+pred_energy_bvhar_v1 <- predict(energy_bvhar_v1, h)
+mse_energy_bvhar_v1 <- mse(pred_energy_bvhar_v1, est_test)
+mean(mse_energy_bvhar_v1)
+```
+
+### BVHAR VHAR-type
+
+```{r}
+bvhar_spec_vhar <- set_weight_bvhar(
+  sigma = apply(est_train, 2, sd),
+  lambda = .2,
+  daily = rep(.5, ncol(est_train)),
+  weekly = rep(.2, ncol(est_train)),
+  monthly = rep(.1, ncol(est_train))
+)
+# fit--------------------------------
+energy_bvhar_v2 <- bvhar_minnesota(est_train, bvhar_spec_vhar)
+pred_energy_bvhar_v2 <- predict(energy_bvhar_v2, h)
+mse_energy_bvhar_v2 <- mse(pred_energy_bvhar_v2, est_test)
+mean(mse_energy_bvhar_v2)
+```
+
+```{r}
+list(
+  VAR = pred_energy_var,
+  VHAR = pred_energy_vhar,
+  BVAR = pred_energy_bvar,
+  BVHAR1 = pred_energy_bvhar_v1,
+  BVHAR2 = pred_energy_bvhar_v2
+) %>% 
+  lapply(function(PRED) mse(PRED, y = est_test) %>% mean()) %>% 
+  unlist() %>% 
+  sort()
+```
+
+```{r}
+list(
+  pred_energy_var,
+  pred_energy_vhar,
+  pred_energy_bvar,
+  pred_energy_bvhar_v1,
+  pred_energy_bvhar_v2
+) %>% 
+  plot_loss(y = est_test) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
+```
+
+
