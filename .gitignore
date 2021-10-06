@@ -6,5 +6,6 @@
 # binary
 *.csv
 *.Rdata
+data/**/*.txt
 *.pdf
 *.html
