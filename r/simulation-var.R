@@ -11,22 +11,21 @@ set.seed(1)
 small_asset <- c("DJI", "IXIC", "RUT", "SPX", "AORD")
 medium_asset <- c(small_asset, c("KS11", "N225", "SSEC", "HSI"))
 large_asset <- c(medium_asset, c("BFX", "FCHI", "FTMIB", "FTSE", "IBEX", "SSMI"))
-oxfordman <- read_csv("data/processed/oxfordman.csv")
 # p: VAR order
-var_lag <- 25
+var_lag <- 5
 # define coefficients-------------------------
 small_fit <- 
-  oxfordman %>% 
+  oxfordman_rk %>% 
   select(all_of(small_asset)) %>% 
-  var_lm(., var_lag)
+  var_lm(., var_lag, include_mean = FALSE)
 medium_fit <- 
-  oxfordman %>% 
+  oxfordman_rk %>% 
   select(all_of(medium_asset)) %>% 
-  var_lm(., var_lag)
+  var_lm(., var_lag, include_mean = FALSE)
 large_fit <- 
-  oxfordman %>% 
+  oxfordman_rk %>% 
   select(all_of(large_asset)) %>% 
-  var_lm(., var_lag)
+  var_lm(., var_lag, include_mean = FALSE)
 # Generate------------------------------------
 # Train: 5000
 # Test: 100
@@ -37,7 +36,7 @@ num_train <- 5000
 num_test <- 100
 num_burin <- 50
 # SMALL---------------------------------------
-small_coef <- coef(small_fit)[-small_fit$df,]
+small_coef <- coef(small_fit)
 small_var <- diag(small_fit$covmat) %>% diag()
 set.seed(1)
 y_small <- sim_var(
@@ -50,7 +49,7 @@ y_small <- sim_var(
 )
 colnames(y_small) <- paste("asset", sprintf(1:length(small_asset), fmt = "%02d"), sep = "_")
 # MEDIUM--------------------------------------
-medium_coef <- coef(medium_fit)[-medium_fit$df,]
+medium_coef <- coef(medium_fit)
 medium_var <- diag(medium_fit$covmat) %>% diag()
 set.seed(1)
 y_medium <- sim_var(
@@ -63,7 +62,7 @@ y_medium <- sim_var(
 )
 colnames(y_medium) <- paste("asset", sprintf(1:length(medium_asset), fmt = "%02d"), sep = "_")
 # LARGE---------------------------------------
-large_coef <- coef(large_fit)[-large_fit$df,]
+large_coef <- coef(large_fit)
 large_var <- diag(large_fit$covmat) %>% diag()
 set.seed(1)
 y_large <- sim_var(

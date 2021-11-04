@@ -6,6 +6,8 @@ date: "`r format(Sys.time(), '%d %b, %Y')`"
 output: 
   bookdown::html_document2:
     toc: true
+  bookdown::pdf_document2:
+    toc: true
 params:
   simulation:
     label: "Simulation model:"
@@ -17,14 +19,14 @@ params:
     choices: [small, medium, large]
   h:
     label: "Out of sample:"
-    value: 20
-    input: slider
-    min: 5
-    max: 100
-    step: 5
-  var_lag:
-    label: "Lag of VAR:"
     value: 5
+    input: slider
+    min: 1
+    max: 100
+    step: 1
+  var_lag:
+    label: "Oder of VAR:"
+    value: 3
     input: slider
     min: 1
     max: 25
@@ -35,46 +37,46 @@ params:
     input: checkbox
   bvar_del:
     label: "delta of BVAR:"
-    value: .1
+    value: .3
     input: numeric
   bvar_lam:
     label: "lambda of BVAR:"
-    value: .2
+    value: .1
     input: numeric
   bvar_lag:
-    label: "Lag of BVAR"
-    value: 5
+    label: "Order of BVAR"
+    value: 3
     input: slider
     min: 1
     max: 25
     step: 1
   bvhar_del:
     label: "delta of BVHAR:"
-    value: .1
+    value: .3
     input: numeric
   bvhar_lam:
     label: "lambda of BVHAR:"
-    value: .2
-    input: numeric
-  daily_del:
-    label: "Daily delta:"
-    value: .2
-    input: numeric
-  weekly_del:
-    label: "Weekly delta:"
     value: .1
     input: numeric
-  monthly_del:
-    label: "Monthly delta:"
-    value: .05
+  daily_wt:
+    label: "Daily weight:"
+    value: .3
+    input: numeric
+  weekly_wt:
+    label: "Weekly weight:"
+    value: .1
+    input: numeric
+  monthly_wt:
+    label: "Monthly weight:"
+    value: .1
     input: numeric
   predplot_cut:
     label: "Prediction plot x label from:"
-    value: 4500
+    value: 4950
     input: slider
     min: 1
     max: 5000
-    step: 100
+    step: 10
 knit:
   (function(inputFile, encoding) {
     rmarkdown::render(
@@ -102,12 +104,24 @@ knitr::knit_hooks$set(
   }
 )
 options(digits = 3)
-plot_cut <- params$predplot_cut
+options(knitr.kable.NA = "")
+options(kableExtra.latex.load_packages = FALSE)
+is_html <- knitr::opts_knit$get("rmarkdown.pandoc.to") == "html"
+is_latex <- knitr::opts_knit$get("rmarkdown.pandoc.to") == "latex"
+kable_format <- ifelse(!is_html, "latex", "html")
+kable_format <- ifelse(length(kable_format) == 0, "html", kable_format) # for excecutable
 ```
 
-```{r}
+```{r pkgs}
 library(tidyverse)
 library(bvhar)
+library(foreach)
+library(knitr)
+library(kableExtra)
+```
+
+```{r fns}
+source("kable-fns.R")
 ```
 
 # Dataset
@@ -158,8 +172,8 @@ y_train %>%
     alpha = .7,
     fill = "grey" # test set
   ) +
-  geom_path(aes(colour = asset), show.legend = FALSE, alpha = .7) +
-  # scale_colour_viridis_d() +
+  geom_path(aes(colour = asset), show.legend = FALSE, alpha = .5) +
+  scale_colour_viridis_d() +
   theme_minimal() +
   labs(
     x = element_blank(),
@@ -241,7 +255,7 @@ pred_bvhar_v1 <- predict(fit_bvhar_v1, num_test)
 (mse_bvhar_v1 <- mse(pred_bvhar_v1, y_test))
 ```
 
-### HAR-type BVHAR
+### VHAR-type BVHAR
 
 $\delta_i$ for every daily, weekly, monthly matrix
 
@@ -250,14 +264,11 @@ $\delta_i$ for every daily, weekly, monthly matrix
   sigma = apply(y_train, 2, sd),
   lambda = params$bvhar_lam,
   eps = 1e-04,
-  daily = rep(params$daily_del, ncol(y_train)),
-  weekly = rep(params$weekly_del, ncol(y_train)),
-  monthly = rep(params$monthly_del, ncol(y_train))
+  daily = rep(params$daily_wt, ncol(y_train)),
+  weekly = rep(params$weekly_wt, ncol(y_train)),
+  monthly = rep(params$monthly_wt, ncol(y_train))
 ))
 ```
-
-
-### HAR-type BVHAR
 
 ```{r}
 fit_bvhar_v2 <- bvhar_minnesota(y_train, bayes_spec = bvhar_spec_v2, include_mean = include_mean)
@@ -270,6 +281,7 @@ pred_bvhar_v2 <- predict(fit_bvhar_v2, num_test)
 ### Plot
 
 ```{r}
+plot_cut <- params$predplot_cut
 autoplot(pred_var, x_cut = plot_cut, ci_alpha = .6, type = "wrap") +
   autolayer(pred_vhar, ci_alpha = .5) +
   autolayer(pred_bvar, ci_alpha = .4) +
@@ -280,24 +292,8 @@ autoplot(pred_var, x_cut = plot_cut, ci_alpha = .6, type = "wrap") +
   scale_fill_viridis_d()
 ```
 
-### Mean of mse
 
-Every variable:
-
-```{r}
-list(
-  VAR = pred_var,
-  VHAR = pred_vhar,
-  BVAR = pred_bvar,
-  BVHAR1 = pred_bvhar_v1,
-  BVHAR2 = pred_bvhar_v2
-) %>% 
-  lapply(function(PRED) mse(PRED, y = y_test) %>% mean()) %>% 
-  unlist() %>% 
-  sort()
-```
-
-Average over *key variables* (in small set), i.e. first 5 ones:
+### Mean of errors
 
 ```{r}
 list(
@@ -307,9 +303,7 @@ list(
   BVHAR1 = pred_bvhar_v1,
   BVHAR2 = pred_bvhar_v2
 ) %>% 
-  lapply(function(PRED) mse(PRED, y = y_test)[1:5] %>% mean()) %>% 
-  unlist() %>% 
-  sort()
+  kable_lossmean(y = y_test, format = kable_format)
 ```
 
 ### Each variable
@@ -324,7 +318,110 @@ list(
 ) %>% 
   plot_loss(y = y_test) +
   # scale_y_log10() +
-  theme_minimal()
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1)) +
+  scale_colour_viridis_d()
+```
+
+
+```{r}
+list(
+  pred_var,
+  pred_vhar,
+  pred_bvar,
+  pred_bvhar_v1,
+  pred_bvhar_v2
+) %>% 
+  make_kable(y = y_test, error = "mse", format = kable_format)
+```
+
+```{r}
+list(
+  pred_var,
+  pred_vhar,
+  pred_bvar,
+  pred_bvhar_v1,
+  pred_bvhar_v2
+) %>% 
+  plot_loss(y = y_test, type = "mae") +
+  # scale_y_log10() +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1)) +
+  scale_colour_viridis_d()
+```
+
+```{r}
+list(
+  pred_var,
+  pred_vhar,
+  pred_bvar,
+  pred_bvhar_v1,
+  pred_bvhar_v2
+) %>% 
+  make_kable(y = y_test, error = "mae", format = kable_format)
+```
+
+```{r}
+list(
+  pred_var,
+  pred_vhar,
+  pred_bvar,
+  pred_bvhar_v1,
+  pred_bvhar_v2
+) %>% 
+  plot_loss(y = y_test, type = "mape") +
+  # scale_y_log10() +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1)) +
+  scale_colour_viridis_d()
+```
+
+```{r}
+list(
+  pred_var,
+  pred_vhar,
+  pred_bvar,
+  pred_bvhar_v1,
+  pred_bvhar_v2
+) %>% 
+  make_kable(y = y_test, error = "mae", format = kable_format)
+```
+
+```{r}
+list(
+  pred_var,
+  pred_vhar,
+  pred_bvar,
+  pred_bvhar_v1,
+  pred_bvhar_v2
+) %>% 
+  make_kable(y = y_test, error = "mape", format = kable_format)
+```
+
+```{r}
+list(
+  pred_var,
+  pred_vhar,
+  pred_bvar,
+  pred_bvhar_v1,
+  pred_bvhar_v2
+) %>% 
+  plot_loss(y = y_test, type = "mase") +
+  # scale_y_log10() +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1)) +
+  scale_colour_viridis_d()
+```
+
+```{r}
+list(
+  pred_var,
+  pred_vhar,
+  pred_bvar,
+  pred_bvhar_v1,
+  pred_bvhar_v2
+) %>% 
+  make_kable(y = y_test, error = "mase", format = kable_format)
 ```
 
 
