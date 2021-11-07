@@ -1,5 +1,5 @@
 ---
-title: "Energy Consumption Data"
+title: "Empirical Analysis"
 author: "Young Geun Kim"
 date: "`r format(Sys.time(), '%d %b, %Y')`"
 output: 
@@ -9,7 +9,7 @@ knit:
   (function(inputFile, encoding) {
     rmarkdown::render(
       input = inputFile,
-      output_dir = "../docs/results", 
+      output_dir = "../output", 
       encoding = encoding
     )
   })

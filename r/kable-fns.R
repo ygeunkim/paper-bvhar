@@ -1,8 +1,11 @@
 # Compute loss for each variable and make kable------------------
 # returns kable
 # use kableExtra
+library(foreach)
+library(knitr)
+library(kableExtra)
 #----------------------------------------------------------------
-make_kable <- function(mod_list, y, error = c("mse", "mae", "mape", "mase"), font_size = NULL, format = "latex") {
+make_kable <- function(mod_list, y, error = c("mse", "mae", "mape", "mase"), kable = TRUE, font_size = NULL, format = "latex") {
   # rbind loss------------------------------------
   error_type <- match.arg(error)
   error_table <- switch(
@@ -35,8 +38,11 @@ make_kable <- function(mod_list, y, error = c("mse", "mae", "mape", "mase"), fon
     )
   rownames(error_table) <- c("VAR", "VHAR", "BVAR", "BVHAR-VAR", "BVHAR-VHAR")
   # kable-----------------------------------------
+  error_table <- as.data.frame(error_table)
+  if (!kable) {
+    return(error_table)
+  }
   error_table %>% 
-    as.data.frame() %>% 
     mutate_all(
       function(x) {
         ifelse(
@@ -67,7 +73,7 @@ make_kable <- function(mod_list, y, error = c("mse", "mae", "mape", "mase"), fon
 # returns kable
 # use kableExtra
 #------------------------------------------------------
-kable_lossmean <- function(mod_list, y, format = "latex") {
+kable_lossmean <- function(mod_list, y, kable = TRUE, format = "latex") {
   error_type <- c("mse", "mae", "mape", "mase")
   loss_mean <- foreach(error = error_type, .combine = rbind) %do% {
     switch(
@@ -113,9 +119,14 @@ kable_lossmean <- function(mod_list, y, format = "latex") {
   }
   rownames(loss_mean) <- error_type
   colnames(loss_mean) <- names(mod_list)
-  loss_mean %>% 
+  loss_mean <- 
+    loss_mean %>% 
     t() %>% 
-    as.data.frame() %>% 
+    as.data.frame()
+  if (!kable) {
+    return(loss_mean)
+  }
+  loss_mean %>% 
     mutate_all(
       function(x) {
         ifelse(

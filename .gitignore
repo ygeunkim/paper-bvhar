@@ -9,3 +9,6 @@
 data/**/*.txt
 *.pdf
 *.html
+*_cache/
+*_files/
+*.xlsx
