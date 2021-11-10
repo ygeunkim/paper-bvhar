@@ -52,10 +52,10 @@ h_step <- 10
 
 ```{r fns, message=FALSE}
 # result table-------------------------
-source("kable-fns.R")
+source("report-fns.R")
+# hyperparameter setting table---------
+source("param-fns.R")
 ```
-
-
 
 # SMALL
 
@@ -63,34 +63,34 @@ source("kable-fns.R")
 
 ```{r, message=FALSE}
 # Train set
-small_train <- read_csv("../data/processed/vharsim_small_train.csv")
+y_train <- read_csv("../data/processed/vharsim_small_train.csv")
 # Evaluation set
-small_test <- 
+y_test <- 
   read_csv("../data/processed/vharsim_small_test.csv") %>% 
   slice(1:h_step)
 ```
 
 ## Plot
 
-```{r, echo=FALSE}
-small_train %>% 
+```{r tsplot, echo=FALSE}
+y_train %>% 
   mutate(train = TRUE) %>% 
-  bind_rows(small_test %>% mutate(train = FALSE)) %>% 
+  bind_rows(y_test %>% mutate(train = FALSE)) %>% 
   mutate(id = 1:n()) %>% 
   pivot_longer(-c(id, train), names_to = "asset", values_to = "value") %>% 
   ggplot(aes(x = id, y = value)) +
-  geom_path(aes(colour = train), show.legend = FALSE) +
-  facet_grid(asset ~ ., scales = "free_y") +
   annotate(
     geom = "rect",
-    xmin = nrow(small_train),
-    xmax = Inf,
+    xmin = nrow(y_train),
+    xmax = nrow(y_train) + nrow(y_test),
     ymin = -Inf,
     ymax = Inf,
     alpha = .7,
     fill = "grey" # test set
   ) +
-  geom_path(aes(colour = asset), show.legend = FALSE, alpha = .5) +
+  # geom_path(aes(colour = asset), show.legend = FALSE, alpha = .5) +
+  geom_path() +
+  facet_grid(asset ~ ., scales = "free_y") +
   scale_colour_viridis_d() +
   theme_minimal() +
   labs(
@@ -108,14 +108,14 @@ small_train %>%
 ```
 
 ```{r}
-fit_var <- var_lm(small_train, var_lag, include_mean = FALSE)
+fit_var <- var_lm(y_train, var_lag, include_mean = FALSE)
 pred_var <- predict(fit_var, h_step)
 ```
 
 ### VHAR
 
 ```{r}
-fit_vhar <- vhar_lm(small_train, include_mean = FALSE)
+fit_vhar <- vhar_lm(y_train, include_mean = FALSE)
 pred_vhar <- predict(fit_vhar, h_step)
 ```
 
@@ -127,9 +127,9 @@ pred_vhar <- predict(fit_vhar, h_step)
 
 ```{r}
 (bvar_spec <- set_bvar(
-  sigma = apply(small_train, 2, sd),
+  sigma = apply(y_train, 2, sd),
   lambda = .5,
-  delta = rep(.1, ncol(small_train)),
+  delta = rep(.1, ncol(y_train)),
   eps = 1e-04
 ))
 ```
@@ -138,16 +138,16 @@ pred_vhar <- predict(fit_vhar, h_step)
 (bvar_optim <- choose_bvar(
   bvar_spec, 
   lower = c(
-    rep(.0001, ncol(small_train)), # sigma
+    rep(.0001, ncol(y_train)), # sigma
     .01, # lambda
-    rep(.01, ncol(small_train)) # delta
+    rep(.01, ncol(y_train)) # delta
   ), 
   upper = c(
-    rep(1, ncol(small_train)), # sigma
+    rep(1, ncol(y_train)), # sigma
     2, # lambda
-    rep(1, ncol(small_train)) # delta
+    rep(1, ncol(y_train)) # delta
   ), 
-  y = small_train, 
+  y = y_train, 
   p = bvar_lag, 
   include_mean = FALSE
 ))
@@ -159,11 +159,11 @@ bvar_summary <- summary(fit_bvar)
 pred_bvar <- predict(fit_bvar, h_step)
 ```
 
-```{r}
-autoplot(fit_bvar)
+```{r residplot}
+autoplot(fit_bvar, alpha = .5)
 ```
 
-```{r}
+```{r bvarcoefplot}
 autoplot(bvar_summary, var_name = "asset_01")
 ```
 
@@ -171,9 +171,9 @@ autoplot(bvar_summary, var_name = "asset_01")
 
 ```{r}
 (bvhar_spec <- set_bvhar(
-  sigma = apply(small_train, 2, sd),
+  sigma = apply(y_train, 2, sd),
   lambda = .5,
-  delta = rep(.1, ncol(small_train)),
+  delta = rep(.1, ncol(y_train)),
   eps = 1e-04
 ))
 ```
@@ -182,16 +182,16 @@ autoplot(bvar_summary, var_name = "asset_01")
 (bvhar_var_optim <- choose_bvhar(
   bvhar_spec, 
   lower = c(
-    rep(.0001, ncol(small_train)), # sigma
+    rep(.0001, ncol(y_train)), # sigma
     .01, # lambda
-    rep(.01, ncol(small_train)) # delta
+    rep(.01, ncol(y_train)) # delta
   ), 
   upper = c(
-    rep(1, ncol(small_train)), # sigma
+    rep(1, ncol(y_train)), # sigma
     2, # lambda
-    rep(1, ncol(small_train)) # delta
+    rep(1, ncol(y_train)) # delta
   ), 
-  y = small_train, 
+  y = y_train, 
   include_mean = FALSE
 ))
 ```
@@ -202,7 +202,7 @@ bvhar_var_summary <- summary(fit_bvhar_var)
 pred_bvhar_var <- predict(fit_bvhar_var, h_step)
 ```
 
-```{r}
+```{r bvharcoefplot1}
 autoplot(bvhar_var_summary, var_name = "asset_01", NCOL = 3)
 ```
 
@@ -210,12 +210,12 @@ autoplot(bvhar_var_summary, var_name = "asset_01", NCOL = 3)
 
 ```{r}
 (bvhar_spec_vhar <- set_weight_bvhar(
-  sigma = apply(small_train, 2, sd),
+  sigma = apply(y_train, 2, sd),
   lambda = .5,
   eps = 1e-04,
-  daily = rep(.1, ncol(small_train)),
-  weekly = rep(.1, ncol(small_train)),
-  monthly = rep(.1, ncol(small_train))
+  daily = rep(.1, ncol(y_train)),
+  weekly = rep(.1, ncol(y_train)),
+  monthly = rep(.1, ncol(y_train))
 ))
 ```
 
@@ -223,20 +223,20 @@ autoplot(bvhar_var_summary, var_name = "asset_01", NCOL = 3)
 (bvhar_vhar_optim <- choose_bvhar(
   bvhar_spec_vhar, 
   lower = c(
-    rep(.0001, ncol(small_train)), # sigma
+    rep(.0001, ncol(y_train)), # sigma
     .01, # lambda
-    rep(.01, ncol(small_train)), # daily
-    rep(.01, ncol(small_train)), # weekly
-    rep(.01, ncol(small_train)) # monthly
+    rep(.01, ncol(y_train)), # daily
+    rep(.01, ncol(y_train)), # weekly
+    rep(.01, ncol(y_train)) # monthly
   ), 
   upper = c(
-    rep(1, ncol(small_train)), # sigma
+    rep(1, ncol(y_train)), # sigma
     2, # lambda
-    rep(1, ncol(small_train)), # daily
-    rep(1, ncol(small_train)), # weekly
-    rep(1, ncol(small_train)) # monthly
+    rep(1, ncol(y_train)), # daily
+    rep(1, ncol(y_train)), # weekly
+    rep(1, ncol(y_train)) # monthly
   ), 
-  y = small_train, 
+  y = y_train, 
   include_mean = FALSE
 ))
 ```
@@ -247,12 +247,9 @@ bvhar_vhar_summary <- summary(fit_bvhar_vhar)
 pred_bvhar_vhar <- predict(fit_bvhar_vhar, h_step)
 ```
 
-```{r}
+```{r bvharcoefplot2}
 autoplot(bvhar_vhar_summary, var_name = "asset_01", NCOL = 3)
 ```
-
-
-
 
 ### Errors
 
@@ -264,7 +261,7 @@ list(
   pred_bvhar_var,
   pred_bvhar_vhar
 ) %>% 
-  make_kable(y = small_test, error = "mse", format = kable_format)
+  make_kable(y = y_test, error = "mse", format = kable_format)
 ```
 
 ```{r}
@@ -275,7 +272,7 @@ list(
   pred_bvhar_var,
   pred_bvhar_vhar
 ) %>% 
-  make_kable(y = small_test, error = "mae", format = kable_format)
+  make_kable(y = y_test, error = "mae", format = kable_format)
 ```
 
 ```{r}
@@ -286,7 +283,7 @@ list(
   pred_bvhar_var,
   pred_bvhar_vhar
 ) %>% 
-  make_kable(y = small_test, error = "mape", format = kable_format)
+  make_kable(y = y_test, error = "mape", format = kable_format)
 ```
 
 ```{r}
@@ -297,7 +294,7 @@ list(
   pred_bvhar_var,
   pred_bvhar_vhar
 ) %>% 
-  make_kable(y = small_test, error = "mase", format = kable_format)
+  make_kable(y = y_test, error = "mase", format = kable_format)
 ```
 
 ```{r}
@@ -308,11 +305,8 @@ list(
   BVHAR1 = pred_bvhar_var,
   BVHAR2 = pred_bvhar_vhar
 ) %>% 
-  kable_lossmean(y = small_test, format = kable_format)
+  kable_lossmean(y = y_test, format = kable_format)
 ```
-
-
-
 
 
 # MEDIUM
@@ -323,37 +317,53 @@ list(
 # Train set
 medium_train <- read_csv("../data/processed/vharsim_medium_train.csv")
 # Evaluation set
-medium_test <- read_csv("../data/processed/vharsim_medium_test.csv")
+medium_test <- 
+  read_csv("../data/processed/vharsim_medium_test.csv") %>% 
+  slice(1:h_step)
 ```
 
 ## Plot
 
-```{r, echo=FALSE}
-medium_train %>% 
-  mutate(train = TRUE) %>% 
-  bind_rows(medium_test %>% mutate(train = FALSE)) %>% 
-  mutate(id = 1:n()) %>% 
-  pivot_longer(-c(id, train), names_to = "asset", values_to = "value") %>% 
-  ggplot(aes(x = id, y = value)) +
-  # geom_path(aes(colour = train), show.legend = FALSE) +
-  # facet_grid(asset ~ ., scales = "free_y") +
-  annotate(
-    geom = "rect",
-    xmin = nrow(medium_train),
-    xmax = Inf,
-    ymin = -Inf,
-    ymax = Inf,
-    alpha = .7,
-    fill = "grey" # test set
-  ) +
-  geom_path(aes(colour = asset), show.legend = FALSE, alpha = .5) +
-  scale_colour_viridis_d() +
-  theme_minimal() +
-  labs(
-    x = element_blank(),
-    y = element_blank()
-  )
-```
+<!-- ```{r , echo=FALSE} -->
+<!-- medium_train %>%  -->
+<!--   mutate(train = TRUE) %>%  -->
+<!--   bind_rows(medium_test %>% mutate(train = FALSE)) %>%  -->
+<!--   mutate(id = 1:n()) %>%  -->
+<!--   pivot_longer(-c(id, train), names_to = "asset", values_to = "value") %>%  -->
+<!--   ggplot(aes(x = id, y = value)) + -->
+<!--   # geom_path(aes(colour = train), show.legend = FALSE) + -->
+<!--   # facet_grid(asset ~ ., scales = "free_y") + -->
+<!--   annotate( -->
+<!--     geom = "rect", -->
+<!--     xmin = nrow(medium_train), -->
+<!--     xmax = nrow(medium_train) + nrow(medium_test), -->
+<!--     ymin = -Inf, -->
+<!--     ymax = Inf, -->
+<!--     alpha = .7, -->
+<!--     fill = "grey" # test set -->
+<!--   ) + -->
+<!--   geom_path(aes(colour = asset), show.legend = FALSE, alpha = .5) + -->
+<!--   scale_colour_viridis_d() + -->
+<!--   theme_minimal() + -->
+<!--   labs( -->
+<!--     x = element_blank(), -->
+<!--     y = element_blank() -->
+<!--   ) -->
+<!-- ``` -->
+
+## Modeling
+
+### VAR
+
+
+### BVAR
+
+
+### BVHAR
+
+
+
+
 
 # LARGE
 

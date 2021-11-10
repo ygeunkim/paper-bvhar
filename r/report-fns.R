@@ -1,11 +1,23 @@
 # Compute loss for each variable and make kable------------------
 # returns kable
 # use kableExtra
-library(foreach)
-library(knitr)
-library(kableExtra)
+if (requireNamespace("tidyverse", quietly = TRUE)) {
+  library(tidyverse)
+}
+if (requireNamespace("bvhar", quietly = TRUE)) {
+  library(bvhar)
+}
+if (requireNamespace("foreach", quietly = TRUE)) {
+  library(foreach)
+}
+if (requireNamespace("knitr", quietly = TRUE)) {
+  library(knitr)
+}
+if (requireNamespace("kableExtra", quietly = TRUE)) {
+  library(kableExtra)
+}
 #----------------------------------------------------------------
-make_kable <- function(mod_list, y, error = c("mse", "mae", "mape", "mase"), kable = TRUE, font_size = NULL, format = "latex") {
+make_kable <- function(mod_list, y, error = c("mse", "mae", "mape", "mase"), kable = TRUE, format = "latex") {
   # rbind loss------------------------------------
   error_type <- match.arg(error)
   error_table <- switch(
@@ -64,8 +76,46 @@ make_kable <- function(mod_list, y, error = c("mse", "mae", "mape", "mase"), kab
     ) %>% 
     kable_styling(
       full_width = FALSE, 
-      latex_options = c("striped", "HOLD_position"),
-      font_size = font_size
+      latex_options = c("striped", "HOLD_position")
+    )
+}
+
+# Get latex code for above loss------------------------
+# for each variable
+#------------------------------------------------------
+get_losstex <- function(mod_list, y) {
+  dim_data <- seq_along(y)
+  error_table <- foreach(error_type = c("mse", "mae", "mape", "mase"), .combine = rbind) %do% {
+    mod_list %>% 
+      make_kable(y_test, error_type, kable = FALSE) %>% 
+      t() %>% 
+      as.data.frame() %>% 
+      mutate_if(
+        is.numeric,
+        function(x) {
+          paste0(
+            "\\numprint{",
+            format(x, nsmall = 3),
+            "}"
+          )
+        }
+      ) %>% 
+      rownames_to_column(var = "variable") %>% 
+      add_column(Loss = error_type, .before = 1)
+  }
+  error_table %>% 
+    kable(
+      format = "latex",
+      booktabs = TRUE,
+      escape = FALSE
+    ) %>% 
+    kable_styling(
+      full_width = FALSE,
+      # latex_options = c("striped", "HOLD_position")
+      latex_options = "HOLD_position"
+    ) %>% 
+    collapse_rows(
+      columns = 1
     )
 }
 
