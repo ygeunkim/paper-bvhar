@@ -48,7 +48,11 @@ make_kable <- function(mod_list, y, error = c("mse", "mae", "mape", "mase"), kab
       colnames(error_table),
       pattern = "\\_"
     )
-  rownames(error_table) <- c("VAR", "VHAR", "BVAR", "BVHAR-VAR", "BVHAR-VHAR")
+  if (!is.null(names(mod_list))) {
+    rownames(error_table) <- names(mod_list)
+  } else {
+    rownames(error_table) <- c("VAR", "VHAR", "BVAR", "BVHAR-VAR", "BVHAR-VHAR")
+  }
   # kable-----------------------------------------
   error_table <- as.data.frame(error_table)
   if (!kable) {
@@ -61,6 +65,7 @@ make_kable <- function(mod_list, y, error = c("mse", "mae", "mape", "mase"), kab
           x == min(x),
           cell_spec(
             format(x, nsmall = 3) %>% as.numeric(),
+            format = format,
             color = "red"
           ),
           format(x, nsmall = 3) %>% as.numeric()
@@ -71,51 +76,11 @@ make_kable <- function(mod_list, y, error = c("mse", "mae", "mape", "mase"), kab
     kable(
       format = format,
       booktabs = TRUE,
-      longtable = TRUE,
       escape = FALSE
     ) %>% 
     kable_styling(
       full_width = FALSE, 
       latex_options = c("striped", "HOLD_position")
-    )
-}
-
-# Get latex code for above loss------------------------
-# for each variable
-#------------------------------------------------------
-get_losstex <- function(mod_list, y) {
-  dim_data <- seq_along(y)
-  error_table <- foreach(error_type = c("mse", "mae", "mape", "mase"), .combine = rbind) %do% {
-    mod_list %>% 
-      make_kable(y_test, error_type, kable = FALSE) %>% 
-      t() %>% 
-      as.data.frame() %>% 
-      mutate_if(
-        is.numeric,
-        function(x) {
-          paste0(
-            "\\numprint{",
-            format(x, nsmall = 3),
-            "}"
-          )
-        }
-      ) %>% 
-      rownames_to_column(var = "variable") %>% 
-      add_column(Loss = error_type, .before = 1)
-  }
-  error_table %>% 
-    kable(
-      format = "latex",
-      booktabs = TRUE,
-      escape = FALSE
-    ) %>% 
-    kable_styling(
-      full_width = FALSE,
-      # latex_options = c("striped", "HOLD_position")
-      latex_options = "HOLD_position"
-    ) %>% 
-    collapse_rows(
-      columns = 1
     )
 }
 
@@ -168,7 +133,11 @@ kable_lossmean <- function(mod_list, y, kable = TRUE, format = "latex") {
       unlist()
   }
   rownames(loss_mean) <- error_type
-  colnames(loss_mean) <- names(mod_list)
+  if (!is.null(names(mod_list))) {
+    colnames(loss_mean) <- names(mod_list)
+  } else {
+    colnames(loss_mean) <- c("VAR", "VHAR", "BVAR", "BVHAR-VAR", "BVHAR-VHAR")
+  }
   loss_mean <- 
     loss_mean %>% 
     t() %>% 
@@ -199,5 +168,58 @@ kable_lossmean <- function(mod_list, y, kable = TRUE, format = "latex") {
     kable_styling(
       full_width = FALSE, 
       latex_options = c("striped", "HOLD_position")
+    )
+}
+
+# Get latex code for above loss------------------------
+# put together
+#------------------------------------------------------
+get_losstex <- function(mod_list, y, caption = "Loss for SMALL Simulation", label = "smallerr") {
+  dim_data <- seq_along(y)
+  mean_table <- kable_lossmean(mod_list, y, kable = FALSE)
+  error_table <- foreach(error_type = c("mse", "mae", "mape", "mase"), .combine = rbind) %do% {
+    mod_list %>% 
+      make_kable(y_test, error_type, kable = FALSE) %>% 
+      cbind(Average = mean_table[,error_type]) %>% 
+      mutate_all(
+        function(x) {
+          ifelse(
+            x == min(x),
+            cell_spec(
+              format(x, nsmall = 3) %>% as.numeric(),
+              format = "latex",
+              color = "red"
+            ),
+            format(x, nsmall = 3) %>% as.numeric()
+          )
+        }
+      ) %>% 
+      t() %>%
+      as.data.frame() %>%
+      rownames_to_column(var = "variable") %>% 
+      add_column(Loss = error_type, .before = 1)
+  }
+  error_table %>% 
+    mutate(Loss = str_to_upper(Loss)) %>% 
+    kable(
+      format = "latex",
+      booktabs = TRUE,
+      escape = FALSE,
+      col.names = c("", "", "VAR", "VHAR", "Minnesota", "VAR-type", "VHAR-type"),
+      caption = caption,
+      label = label
+    ) %>% 
+    kable_paper(full_width = FALSE) %>% 
+    add_header_above(
+      c(
+        " " = 1,
+        " " = 1,
+        "Frequentist" = 2,
+        "BVAR" = 1,
+        "BVHAR" = 2
+      )
+    ) %>% 
+    collapse_rows(
+      columns = 1
     )
 }
