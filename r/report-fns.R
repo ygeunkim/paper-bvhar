@@ -51,7 +51,9 @@ make_kable <- function(mod_list, y, error = c("mse", "mae", "mape", "mase"), kab
   if (!is.null(names(mod_list))) {
     rownames(error_table) <- names(mod_list)
   } else {
-    rownames(error_table) <- c("VAR", "VHAR", "BVAR", "BVHAR-VAR", "BVHAR-VHAR")
+    rownames(error_table) <- 
+      sapply(mod_list, function(x) x$process) %>% 
+      str_replace_all(pattern = "\\_", replacement = "-")
   }
   # kable-----------------------------------------
   error_table <- as.data.frame(error_table)
@@ -136,7 +138,9 @@ kable_lossmean <- function(mod_list, y, kable = TRUE, format = "latex") {
   if (!is.null(names(mod_list))) {
     colnames(loss_mean) <- names(mod_list)
   } else {
-    colnames(loss_mean) <- c("VAR", "VHAR", "BVAR", "BVHAR-VAR", "BVHAR-VHAR")
+    colnames(loss_mean) <- 
+      sapply(mod_list, function(x) x$process) %>% 
+      str_replace_all(pattern = "\\_", replacement = "-")
   }
   loss_mean <- 
     loss_mean %>% 
@@ -179,28 +183,36 @@ get_losstex <- function(mod_list, y, caption = "Loss for SMALL Simulation", labe
   mean_table <- kable_lossmean(mod_list, y, kable = FALSE)
   error_table <- foreach(error_type = c("mse", "mae", "mape", "mase"), .combine = rbind) %do% {
     mod_list %>% 
-      make_kable(y_test, error_type, kable = FALSE) %>% 
+      make_kable(y, error_type, kable = FALSE) %>% 
       cbind(Average = mean_table[,error_type]) %>% 
       mutate_all(
         function(x) {
           ifelse(
             x == min(x),
             cell_spec(
-              format(x, nsmall = 3) %>% as.numeric(),
+              format(log(x), nsmall = 3) %>% as.numeric(), # return log of loss
               format = "latex",
               color = "red"
             ),
-            format(x, nsmall = 3) %>% as.numeric()
+            format(log(x), nsmall = 3) %>% as.numeric() # return log of loss
           )
         }
       ) %>% 
-      t() %>%
+      t() %>% 
       as.data.frame() %>%
       rownames_to_column(var = "variable") %>% 
       add_column(Loss = error_type, .before = 1)
   }
   error_table %>% 
-    mutate(Loss = str_to_upper(Loss)) %>% 
+    mutate(
+      Loss = str_to_upper(Loss),
+      Loss = str_c("log(", Loss, ")"),
+      variable = ifelse(
+        variable == "Average",
+        cell_spec(variable, format = "latex", background = "gray"), # mark the average cell
+        variable
+      )
+    ) %>% 
     kable(
       format = "latex",
       booktabs = TRUE,

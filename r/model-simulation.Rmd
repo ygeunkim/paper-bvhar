@@ -5,11 +5,17 @@ date: "`r format(Sys.time(), '%d %b, %Y')`"
 output: 
   bookdown::html_document2:
     toc: true
+params:
+  size:
+    label: "Simulation size:"
+    value: small
+    choices: [small, medium, large]
 knit:
   (function(inputFile, encoding) {
     rmarkdown::render(
       input = inputFile,
       output_dir = "../output", 
+      params = "ask", 
       encoding = encoding
     )
   })
@@ -62,11 +68,28 @@ source("param-fns.R")
 ## Import
 
 ```{r, message=FALSE}
+# Train data set----------------------------
+tr_file <- 
+  str_c(
+    "../data/processed/",
+    "vhar",
+    "sim"
+  ) %>% 
+  str_c(params$size, "train.csv", sep = "_")
+# Test data set----------------------------
+te_file <- 
+  str_c(
+    "../data/processed/",
+    "vhar",
+    "sim"
+  ) %>% 
+  str_c(params$size, "test.csv", sep = "_")
+# Import-----------------------------------
 # Train set
-y_train <- read_csv("../data/processed/vharsim_small_train.csv")
+y_train <- read_csv(tr_file)
 # Evaluation set
 y_test <- 
-  read_csv("../data/processed/vharsim_small_test.csv") %>% 
+  read_csv(te_file) %>% 
   slice(1:h_step)
 ```
 
@@ -254,127 +277,23 @@ autoplot(bvhar_vhar_summary, var_name = "asset_01", NCOL = 3)
 ### Errors
 
 ```{r}
+roll_var_10 <- forecast_roll(fit_var, h_step, y_test)
+roll_vhar_10 <- forecast_roll(fit_vhar, h_step, y_test)
+roll_bvar_10 <- forecast_roll(fit_bvar, h_step, y_test)
+roll_bvhar_var_10 <- forecast_roll(fit_bvhar_var, h_step, y_test)
+roll_bvhar_vhar_10 <- forecast_roll(fit_bvhar_vhar, h_step, y_test)
+```
+
+```{r, comment=NULL}
 list(
-  pred_var,
-  pred_vhar,
-  pred_bvar,
-  pred_bvhar_var,
-  pred_bvhar_vhar
+  roll_var_10,
+  roll_vhar_10,
+  roll_bvar_10,
+  roll_bvhar_var_10,
+  roll_bvhar_vhar_10
 ) %>% 
-  make_kable(y = y_test, error = "mse", format = kable_format)
+  get_losstex(y_test, "SMALL Simulation - 10-step ahead Rolling Window Forecasting Loss", label = "smallroll") %>% 
+  writeLines()
 ```
-
-```{r}
-list(
-  pred_var,
-  pred_vhar,
-  pred_bvar,
-  pred_bvhar_var,
-  pred_bvhar_vhar
-) %>% 
-  make_kable(y = y_test, error = "mae", format = kable_format)
-```
-
-```{r}
-list(
-  pred_var,
-  pred_vhar,
-  pred_bvar,
-  pred_bvhar_var,
-  pred_bvhar_vhar
-) %>% 
-  make_kable(y = y_test, error = "mape", format = kable_format)
-```
-
-```{r}
-list(
-  pred_var,
-  pred_vhar,
-  pred_bvar,
-  pred_bvhar_var,
-  pred_bvhar_vhar
-) %>% 
-  make_kable(y = y_test, error = "mase", format = kable_format)
-```
-
-```{r}
-list(
-  VAR = pred_var,
-  VHAR = pred_vhar,
-  BVAR = pred_bvar,
-  BVHAR1 = pred_bvhar_var,
-  BVHAR2 = pred_bvhar_vhar
-) %>% 
-  kable_lossmean(y = y_test, format = kable_format)
-```
-
-
-# MEDIUM
-
-## Import
-
-```{r, message=FALSE}
-# Train set
-medium_train <- read_csv("../data/processed/vharsim_medium_train.csv")
-# Evaluation set
-medium_test <- 
-  read_csv("../data/processed/vharsim_medium_test.csv") %>% 
-  slice(1:h_step)
-```
-
-## Plot
-
-<!-- ```{r , echo=FALSE} -->
-<!-- medium_train %>%  -->
-<!--   mutate(train = TRUE) %>%  -->
-<!--   bind_rows(medium_test %>% mutate(train = FALSE)) %>%  -->
-<!--   mutate(id = 1:n()) %>%  -->
-<!--   pivot_longer(-c(id, train), names_to = "asset", values_to = "value") %>%  -->
-<!--   ggplot(aes(x = id, y = value)) + -->
-<!--   # geom_path(aes(colour = train), show.legend = FALSE) + -->
-<!--   # facet_grid(asset ~ ., scales = "free_y") + -->
-<!--   annotate( -->
-<!--     geom = "rect", -->
-<!--     xmin = nrow(medium_train), -->
-<!--     xmax = nrow(medium_train) + nrow(medium_test), -->
-<!--     ymin = -Inf, -->
-<!--     ymax = Inf, -->
-<!--     alpha = .7, -->
-<!--     fill = "grey" # test set -->
-<!--   ) + -->
-<!--   geom_path(aes(colour = asset), show.legend = FALSE, alpha = .5) + -->
-<!--   scale_colour_viridis_d() + -->
-<!--   theme_minimal() + -->
-<!--   labs( -->
-<!--     x = element_blank(), -->
-<!--     y = element_blank() -->
-<!--   ) -->
-<!-- ``` -->
-
-## Modeling
-
-### VAR
-
-
-### BVAR
-
-
-### BVHAR
-
-
-
-
-
-# LARGE
-
-## Import
-
-```{r, message=FALSE}
-# Train set
-large_train <- read_csv("../data/processed/vharsim_large_train.csv")
-# Evaluation set
-large_test <- read_csv("../data/processed/vharsim_large_test.csv")
-```
-
 
 
