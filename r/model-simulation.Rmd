@@ -90,7 +90,7 @@ y_train <- read_csv(tr_file)
 # Evaluation set
 y_test <- 
   read_csv(te_file) %>% 
-  slice(1:h_step)
+  slice(1:30)
 ```
 
 ## Plot
@@ -277,20 +277,31 @@ autoplot(bvhar_vhar_summary, var_name = "asset_01", NCOL = 3)
 ### Errors
 
 ```{r}
-roll_var_10 <- forecast_roll(fit_var, h_step, y_test)
-roll_vhar_10 <- forecast_roll(fit_vhar, h_step, y_test)
-roll_bvar_10 <- forecast_roll(fit_bvar, h_step, y_test)
-roll_bvhar_var_10 <- forecast_roll(fit_bvhar_var, h_step, y_test)
-roll_bvhar_vhar_10 <- forecast_roll(fit_bvhar_vhar, h_step, y_test)
+cv_var_1 <- forecast_roll(fit_var, 5, y_test)
+cv_vhar_1 <- forecast_roll(fit_vhar, 5, y_test)
+cv_bvar_1 <- forecast_roll(fit_bvar, 5, y_test)
+cv_bvhar_var_1 <- forecast_roll(fit_bvhar_var, 5, y_test)
+cv_bvhar_vhar_1 <- forecast_roll(fit_bvhar_vhar, 5, y_test)
+```
+
+```{r cvplot}
+list(
+  cv_var_1,
+  cv_vhar_1,
+  cv_bvar_1,
+  cv_bvhar_var_1,
+  cv_bvhar_vhar_1
+) %>% 
+  plot_loss(y_test, mean_line = TRUE, mean_param = list(alpha = .5))
 ```
 
 ```{r, comment=NULL}
 list(
-  roll_var_10,
-  roll_vhar_10,
-  roll_bvar_10,
-  roll_bvhar_var_10,
-  roll_bvhar_vhar_10
+  cv_var_1,
+  cv_vhar_1,
+  cv_bvar_1,
+  cv_bvhar_var_1,
+  cv_bvhar_vhar_1
 ) %>% 
   get_losstex(y_test, "SMALL Simulation - 10-step ahead Rolling Window Forecasting Loss", label = "smallroll") %>% 
   writeLines()

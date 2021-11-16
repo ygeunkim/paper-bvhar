@@ -1,5 +1,9 @@
-library(tidyverse)
-library(bvhar)
+if (requireNamespace("tidyverse", quietly = TRUE)) {
+  library(tidyverse)
+}
+if (requireNamespace("bvhar", quietly = TRUE)) {
+  library(bvhar)
+}
 set.seed(1)
 # Simulate VHAR-------------------------------
 # Use coefficient from fitting oxfordman.csv
@@ -24,13 +28,13 @@ large_fit <-
   select(all_of(large_asset)) %>% 
   vhar_lm(include_mean = FALSE)
 # Generate------------------------------------
-# Train: 5000
-# Test: 100
-# Burn-in: 1000
+# Train: 1000
+# Test: 50
+# Burn-in: 500
 #---------------------------------------------
 # numbers: train + test
-num_train <- 5000
-num_test <- 100
+num_train <- 1000
+num_test <- 50
 num_burin <- 50
 # SMALL---------------------------------------
 small_coef <- coef(small_fit)
