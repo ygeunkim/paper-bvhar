@@ -1,18 +1,22 @@
-library(tidyverse)
-library(bvhar)
+if (requireNamespace("tidyverse", quietly = TRUE)) {
+  library(tidyverse)
+}
+if (requireNamespace("bvhar", quietly = TRUE)) {
+  library(bvhar)
+}
 set.seed(1)
 # Simulate VAR--------------------------------
 # Order: 25
 # Use coefficient from fitting oxfordman.csv
-# small: DJI, IXIC, RUT, SPX, AORD
+# small: DJI, IXIC, RUT, SPX
 # medium: add KS11, N225, SSEC, HSI
 # large: add BFX, FCHI, FTMIB, FTSE, IBEX, SSMI
 #---------------------------------------------
-small_asset <- c("DJI", "IXIC", "RUT", "SPX", "AORD")
+small_asset <- c("DJI", "IXIC", "RUT", "SPX")
 medium_asset <- c(small_asset, c("KS11", "N225", "SSEC", "HSI"))
 large_asset <- c(medium_asset, c("BFX", "FCHI", "FTMIB", "FTSE", "IBEX", "SSMI"))
 # p: VAR order
-var_lag <- 1
+var_lag <- 5
 # define coefficients-------------------------
 small_fit <- 
   oxfordman_rk %>% 
@@ -33,7 +37,7 @@ large_fit <-
 #---------------------------------------------
 # numbers: train + test
 num_train <- 5000
-num_test <- 100
+num_test <- 50
 num_burin <- 50
 # SMALL---------------------------------------
 small_coef <- coef(small_fit)

@@ -28,8 +28,7 @@ knitr::opts_chunk$set(
   out.width = "70%",
   fig.align = "center",
   fig.width = 6,
-  fig.asp = .618,
-  fig.pos = "H"
+  fig.asp = .618
 )
 knitr::knit_hooks$set(
   document = function(x) {
@@ -161,7 +160,7 @@ pred_vhar <- predict(fit_vhar, h_step)
 (bvar_optim <- choose_bvar(
   bvar_spec, 
   lower = c(
-    rep(.0001, ncol(y_train)), # sigma
+    rep(1e-9, ncol(y_train)), # sigma
     .01, # lambda
     rep(.01, ncol(y_train)) # delta
   ), 
@@ -205,7 +204,7 @@ autoplot(bvar_summary, var_name = "asset_01")
 (bvhar_var_optim <- choose_bvhar(
   bvhar_spec, 
   lower = c(
-    rep(.0001, ncol(y_train)), # sigma
+    rep(1e-7, ncol(y_train)), # sigma
     .01, # lambda
     rep(.01, ncol(y_train)) # delta
   ), 
@@ -246,7 +245,7 @@ autoplot(bvhar_var_summary, var_name = "asset_01", NCOL = 3)
 (bvhar_vhar_optim <- choose_bvhar(
   bvhar_spec_vhar, 
   lower = c(
-    rep(.0001, ncol(y_train)), # sigma
+    rep(1e-7, ncol(y_train)), # sigma
     .01, # lambda
     rep(.01, ncol(y_train)), # daily
     rep(.01, ncol(y_train)), # weekly
@@ -276,35 +275,71 @@ autoplot(bvhar_vhar_summary, var_name = "asset_01", NCOL = 3)
 
 ### Errors
 
+Noting the hyperparameters:
+
 ```{r}
-cv_var_1 <- forecast_roll(fit_var, 5, y_test)
-cv_vhar_1 <- forecast_roll(fit_vhar, 5, y_test)
-cv_bvar_1 <- forecast_roll(fit_bvar, 5, y_test)
-cv_bvhar_var_1 <- forecast_roll(fit_bvhar_var, 5, y_test)
-cv_bvhar_vhar_1 <- forecast_roll(fit_bvhar_vhar, 5, y_test)
+list(
+  bvar_optim$spec,
+  bvhar_var_optim$spec,
+  bvhar_vhar_optim$spec
+) %>% 
+  report_hyperparam(caption = "SMALL Simulation - Hyperparameter Lists", label = "hyperparamsmall") %>% 
+  writeLines()
+```
+
+Out-of-forecasting:
+
+```{r}
+mod_list <- list(
+  fit_var,
+  fit_vhar,
+  fit_bvar,
+  fit_bvhar_var,
+  fit_bvhar_vhar
+)
+# 1-step-----------
+cv_list_1 <- 
+  mod_list %>% 
+  lapply(
+    function(mod) {
+      forecast_roll(mod, 1, y_test)
+    }
+  )
+# 5-step-----------
+cv_list_5 <- 
+  mod_list %>% 
+  lapply(
+    function(mod) {
+      forecast_roll(mod, 5, y_test)
+    }
+  )
+# 20-step----------
+cv_list_20 <- 
+  mod_list %>% 
+  lapply(
+    function(mod) {
+      forecast_roll(mod, 20, y_test)
+    }
+  )
 ```
 
 ```{r cvplot}
-list(
-  cv_var_1,
-  cv_vhar_1,
-  cv_bvar_1,
-  cv_bvhar_var_1,
-  cv_bvhar_vhar_1
-) %>% 
-  plot_loss(y_test, mean_line = TRUE, mean_param = list(alpha = .5))
+cv_list_5 %>% 
+  gg_loss(y_test, mean_line = TRUE, mean_param = list(alpha = .5)) +
+  theme_minimal() +
+  theme(
+    axis.text.x = ggplot2::element_text(angle = -30, vjust = -1),
+    legend.title = element_text(size = 8),
+    legend.text = element_text(size = 7),
+    legend.key.size = unit(.3, "cm")
+  )
 ```
 
 ```{r, comment=NULL}
-list(
-  cv_var_1,
-  cv_vhar_1,
-  cv_bvar_1,
-  cv_bvhar_var_1,
-  cv_bvhar_vhar_1
-) %>% 
-  get_losstex(y_test, "SMALL Simulation - 10-step ahead Rolling Window Forecasting Loss", label = "smallroll") %>% 
+cv_list_5 %>% 
+  get_losstex(y_test, "SMALL Simulation - 5-step ahead Rolling Window Forecasting Loss", label = "smallroll") %>% 
   writeLines()
 ```
+
 
 

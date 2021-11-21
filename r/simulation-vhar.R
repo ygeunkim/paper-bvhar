@@ -7,11 +7,11 @@ if (requireNamespace("bvhar", quietly = TRUE)) {
 set.seed(1)
 # Simulate VHAR-------------------------------
 # Use coefficient from fitting oxfordman.csv
-# small: DJI, IXIC, RUT, SPX, AORD
+# small: DJI, IXIC, RUT, SPX
 # medium: add KS11, N225, SSEC, HSI
 # large: add BFX, FCHI, FTMIB, FTSE, IBEX, SSMI
 #---------------------------------------------
-small_asset <- c("DJI", "IXIC", "RUT", "SPX", "AORD")
+small_asset <- c("DJI", "IXIC", "RUT", "SPX")
 medium_asset <- c(small_asset, c("KS11", "N225", "SSEC", "HSI"))
 large_asset <- c(medium_asset, c("BFX", "FCHI", "FTMIB", "FTSE", "IBEX", "SSMI"))
 # define coefficients-------------------------
