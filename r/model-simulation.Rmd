@@ -160,7 +160,7 @@ pred_vhar <- predict(fit_vhar, h_step)
 (bvar_optim <- choose_bvar(
   bvar_spec, 
   lower = c(
-    rep(1e-9, ncol(y_train)), # sigma
+    rep(1e-7, ncol(y_train)), # sigma
     .01, # lambda
     rep(.01, ncol(y_train)) # delta
   ), 

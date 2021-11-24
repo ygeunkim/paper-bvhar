@@ -38,7 +38,7 @@ num_test <- 50
 num_burin <- 50
 # SMALL---------------------------------------
 small_coef <- coef(small_fit)
-small_var <- diag(small_fit$covmat) %>% diag()
+small_var <- small_fit$covmat
 set.seed(1)
 y_small <- sim_vhar(
   num_train + num_test,
@@ -50,7 +50,7 @@ y_small <- sim_vhar(
 colnames(y_small) <- paste("asset", sprintf(1:length(small_asset), fmt = "%02d"), sep = "_")
 # MEDIUM--------------------------------------
 medium_coef <- coef(medium_fit)
-medium_var <- diag(medium_fit$covmat) %>% diag()
+medium_var <- medium_fit$covmat
 set.seed(1)
 y_medium <- sim_vhar(
   num_train + num_test,
@@ -62,7 +62,7 @@ y_medium <- sim_vhar(
 colnames(y_medium) <- paste("asset", sprintf(1:length(medium_asset), fmt = "%02d"), sep = "_")
 # LARGE---------------------------------------
 large_coef <- coef(large_fit)
-large_var <- diag(large_fit$covmat) %>% diag()
+large_var <- large_fit$covmat
 set.seed(1)
 y_large <- sim_vhar(
   num_train + num_test,
@@ -73,7 +73,7 @@ y_large <- sim_vhar(
 )
 colnames(y_large) <- paste("asset", sprintf(1:length(large_asset), fmt = "%02d"), sep = "_")
 # Plot----------------------------------------
-y_medium %>% 
+y_small %>% 
   as.data.frame() %>% 
   mutate(id = 1:n()) %>% 
   pivot_longer(-id, names_to = "variable", values_to = "value") %>% 
