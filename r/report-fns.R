@@ -217,12 +217,13 @@ get_losstex <- function(mod_list, y, caption = "Loss for SMALL Simulation", labe
     kable(
       format = "latex",
       booktabs = TRUE,
+      longtable = TRUE,
       escape = FALSE,
       col.names = c("", "", "VAR", "VHAR", "Minnesota", "VAR-type", "VHAR-type"),
       caption = caption,
       label = label
     ) %>% 
-    kable_paper(full_width = FALSE, latex_options = c("scale_down")) %>% 
+    kable_paper(full_width = FALSE, latex_options = c("repeat_header")) %>% 
     add_header_above(
       c(
         " " = 1,
