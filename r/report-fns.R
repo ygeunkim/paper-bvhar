@@ -190,11 +190,13 @@ get_losstex <- function(mod_list, y, caption = "Loss for SMALL Simulation", labe
           ifelse(
             x == min(x),
             cell_spec(
-              format(log(x), nsmall = 3) %>% as.numeric(), # return log of loss
+              # format(x, nsmall = 3) %>% as.numeric(),
+              paste0("\\numprint{", format(x, nsmall = 3) %>% as.numeric(), "}"), # numprint
               format = "latex",
+              escape = FALSE,
               color = "red"
             ),
-            format(log(x), nsmall = 3) %>% as.numeric() # return log of loss
+            paste0("\\numprint{", format(x, nsmall = 3) %>% as.numeric(), "}") # numprint
           )
         }
       ) %>% 
@@ -206,7 +208,6 @@ get_losstex <- function(mod_list, y, caption = "Loss for SMALL Simulation", labe
   error_table %>% 
     mutate(
       Loss = str_to_upper(Loss),
-      Loss = str_c("log(", Loss, ")"),
       variable = ifelse(
         variable == "Average",
         cell_spec(variable, format = "latex", background = "gray"), # mark the average cell
@@ -221,7 +222,7 @@ get_losstex <- function(mod_list, y, caption = "Loss for SMALL Simulation", labe
       caption = caption,
       label = label
     ) %>% 
-    kable_paper(full_width = FALSE) %>% 
+    kable_paper(full_width = FALSE, latex_options = c("scale_down")) %>% 
     add_header_above(
       c(
         " " = 1,

@@ -8,7 +8,7 @@ output:
 params:
   size:
     label: "Simulation size:"
-    value: small
+    value: medium
     choices: [small, medium, large]
 knit:
   (function(inputFile, encoding) {
@@ -52,7 +52,7 @@ library(bvhar)
 # set seed for reproducible result-----
 set.seed(1)
 # out of sample------------------------
-h_step <- 10
+# h_step <- 10
 ```
 
 ```{r fns, message=FALSE}
@@ -87,9 +87,7 @@ te_file <-
 # Train set
 y_train <- read_csv(tr_file)
 # Evaluation set
-y_test <- 
-  read_csv(te_file) %>% 
-  slice(1:30)
+y_test <- read_csv(te_file)
 ```
 
 ## Plot
@@ -131,14 +129,12 @@ y_train %>%
 
 ```{r}
 fit_var <- var_lm(y_train, var_lag, include_mean = FALSE)
-pred_var <- predict(fit_var, h_step)
 ```
 
 ### VHAR
 
 ```{r}
 fit_vhar <- vhar_lm(y_train, include_mean = FALSE)
-pred_vhar <- predict(fit_vhar, h_step)
 ```
 
 ### BVAR
@@ -177,16 +173,6 @@ pred_vhar <- predict(fit_vhar, h_step)
 
 ```{r}
 fit_bvar <- bvar_optim$fit
-bvar_summary <- summary(fit_bvar)
-pred_bvar <- predict(fit_bvar, h_step)
-```
-
-```{r residplot}
-autoplot(fit_bvar, alpha = .5)
-```
-
-```{r bvarcoefplot}
-autoplot(bvar_summary, var_name = "asset_01")
 ```
 
 ### BVHAR-VAR
@@ -220,12 +206,6 @@ autoplot(bvar_summary, var_name = "asset_01")
 
 ```{r}
 fit_bvhar_var <- bvhar_var_optim$fit
-bvhar_var_summary <- summary(fit_bvhar_var)
-pred_bvhar_var <- predict(fit_bvhar_var, h_step)
-```
-
-```{r bvharcoefplot1}
-autoplot(bvhar_var_summary, var_name = "asset_01", NCOL = 3)
 ```
 
 ### BVHAR-VHAR
@@ -265,12 +245,6 @@ autoplot(bvhar_var_summary, var_name = "asset_01", NCOL = 3)
 
 ```{r}
 fit_bvhar_vhar <- bvhar_vhar_optim$fit
-bvhar_vhar_summary <- summary(fit_bvhar_vhar)
-pred_bvhar_vhar <- predict(fit_bvhar_vhar, h_step)
-```
-
-```{r bvharcoefplot2}
-autoplot(bvhar_vhar_summary, var_name = "asset_01", NCOL = 3)
 ```
 
 ### Errors
@@ -324,7 +298,7 @@ cv_list_20 <-
 ```
 
 ```{r cvplot}
-cv_list_5 %>% 
+cv_list_20 %>% 
   gg_loss(y_test, mean_line = TRUE, mean_param = list(alpha = .5)) +
   theme_minimal() +
   theme(
@@ -335,9 +309,9 @@ cv_list_5 %>%
   )
 ```
 
-```{r, comment=NULL}
-cv_list_5 %>% 
-  get_losstex(y_test, "SMALL Simulation - 5-step ahead Rolling Window Forecasting Loss", label = "smallroll") %>% 
+```{r onestep, comment=NULL}
+cv_list_1 %>% 
+  get_losstex(y_test, "SMALL Simulation - 1-step ahead Rolling Window Forecasting Loss", label = "smallone") %>% 
   writeLines()
 ```
 

@@ -12,3 +12,4 @@ data/**/*.txt
 *_cache/
 *_files/
 *.xlsx
+.DS_Store

@@ -34,8 +34,8 @@ large_fit <-
 #---------------------------------------------
 # numbers: train + test
 num_train <- 1000
-num_test <- 50
-num_burin <- 50
+num_test <- 100
+num_burin <- 200
 # SMALL---------------------------------------
 small_coef <- coef(small_fit)
 small_var <- small_fit$covmat
@@ -44,7 +44,7 @@ y_small <- sim_vhar(
   num_train + num_test,
   num_burin,
   small_coef,
-  small_var,
+  diag(small_var) %>% diag(),
   matrix(0L, nrow = 22L, ncol = length(small_asset))
 )
 colnames(y_small) <- paste("asset", sprintf(1:length(small_asset), fmt = "%02d"), sep = "_")
@@ -56,7 +56,7 @@ y_medium <- sim_vhar(
   num_train + num_test,
   num_burin,
   medium_coef,
-  medium_var,
+  diag(medium_var) %>% diag(),
   matrix(0L, nrow = 22L, ncol = length(medium_asset))
 )
 colnames(y_medium) <- paste("asset", sprintf(1:length(medium_asset), fmt = "%02d"), sep = "_")
@@ -68,7 +68,7 @@ y_large <- sim_vhar(
   num_train + num_test,
   num_burin,
   large_coef,
-  large_var,
+  diag(large_var) %>% diag(),
   matrix(0L, nrow = 22L, ncol = length(large_asset))
 )
 colnames(y_large) <- paste("asset", sprintf(1:length(large_asset), fmt = "%02d"), sep = "_")

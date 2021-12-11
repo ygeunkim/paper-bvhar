@@ -1,0 +1,491 @@
+---
+title: "Simulating Minnesota VAR"
+author: "Young Geun Kim"
+date: "`r format(Sys.time(), '%d %b, %Y')`"
+output: 
+  bookdown::html_document2:
+    toc: true
+knit:
+  (function(inputFile, encoding) {
+    rmarkdown::render(
+      input = inputFile,
+      output_dir = "../output", 
+      encoding = encoding
+    )
+  })
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  comment = "#>",
+  collapse = TRUE,
+  out.width = "70%",
+  fig.align = "center",
+  fig.width = 6,
+  fig.asp = .618
+)
+knitr::knit_hooks$set(
+  document = function(x) {
+    sub("\\usepackage[]{color}", "\\usepackage{xcolor}", x, fixed = TRUE)
+  }
+)
+options(digits = 3)
+options(knitr.kable.NA = "")
+options(kableExtra.latex.load_packages = FALSE)
+is_html <- knitr::opts_knit$get("rmarkdown.pandoc.to") == "html"
+is_latex <- knitr::opts_knit$get("rmarkdown.pandoc.to") == "latex"
+kable_format <- ifelse(!is_html, "latex", "html")
+kable_format <- ifelse(length(kable_format) == 0, "html", kable_format) # for excecutable
+```
+
+```{r pkgs, message=FALSE}
+# tidyverse----------------------------
+library(tidyverse)
+# BVHAR custom package-----------------
+library(bvhar)
+# set seed for reproducible result-----
+set.seed(1)
+```
+
+```{r fns, message=FALSE}
+# result table-------------------------
+source("report-fns.R")
+# hyperparameter setting table---------
+source("param-fns.R")
+```
+
+# BVAR Coefficient
+
+## Minnesota prior
+
+```{r}
+n_small <- 3
+bvar_small_spec <- set_bvar(
+  sigma = rep(.05, n_small),
+  lambda = .2,
+  delta = rep(.1, n_small)
+)
+#------------------------------
+set.seed(1)
+bvar_lag <- 5
+bvar_small_coef <- sim_mncoef(bvar_lag, bvar_small_spec)
+```
+
+```{r bvarsetting}
+bvar_small_spec %>% 
+  kable_hyperparam(caption = "\\label{tab:bvarsetting}BVAR Coefficient Simulation Setting") %>% 
+  writeLines()
+```
+
+```{r}
+n_medium <- 9
+bvar_medium_spec <- set_bvar(
+  sigma = rep(.05, n_medium),
+  lambda = .1,
+  delta = rep(.1, n_medium)
+)
+#------------------------------
+set.seed(1)
+bvar_medium_coef <- sim_mncoef(bvar_lag, bvar_medium_spec)
+```
+
+```{r}
+n_large <- 12
+bvar_large_spec <- set_bvar(
+  sigma = rep(.05, n_large),
+  lambda = .03,
+  delta = rep(.1, n_large)
+)
+#------------------------------
+set.seed(1)
+bvar_lag <- 5
+bvar_large_coef <- sim_mncoef(bvar_lag, bvar_large_spec)
+```
+
+## VHAR
+
+```{r}
+set.seed(1)
+y_small <- sim_var(
+  1000 + 100,
+  300,
+  bvar_small_coef$coefficients,
+  bvar_lag,
+  bvar_small_coef$covmat,
+  matrix(0L, nrow = bvar_lag, ncol = n_small)
+) %>% 
+  as.data.frame()
+colnames(y_small) <- paste("asset", sprintf(1:n_small, fmt = "%02d"), sep = "_")
+# Split---------------------------------
+y_small_split <- divide_ts(y_small, 100)
+y_small_train <- y_small_split$train
+y_small_test <- y_small_split$test
+```
+
+```{r}
+set.seed(1)
+y_medium <- sim_var(
+  1000 + 100,
+  300,
+  bvar_medium_coef$coefficients,
+  bvar_lag,
+  bvar_medium_coef$covmat,
+  matrix(0L, nrow = bvar_lag, ncol = n_medium)
+) %>% 
+  as.data.frame()
+colnames(y_medium) <- paste("asset", sprintf(1:n_medium, fmt = "%02d"), sep = "_")
+# Split---------------------------------
+y_medium_split <- divide_ts(y_medium, 100)
+y_medium_train <- y_medium_split$train
+y_medium_test <- y_medium_split$test
+```
+
+```{r}
+set.seed(1)
+y_large <- sim_var(
+  1000 + 100,
+  300,
+  bvar_large_coef$coefficients,
+  bvar_lag,
+  bvar_large_coef$covmat,
+  matrix(0L, nrow = bvar_lag, ncol = n_large)
+) %>% 
+  as.data.frame()
+colnames(y_large) <- paste("asset", sprintf(1:n_large, fmt = "%02d"), sep = "_")
+# Split---------------------------------
+y_large_split <- divide_ts(y_large, 100)
+y_large_train <- y_large_split$train
+y_large_test <- y_large_split$test
+```
+
+# Modeling
+
+## VAR
+
+```{r}
+(var_lag <- 5)
+```
+
+```{r}
+fit_var_small <- var_lm(y_small_train, var_lag, include_mean = FALSE)
+fit_var_medium <- var_lm(y_medium_train, var_lag, include_mean = FALSE)
+fit_var_large <- var_lm(y_large_train, var_lag, include_mean = FALSE)
+```
+
+## VHAR
+
+```{r}
+fit_vhar_small <- vhar_lm(y_small_train, include_mean = FALSE)
+fit_vhar_medium <- vhar_lm(y_medium_train, include_mean = FALSE)
+fit_vhar_large <- vhar_lm(y_large_train, include_mean = FALSE)
+```
+
+## BVAR
+
+```{r}
+(bvar_small_optim <- choose_bvar(
+  bvar_small_spec, 
+  lower = c(
+    rep(1e-2, n_small), # sigma
+    .01, # lambda
+    rep(1e-2, n_small) # delta
+  ), 
+  upper = c(
+    rep(2, n_small), # sigma
+    2, # lambda
+    rep(1, n_small) # delta
+  ), 
+  y = y_small_train, 
+  p = bvar_lag, 
+  include_mean = FALSE
+))
+```
+
+```{r}
+(bvar_medium_optim <- choose_bvar(
+  bvar_medium_spec, 
+  lower = c(
+    rep(1e-2, n_medium), # sigma
+    .01, # lambda
+    rep(1e-2, n_medium) # delta
+  ), 
+  upper = c(
+    rep(2, n_medium), # sigma
+    2, # lambda
+    rep(1, n_medium) # delta
+  ), 
+  y = y_medium_train, 
+  p = bvar_lag, 
+  include_mean = FALSE
+))
+```
+
+```{r}
+(bvar_large_optim <- choose_bvar(
+  bvar_large_spec, 
+  lower = c(
+    rep(1e-2, n_large), # sigma
+    .01, # lambda
+    rep(1e-2, n_large) # delta
+  ), 
+  upper = c(
+    rep(2, n_large), # sigma
+    2, # lambda
+    rep(1, n_large) # delta
+  ), 
+  y = y_large_train, 
+  p = bvar_lag, 
+  include_mean = FALSE
+))
+```
+
+```{r}
+fit_small_bvar <- bvar_small_optim$fit
+fit_medium_bvar <- bvar_medium_optim$fit
+fit_large_bvar <- bvar_large_optim$fit
+```
+
+## BVHAR-VAR
+
+```{r}
+bvhar_var_small_spec <- set_bvhar(
+  sigma = rep(.05, n_small),
+  lambda = .2,
+  delta = rep(.1, n_small)
+)
+#----------------------------
+bvhar_var_medium_spec <- set_bvhar(
+  sigma = rep(.05, n_medium),
+  lambda = .1,
+  delta = rep(.1, n_medium)
+)
+#----------------------------
+bvhar_var_large_spec <- set_bvhar(
+  sigma = rep(.05, n_large),
+  lambda = .03,
+  delta = rep(.1, n_large)
+)
+```
+
+```{r}
+(bvhar_var_small_optim <- choose_bvhar(
+  bvhar_var_small_spec, 
+  lower = c(
+    rep(1e-2, n_small), # sigma
+    .01, # lambda
+    rep(1e-2, n_small) # delta
+  ), 
+  upper = c(
+    rep(2, n_small), # sigma
+    2, # lambda
+    rep(1, n_small) # delta
+  ), 
+  y = y_small_train, 
+  include_mean = FALSE
+))
+```
+
+```{r}
+(bvhar_var_medium_optim <- choose_bvhar(
+  bvhar_medium_spec, 
+  lower = c(
+    rep(1e-2, n_medium), # sigma
+    .01, # lambda
+    rep(1e-2, n_medium) # delta
+  ), 
+  upper = c(
+    rep(2, n_medium), # sigma
+    2, # lambda
+    rep(1, n_medium) # delta
+  ), 
+  y = y_medium_train, 
+  include_mean = FALSE
+))
+```
+
+```{r}
+(bvhar_var_large_optim <- choose_bvhar(
+  bvhar_large_spec, 
+  lower = c(
+    rep(1e-2, n_large), # sigma
+    .01, # lambda
+    rep(1e-2, n_large) # delta
+  ), 
+  upper = c(
+    rep(2, n_large), # sigma
+    2, # lambda
+    rep(1, n_large) # delta
+  ), 
+  y = y_large_train, 
+  include_mean = FALSE
+))
+```
+
+```{r}
+fit_bvhar_small_var <- bvhar_var_small_optim$fit
+fit_bvhar_medium_var <- bvhar_var_medium_optim$fit
+fit_bvhar_large_var <- bvhar_var_large_optim$fit
+```
+
+## BVHAR-VHAR
+
+```{r}
+bvhar_vhar_small_spec <- set_weight_bvhar(
+  sigma = rep(.05, n_small),
+  lambda = .2,
+  daily = rep(.1, n_small),
+  weekly = rep(.05, n_small),
+  monthly = rep(.1, n_small)
+)
+#-----------------------------------------
+bvhar_vhar_medium_spec <- set_weight_bvhar(
+  sigma = rep(.05, n_medium),
+  lambda = .2,
+  daily = rep(.1, n_medium),
+  weekly = rep(.05, n_medium),
+  monthly = rep(.1, n_medium)
+)
+#-----------------------------------------
+bvhar_vhar_large_spec <- set_weight_bvhar(
+  sigma = rep(.05, n_large),
+  lambda = .2,
+  daily = rep(.1, n_large),
+  weekly = rep(.05, n_large),
+  monthly = rep(.1, n_large)
+)
+```
+
+```{r}
+(bvhar_vhar_small_optim <- choose_bvhar(
+  bvhar_vhar_small_spec, 
+  lower = c(
+    rep(1e-2, n_small), # sigma
+    .01, # lambda
+    rep(1e-2, n_small), # daily
+    rep(1e-2, n_small), # weekly
+    rep(1e-2, n_small) # monthly
+  ), 
+  upper = c(
+    rep(2, n_small), # sigma
+    2, # lambda
+    rep(1, n_small), # daily
+    rep(1, n_small), # weekly
+    rep(1, n_small) # monthly
+  ), 
+  y = y_small_train, 
+  include_mean = FALSE
+))
+```
+
+```{r}
+(bvhar_vhar_medium_optim <- choose_bvhar(
+  bvhar_vhar_medium_spec, 
+  lower = c(
+    rep(1e-2, n_medium), # sigma
+    .01, # lambda
+    rep(1e-2, n_medium), # daily
+    rep(1e-2, n_medium), # weekly
+    rep(1e-2, n_medium) # monthly
+  ), 
+  upper = c(
+    rep(2, n_medium), # sigma
+    2, # lambda
+    rep(1, n_medium), # daily
+    rep(1, n_medium), # weekly
+    rep(1, n_medium) # monthly
+  ), 
+  y = y_medium_train, 
+  include_mean = FALSE
+))
+```
+
+```{r}
+(bvhar_vhar_large_optim <- choose_bvhar(
+  bvhar_vhar_large_spec, 
+  lower = c(
+    rep(1e-2, n_large), # sigma
+    .01, # lambda
+    rep(1e-2, n_large), # daily
+    rep(1e-2, n_large), # weekly
+    rep(1e-2, n_large) # monthly
+  ), 
+  upper = c(
+    rep(2, n_large), # sigma
+    2, # lambda
+    rep(1, n_large), # daily
+    rep(1, n_large), # weekly
+    rep(1, n_large) # monthly
+  ), 
+  y = y_large_train, 
+  include_mean = FALSE
+))
+```
+
+```{r}
+fit_bvhar_small_vhar <- bvhar_vhar_small_optim$fit
+fit_bvhar_medium_vhar <- bvhar_vhar_medium_optim$fit
+fit_bvhar_large_vhar <- bvhar_vhar_large_optim$fit
+```
+
+
+# Errors
+
+```{r}
+mod_small_list <- list(
+  fit_var_small,
+  fit_vhar_small,
+  fit_small_bvar,
+  fit_bvhar_small_var,
+  fit_bvhar_small_vhar
+)
+# 1-step-----------
+cv_list_1 <- 
+  mod_small_list %>% 
+  lapply(
+    function(mod) {
+      forecast_roll(mod, 1, y_small_test)
+    }
+  )
+# 5-step-----------
+cv_list_5 <- 
+  mod_small_list %>% 
+  lapply(
+    function(mod) {
+      forecast_roll(mod, 5, y_small_test)
+    }
+  )
+# 20-step----------
+cv_list_20 <- 
+  mod_small_list %>% 
+  lapply(
+    function(mod) {
+      forecast_roll(mod, 20, y_small_test)
+    }
+  )
+```
+
+## Plots
+
+```{r coefcvone}
+cv_list_20 %>% 
+  gg_loss(y_small_test, mean_line = TRUE, mean_param = list(alpha = .5)) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = -30, vjust = -1),
+    legend.title = element_text(size = 8),
+    legend.text = element_text(size = 7),
+    legend.key.size = unit(.3, "cm")
+  )
+```
+
+```{r coefcvconetab, comment=NULL}
+cv_list_20 %>% 
+  get_losstex(y_small_test, "SMALL Simulation - 5-step ahead Rolling Window Forecasting Loss", label = "smallone") %>% 
+  writeLines()
+```
+
+
+
+
+
+
