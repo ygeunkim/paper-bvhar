@@ -88,6 +88,7 @@ report_hyperparam <- function(spec_list, caption = "Hyperparameter Lists", label
       format = "latex",
       booktabs = TRUE,
       escape = FALSE,
+      col.names = NULL,
       caption = caption,
       label = label
     ) %>% 

@@ -190,7 +190,6 @@ get_losstex <- function(mod_list, y, caption = "Loss for SMALL Simulation", labe
           ifelse(
             x == min(x),
             cell_spec(
-              # format(x, nsmall = 3) %>% as.numeric(),
               paste0("\\numprint{", format(x, nsmall = 3) %>% as.numeric(), "}"), # numprint
               format = "latex",
               escape = FALSE,

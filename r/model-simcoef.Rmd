@@ -3,7 +3,7 @@ title: "Simulating Minnesota VAR"
 author: "Young Geun Kim"
 date: "`r format(Sys.time(), '%d %b, %Y')`"
 output: 
-  bookdown::html_document2:
+  html_document:
     toc: true
 knit:
   (function(inputFile, encoding) {
@@ -442,6 +442,44 @@ fit_bvhar_large_vhar <- bvhar_vhar_large_optim$fit
 
 # Errors
 
+## Hyperparameters
+
+### SMALL
+
+```{r smallemp, comment=NULL, echo=FALSE}
+list(
+  bvar_small_optim$spec,
+  bvhar_var_small_optim$spec,
+  bvhar_vhar_small_optim$spec
+) %>% 
+  report_hyperparam(caption = "SMALL Simulation - Hyperparameter Lists", label = "hyperparamsmall") %>% 
+  writeLines()
+```
+
+### MEDIUM
+
+```{r medemp, comment=NULL, echo=FALSE}
+list(
+  bvar_medium_optim$spec,
+  bvhar_var_medium_optim$spec,
+  bvhar_vhar_medium_optim$spec
+) %>% 
+  report_hyperparam(caption = "MEDIUM Simulation - Hyperparameter Lists", label = "hyperparammed") %>% 
+  writeLines()
+```
+
+### LARGE
+
+```{r largeemp, comment=NULL, echo=FALSE}
+list(
+  bvar_large_optim$spec,
+  bvhar_var_large_optim$spec,
+  bvhar_vhar_large_optim$spec
+) %>% 
+  report_hyperparam(caption = "LARGE Simulation - Hyperparameter Lists", label = "hyperparamlarge") %>% 
+  writeLines()
+```
+
 ## SMALL
 
 ```{r}
@@ -478,11 +516,11 @@ cv_small_20 <-
   )
 ```
 
-## Plots
+### Plots
 
 ```{r smallcvonefig}
 cv_small_1 %>% 
-  gg_loss(y_small_test, mean_line = TRUE, mean_param = list(alpha = .5)) +
+  gg_loss(y_small_test, mean_line = TRUE, mean_param = list(alpha = .5), viridis = TRUE, show.legend = FALSE) +
   theme_minimal() +
   theme(
     axis.text.x = element_text(angle = -30, vjust = -1),
@@ -494,7 +532,7 @@ cv_small_1 %>%
 
 ```{r smallcvfivefig}
 cv_small_5 %>% 
-  gg_loss(y_small_test, mean_line = TRUE, mean_param = list(alpha = .5)) +
+  gg_loss(y_small_test, mean_line = TRUE, mean_param = list(alpha = .5), viridis = TRUE, show.legend = FALSE) +
   theme_minimal() +
   theme(
     axis.text.x = element_text(angle = -30, vjust = -1),
@@ -506,7 +544,7 @@ cv_small_5 %>%
 
 ```{r smallcvtwentyfig}
 cv_small_20 %>% 
-  gg_loss(y_small_test, mean_line = TRUE, mean_param = list(alpha = .5)) +
+  gg_loss(y_small_test, mean_line = TRUE, mean_param = list(alpha = .5), viridis = TRUE, show.legend = FALSE) +
   theme_minimal() +
   theme(
     axis.text.x = element_text(angle = -30, vjust = -1),
@@ -516,17 +554,25 @@ cv_small_20 %>%
   )
 ```
 
+### Tables
+
+1-step:
+
 ```{r smallcvconetab, comment=NULL, echo=FALSE}
 cv_small_1 %>% 
   get_losstex(y_small_test, "SMALL Simulation - 1-step ahead Rolling Window Forecasting Loss", label = "smallone") %>% 
   writeLines()
 ```
 
+5-step:
+
 ```{r smallcvfivetab, comment=NULL, echo=FALSE}
 cv_small_5 %>% 
   get_losstex(y_small_test, "SMALL Simulation - 5-step ahead Rolling Window Forecasting Loss", label = "smallfive") %>% 
   writeLines()
 ```
+
+20-step:
 
 ```{r smallcvtwentytab, comment=NULL, echo=FALSE}
 cv_small_20 %>% 
@@ -570,9 +616,11 @@ cv_medium_20 <-
   )
 ```
 
+### Plots
+
 ```{r medcvonefig}
 cv_medium_1 %>% 
-  gg_loss(y_medium_test, mean_line = TRUE, mean_param = list(alpha = .5)) +
+  gg_loss(y_medium_test, mean_line = TRUE, mean_param = list(alpha = .5), viridis = TRUE, show.legend = FALSE) +
   theme_minimal() +
   theme(
     axis.text.x = element_text(angle = -30, vjust = -1),
@@ -584,7 +632,7 @@ cv_medium_1 %>%
 
 ```{r medcvfivefig}
 cv_medium_5 %>% 
-  gg_loss(y_medium_test, mean_line = TRUE, mean_param = list(alpha = .5)) +
+  gg_loss(y_medium_test, mean_line = TRUE, mean_param = list(alpha = .5), viridis = TRUE, show.legend = FALSE) +
   theme_minimal() +
   theme(
     axis.text.x = element_text(angle = -30, vjust = -1),
@@ -596,7 +644,7 @@ cv_medium_5 %>%
 
 ```{r medcvtwentyfig}
 cv_medium_20 %>% 
-  gg_loss(y_medium_test, mean_line = TRUE, mean_param = list(alpha = .5)) +
+  gg_loss(y_medium_test, mean_line = TRUE, mean_param = list(alpha = .5), viridis = TRUE, show.legend = FALSE) +
   theme_minimal() +
   theme(
     axis.text.x = element_text(angle = -30, vjust = -1),
@@ -606,22 +654,29 @@ cv_medium_20 %>%
   )
 ```
 
+### Tables
+
+1-step:
 
 ```{r medcvonetab, comment=NULL, echo=FALSE}
 cv_medium_1 %>% 
-  get_losstex(y_medium_test, "MEDIUM Simulation - 1-step ahead Rolling Window Forecasting Loss", label = "smallone") %>% 
+  get_losstex(y_medium_test, "MEDIUM Simulation - 1-step ahead Rolling Window Forecasting Loss", label = "medone") %>% 
   writeLines()
 ```
+
+5-step:
 
 ```{r medcvfivetab, comment=NULL, echo=FALSE}
 cv_medium_5 %>% 
-  get_losstex(y_medium_test, "MEDIUM Simulation - 5-step ahead Rolling Window Forecasting Loss", label = "smallfive") %>% 
+  get_losstex(y_medium_test, "MEDIUM Simulation - 5-step ahead Rolling Window Forecasting Loss", label = "medfive") %>% 
   writeLines()
 ```
 
+20-step:
+
 ```{r medcvtwentytab, comment=NULL, echo=FALSE}
 cv_medium_20 %>% 
-  get_losstex(y_medium_test, "MEDIUM Simulation - 20-step ahead Rolling Window Forecasting Loss", label = "smalltwenty") %>% 
+  get_losstex(y_medium_test, "MEDIUM Simulation - 20-step ahead Rolling Window Forecasting Loss", label = "medtwenty") %>% 
   writeLines()
 ```
 
@@ -662,10 +717,11 @@ cv_large_20 <-
   )
 ```
 
+### Plots
 
 ```{r largecvonefig}
 cv_large_1 %>% 
-  gg_loss(y_large_test, mean_line = TRUE, mean_param = list(alpha = .5)) +
+  gg_loss(y_large_test, mean_line = TRUE, mean_param = list(alpha = .5), viridis = TRUE, show.legend = FALSE) +
   theme_minimal() +
   theme(
     axis.text.x = element_text(angle = -30, vjust = -1),
@@ -677,7 +733,7 @@ cv_large_1 %>%
 
 ```{r largecvfivefig}
 cv_large_5 %>% 
-  gg_loss(y_large_test, mean_line = TRUE, mean_param = list(alpha = .5)) +
+  gg_loss(y_large_test, mean_line = TRUE, mean_param = list(alpha = .5), viridis = TRUE, show.legend = FALSE) +
   theme_minimal() +
   theme(
     axis.text.x = element_text(angle = -30, vjust = -1),
@@ -689,7 +745,7 @@ cv_large_5 %>%
 
 ```{r largecvtwentyfig}
 cv_large_20 %>% 
-  gg_loss(y_large_test, mean_line = TRUE, mean_param = list(alpha = .5)) +
+  gg_loss(y_large_test, mean_line = TRUE, mean_param = list(alpha = .5), viridis = TRUE, show.legend = FALSE) +
   theme_minimal() +
   theme(
     axis.text.x = element_text(angle = -30, vjust = -1),
@@ -699,11 +755,17 @@ cv_large_20 %>%
   )
 ```
 
+### Tables
+
+1-step:
+
 ```{r largecvonetab, comment=NULL, echo=FALSE}
 cv_large_1 %>% 
   get_losstex(y_large_test, "LARGE Simulation - 1-step ahead Rolling Window Forecasting Loss", label = "largeone") %>% 
   writeLines()
 ```
+
+5-step:
 
 ```{r largecvfivetab, comment=NULL, echo=FALSE}
 cv_large_5 %>% 
@@ -711,10 +773,208 @@ cv_large_5 %>%
   writeLines()
 ```
 
+20-step:
+
 ```{r largecvtwentytab, comment=NULL, echo=FALSE}
 cv_large_20 %>% 
   get_losstex(y_large_test, "LARGE Simulation - 20-step ahead Rolling Window Forecasting Loss", label = "largetwenty") %>% 
   writeLines()
 ```
+
+# Additional
+
+<!-- ```{r modlegend, echo=FALSE} -->
+<!-- tibble( -->
+<!--   y = 5:1, -->
+<!--   x = c("BVAR_Minnesota", "BVHAR_MN_VAR", "BVHAR_MN_VHAR", "VAR", "VHAR") -->
+<!-- ) %>%  -->
+<!--   ggplot() + -->
+<!--   geom_hline(aes(yintercept = y, color = x)) + -->
+<!--   geom_text( -->
+<!--     aes(x = -1, y = y, label = x) -->
+<!--   ) + -->
+<!--   theme_minimal() + -->
+<!--   theme( -->
+<!--     axis.text = element_blank(), -->
+<!--     axis.title = element_blank() -->
+<!--   ) -->
+<!-- ``` -->
+
+```{r modlegend, echo=FALSE}
+tibble(
+  x = 1:100,
+  BVAR_Minnesota = 5,
+  BVHAR_MN_VAR = 4,
+  BVHAR_MN_VHAR = 3,
+  VAR = 2,
+  VHAR = 1
+) %>% 
+  pivot_longer(-x, names_to = "mod", values_to = "y") %>% 
+  mutate(mod_label = ifelse(x == max(x), mod, NA_character_)) %>% 
+  ggplot(aes(y = y)) +
+  geom_path(aes(x = x, colour = mod)) +
+  geom_text(
+    aes(x = x + 3, label = mod_label),
+    na.rm = TRUE,
+    hjust = 0,
+    size = 3
+  ) +
+  scale_colour_viridis_d() +
+  theme_minimal() +
+  theme(
+    legend.position = "none",
+    axis.text = element_blank(),
+    axis.title = element_blank()
+  ) +
+  xlim(1, 125)
+```
+
+
+# Coefficients
+
+```{r, eval=FALSE}
+bayes_small_mod <- mod_small_list[3:5]
+names(bayes_small_mod) <- sapply(bayes_small_mod, function(x) x$process)
+small_vec <- names(y_small_train)
+names(small_vec) <- names(y_small_train)
+# draw---------------------
+set.seed(1)
+bayes_small_plot <- 
+  bayes_small_mod %>% 
+  lapply(
+    function(mods) {
+      lapply(
+        small_vec,
+        function(x) {
+          autoplot(summary(mods), var_name = x) +
+            theme_minimal()
+        }
+      )
+    }
+  )
+# save---------------------
+lapply(
+  seq_along(bayes_small_plot),
+  function(x) {
+    process_name <- names(bayes_small_plot)[x] # one of the processes
+    p_list <- bayes_small_plot[[process_name]]
+    asset_name <- names(p_list) # character vector: asset_01, asset_02, ...
+    lapply(
+      asset_name,
+      function(y) {
+        file_name <- 
+          paste0(
+            "../output/figs/small-coef/", 
+            str_replace_all(process_name, pattern = "\\_", replacement = "\\-"), 
+            "-", 
+            str_remove_all(y, pattern = "\\_"),
+            ".pdf"
+          )
+        ggsave(filename = file_name, plot = p_list[[y]])
+      }
+    )
+  }
+)
+```
+
+```{r, eval=FALSE}
+bayes_medium_mod <- mod_medium_list[3:5]
+names(bayes_medium_mod) <- sapply(bayes_medium_mod, function(x) x$process)
+medium_vec <- names(y_medium_train)
+names(medium_vec) <- names(y_medium_train)
+# draw---------------------
+set.seed(1)
+bayes_medium_plot <- 
+  bayes_medium_mod %>% 
+  lapply(
+    function(mods) {
+      lapply(
+        medium_vec,
+        function(x) {
+          autoplot(summary(mods), var_name = x) +
+            theme_minimal()
+        }
+      )
+    }
+  )
+# save---------------------
+lapply(
+  seq_along(bayes_medium_plot),
+  function(x) {
+    process_name <- names(bayes_medium_plot)[x] # one of the processes
+    p_list <- bayes_medium_plot[[process_name]]
+    asset_name <- names(p_list) # character vector: asset_01, asset_02, ...
+    lapply(
+      asset_name,
+      function(y) {
+        file_name <- 
+          paste0(
+            "../output/figs/med-coef/", 
+            str_replace_all(process_name, pattern = "\\_", replacement = "\\-"), 
+            "-", 
+            str_remove_all(y, pattern = "\\_"),
+            ".pdf"
+          )
+        ggsave(filename = file_name, plot = p_list[[y]])
+      }
+    )
+  }
+)
+```
+
+```{r, eval=FALSE}
+bayes_large_mod <- mod_large_list[3:5]
+names(bayes_large_mod) <- sapply(bayes_large_mod, function(x) x$process)
+large_vec <- names(y_large_train)
+names(large_vec) <- names(y_large_train)
+# draw---------------------
+set.seed(1)
+bayes_large_plot <- 
+  bayes_large_mod %>% 
+  lapply(
+    function(mods) {
+      lapply(
+        large_vec,
+        function(x) {
+          autoplot(summary(mods), var_name = x) +
+            theme_minimal()
+        }
+      )
+    }
+  )
+# save---------------------
+lapply(
+  seq_along(bayes_large_plot),
+  function(x) {
+    process_name <- names(bayes_large_plot)[x] # one of the processes
+    p_list <- bayes_large_plot[[process_name]]
+    asset_name <- names(p_list) # character vector: asset_01, asset_02, ...
+    lapply(
+      asset_name,
+      function(y) {
+        file_name <- 
+          paste0(
+            "../output/figs/large-coef/", 
+            str_replace_all(process_name, pattern = "\\_", replacement = "\\-"), 
+            "-", 
+            str_remove_all(y, pattern = "\\_"),
+            ".pdf"
+          )
+        ggsave(filename = file_name, plot = p_list[[y]])
+      }
+    )
+  }
+)
+```
+
+
+# Distribution
+
+```{r}
+(h_step <- 20)
+```
+
+
+
 
 

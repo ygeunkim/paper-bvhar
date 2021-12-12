@@ -13,3 +13,4 @@ data/**/*.txt
 *_files/
 *.xlsx
 .DS_Store
+figs/
