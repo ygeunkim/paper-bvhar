@@ -90,7 +90,7 @@ make_kable <- function(mod_list, y, error = c("mse", "mae", "mape", "mase"), kab
 # returns kable
 # use kableExtra
 #------------------------------------------------------
-kable_lossmean <- function(mod_list, y, kable = TRUE, format = "latex") {
+kable_lossmean <- function(mod_list, y, kable = TRUE, caption = "", label = "") {
   error_type <- c("mse", "mae", "mape", "mase")
   loss_mean <- foreach(error = error_type, .combine = rbind) %do% {
     switch(
@@ -134,7 +134,7 @@ kable_lossmean <- function(mod_list, y, kable = TRUE, format = "latex") {
     ) %>% 
       unlist()
   }
-  rownames(loss_mean) <- error_type
+  rownames(loss_mean) <- str_to_upper(error_type)
   if (!is.null(names(mod_list))) {
     colnames(loss_mean) <- names(mod_list)
   } else {
@@ -155,23 +155,25 @@ kable_lossmean <- function(mod_list, y, kable = TRUE, format = "latex") {
         ifelse(
           x == min(x),
           cell_spec(
-            format(x, nsmall = 3) %>% as.numeric(),
+            paste0("\\numprint{", format(x, nsmall = 3) %>% as.numeric(), "}"), # numprint
+            format = "latex",
+            escape = FALSE,
             color = "red"
           ),
-          format(x, nsmall = 3) %>% as.numeric()
+          paste0("\\numprint{", format(x, nsmall = 3) %>% as.numeric(), "}") # numprint
         )
       }
     ) %>% 
     t() %>% 
     kable(
-      format = format,
+      format = "latex",
       booktabs = TRUE,
-      longtable = TRUE,
-      escape = FALSE
+      escape = FALSE,
+      caption = caption,
+      label = label
     ) %>% 
-    kable_styling(
-      full_width = FALSE, 
-      latex_options = c("striped", "HOLD_position")
+    kable_paper(
+      full_width = FALSE
     )
 }
 
@@ -184,7 +186,7 @@ get_losstex <- function(mod_list, y, caption = "Loss for SMALL Simulation", labe
   error_table <- foreach(error_type = c("mse", "mae", "mape", "mase"), .combine = rbind) %do% {
     mod_list %>% 
       make_kable(y, error_type, kable = FALSE) %>% 
-      cbind(Average = mean_table[,error_type]) %>% 
+      cbind(Average = mean_table[,str_to_upper(error_type)]) %>% 
       mutate_all(
         function(x) {
           ifelse(

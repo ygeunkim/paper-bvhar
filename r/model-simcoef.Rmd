@@ -58,117 +58,146 @@ source("param-fns.R")
 
 ## Minnesota prior
 
-```{r}
+```{r smallbvarsetting, comment=NULL, echo=FALSE}
 n_small <- 3
 bvar_small_spec <- set_bvar(
   sigma = rep(.05, n_small),
-  lambda = .2,
+  lambda = .3,
   delta = rep(0, n_small)
 )
-#------------------------------
-set.seed(1)
-bvar_lag <- 5
-bvar_small_coef <- sim_mncoef(bvar_lag, bvar_small_spec)
-```
-
-```{r smallbvarsetting, comment=NULL, echo=FALSE}
 bvar_small_spec %>% 
   kable_hyperparam(caption = "\\label{tab:smallbvarspec}BVAR Coefficient Simulation Setting - SMALL") %>% 
   writeLines()
 ```
 
-```{r}
+```{r medbvarsetting, comment=NULL, echo=FALSE}
 n_medium <- 9
 bvar_medium_spec <- set_bvar(
   sigma = rep(.05, n_medium),
   lambda = .1,
   delta = rep(0, n_medium)
 )
-#------------------------------
-set.seed(1)
-bvar_medium_coef <- sim_mncoef(bvar_lag, bvar_medium_spec)
-```
-
-```{r medbvarsetting, comment=NULL, echo=FALSE}
-bvar_medium_spec %>% 
+bvar_small_spec %>% 
   kable_hyperparam(caption = "\\label{tab:medbvarspec}BVAR Coefficient Simulation Setting - MEDIUM") %>% 
   writeLines()
 ```
 
-```{r}
+```{r largebvarsetting, comment=NULL, echo=FALSE}
 n_large <- 12
 bvar_large_spec <- set_bvar(
   sigma = rep(.05, n_large),
   lambda = .03,
   delta = rep(0, n_large)
 )
-#------------------------------
-set.seed(1)
-bvar_lag <- 5
-bvar_large_coef <- sim_mncoef(bvar_lag, bvar_large_spec)
-```
-
-```{r largebvarsetting, comment=NULL, echo=FALSE}
 bvar_large_spec %>% 
   kable_hyperparam(caption = "\\label{tab:largebvarspec}BVAR Coefficient Simulation Setting - LARGE") %>% 
   writeLines()
 ```
 
-## VHAR
+## VAR(5)
+
+### SMALL
 
 ```{r}
-set.seed(1)
-y_small <- sim_var(
-  1000 + 100,
-  300,
-  bvar_small_coef$coefficients,
-  bvar_lag,
-  bvar_small_coef$covmat,
-  matrix(0L, nrow = bvar_lag, ncol = n_small)
-) %>% 
-  as.data.frame()
-colnames(y_small) <- paste("asset", sprintf(1:n_small, fmt = "%02d"), sep = "_")
-# Split---------------------------------
-y_small_split <- divide_ts(y_small, 100)
-y_small_train <- y_small_split$train
-y_small_test <- y_small_split$test
+y_small_train <- read_csv("../data/processed/bvarsim_small_train.csv")
+y_small_test <- read_csv("../data/processed/bvarsim_small_test.csv")
 ```
 
-```{r}
-set.seed(1)
-y_medium <- sim_var(
-  1000 + 100,
-  300,
-  bvar_medium_coef$coefficients,
-  bvar_lag,
-  bvar_medium_coef$covmat,
-  matrix(0L, nrow = bvar_lag, ncol = n_medium)
-) %>% 
-  as.data.frame()
-colnames(y_medium) <- paste("asset", sprintf(1:n_medium, fmt = "%02d"), sep = "_")
-# Split---------------------------------
-y_medium_split <- divide_ts(y_medium, 100)
-y_medium_train <- y_medium_split$train
-y_medium_test <- y_medium_split$test
+```{r smallplot}
+y_small_train %>% 
+  mutate(train = TRUE) %>% 
+  bind_rows(y_small_test %>% mutate(train = FALSE)) %>% 
+  mutate(id = 1:n()) %>% 
+  pivot_longer(-c(id, train), names_to = "asset", values_to = "value") %>% 
+  ggplot(aes(x = id, y = value)) +
+  annotate(
+    geom = "rect",
+    xmin = nrow(y_small_train),
+    xmax = nrow(y_small_train) + nrow(y_small_test),
+    ymin = -Inf,
+    ymax = Inf,
+    alpha = .7,
+    fill = "grey" # test set
+  ) +
+  # geom_path(aes(colour = asset), show.legend = FALSE, alpha = .5) +
+  geom_path() +
+  facet_grid(asset ~ ., scales = "free_y") +
+  scale_colour_viridis_d() +
+  theme_minimal() +
+  labs(
+    x = element_blank(),
+    y = element_blank()
+  )
 ```
 
+### MEDIUM
+
 ```{r}
-set.seed(1)
-y_large <- sim_var(
-  1000 + 100,
-  300,
-  bvar_large_coef$coefficients,
-  bvar_lag,
-  bvar_large_coef$covmat,
-  matrix(0L, nrow = bvar_lag, ncol = n_large)
-) %>% 
-  as.data.frame()
-colnames(y_large) <- paste("asset", sprintf(1:n_large, fmt = "%02d"), sep = "_")
-# Split---------------------------------
-y_large_split <- divide_ts(y_large, 100)
-y_large_train <- y_large_split$train
-y_large_test <- y_large_split$test
+y_medium_train <- read_csv("../data/processed/bvarsim_medium_train.csv")
+y_medium_test <- read_csv("../data/processed/bvarsim_medium_test.csv")
 ```
+
+```{r medplot}
+y_medium_train %>% 
+  mutate(train = TRUE) %>% 
+  bind_rows(y_medium_test %>% mutate(train = FALSE)) %>% 
+  mutate(id = 1:n()) %>% 
+  pivot_longer(-c(id, train), names_to = "asset", values_to = "value") %>% 
+  ggplot(aes(x = id, y = value)) +
+  annotate(
+    geom = "rect",
+    xmin = nrow(y_medium_train),
+    xmax = nrow(y_medium_train) + nrow(y_medium_test),
+    ymin = -Inf,
+    ymax = Inf,
+    alpha = .7,
+    fill = "grey" # test set
+  ) +
+  # geom_path(aes(colour = asset), show.legend = FALSE, alpha = .5) +
+  geom_path() +
+  facet_grid(asset ~ ., scales = "free_y") +
+  scale_colour_viridis_d() +
+  theme_minimal() +
+  labs(
+    x = element_blank(),
+    y = element_blank()
+  )
+```
+
+### LARGE
+
+```{r}
+y_large_train <- read_csv("../data/processed/bvarsim_large_train.csv")
+y_large_test <- read_csv("../data/processed/bvarsim_large_test.csv")
+```
+
+```{r largeplot}
+y_large_train %>% 
+  mutate(train = TRUE) %>% 
+  bind_rows(y_large_test %>% mutate(train = FALSE)) %>% 
+  mutate(id = 1:n()) %>% 
+  pivot_longer(-c(id, train), names_to = "asset", values_to = "value") %>% 
+  ggplot(aes(x = id, y = value)) +
+  annotate(
+    geom = "rect",
+    xmin = nrow(y_large_train),
+    xmax = nrow(y_large_train) + nrow(y_large_test),
+    ymin = -Inf,
+    ymax = Inf,
+    alpha = .7,
+    fill = "grey" # test set
+  ) +
+  # geom_path(aes(colour = asset), show.legend = FALSE, alpha = .5) +
+  geom_path() +
+  facet_grid(asset ~ ., scales = "free_y") +
+  scale_colour_viridis_d() +
+  theme_minimal() +
+  labs(
+    x = element_blank(),
+    y = element_blank()
+  )
+```
+
 
 # Modeling
 
@@ -194,17 +223,21 @@ fit_vhar_large <- vhar_lm(y_large_train, include_mean = FALSE)
 
 ## BVAR
 
-```{r, cache=TRUE}
+```{r}
+(bvar_lag <- 5)
+```
+
+```{r smallbvaroptim, cache=TRUE}
 (bvar_small_optim <- choose_bvar(
   bvar_small_spec, 
   lower = c(
     rep(1e-2, n_small), # sigma
-    .01, # lambda
+    1e-2, # lambda
     rep(1e-2, n_small) # delta
   ), 
   upper = c(
-    rep(2, n_small), # sigma
-    2, # lambda
+    rep(1, n_small), # sigma
+    Inf, # lambda
     rep(1, n_small) # delta
   ), 
   y = y_small_train, 
@@ -213,17 +246,17 @@ fit_vhar_large <- vhar_lm(y_large_train, include_mean = FALSE)
 ))
 ```
 
-```{r, cache=TRUE}
+```{r medbvaroptim, cache=TRUE}
 (bvar_medium_optim <- choose_bvar(
   bvar_medium_spec, 
   lower = c(
     rep(1e-2, n_medium), # sigma
-    .01, # lambda
+    1e-2, # lambda
     rep(1e-2, n_medium) # delta
   ), 
   upper = c(
-    rep(2, n_medium), # sigma
-    2, # lambda
+    rep(1, n_medium), # sigma
+    1, # lambda
     rep(1, n_medium) # delta
   ), 
   y = y_medium_train, 
@@ -232,17 +265,17 @@ fit_vhar_large <- vhar_lm(y_large_train, include_mean = FALSE)
 ))
 ```
 
-```{r, cache=TRUE}
+```{r largebvaroptim, cache=TRUE}
 (bvar_large_optim <- choose_bvar(
   bvar_large_spec, 
   lower = c(
     rep(1e-2, n_large), # sigma
-    .01, # lambda
+    1e-2, # lambda
     rep(1e-2, n_large) # delta
   ), 
   upper = c(
-    rep(2, n_large), # sigma
-    2, # lambda
+    rep(1, n_large), # sigma
+    1, # lambda
     rep(1, n_large) # delta
   ), 
   y = y_large_train, 
@@ -279,17 +312,17 @@ bvhar_var_large_spec <- set_bvhar(
 )
 ```
 
-```{r, cache=TRUE}
+```{r smallbvharoptim, cache=TRUE}
 (bvhar_var_small_optim <- choose_bvhar(
   bvhar_var_small_spec, 
   lower = c(
     rep(1e-2, n_small), # sigma
-    .01, # lambda
+    1e-2, # lambda
     rep(1e-2, n_small) # delta
   ), 
   upper = c(
-    rep(2, n_small), # sigma
-    2, # lambda
+    rep(1, n_small), # sigma
+    Inf, # lambda
     rep(1, n_small) # delta
   ), 
   y = y_small_train, 
@@ -297,17 +330,17 @@ bvhar_var_large_spec <- set_bvhar(
 ))
 ```
 
-```{r, cache=TRUE}
+```{r medbvharoptim, cache=TRUE}
 (bvhar_var_medium_optim <- choose_bvhar(
   bvhar_var_medium_spec, 
   lower = c(
     rep(1e-2, n_medium), # sigma
-    .01, # lambda
+    1e-2, # lambda
     rep(1e-2, n_medium) # delta
   ), 
   upper = c(
-    rep(2, n_medium), # sigma
-    2, # lambda
+    rep(1, n_medium), # sigma
+    1, # lambda
     rep(1, n_medium) # delta
   ), 
   y = y_medium_train, 
@@ -315,17 +348,17 @@ bvhar_var_large_spec <- set_bvhar(
 ))
 ```
 
-```{r, cache=TRUE}
+```{r largebvharoptim, cache=TRUE}
 (bvhar_var_large_optim <- choose_bvhar(
   bvhar_var_large_spec, 
   lower = c(
     rep(1e-2, n_large), # sigma
-    .01, # lambda
+    1e-2, # lambda
     rep(1e-2, n_large) # delta
   ), 
   upper = c(
-    rep(2, n_large), # sigma
-    2, # lambda
+    rep(1, n_large), # sigma
+    1, # lambda
     rep(1, n_large) # delta
   ), 
   y = y_large_train, 
@@ -367,19 +400,19 @@ bvhar_vhar_large_spec <- set_weight_bvhar(
 )
 ```
 
-```{r, cache=TRUE}
+```{r smallbvharvharoptim, cache=TRUE}
 (bvhar_vhar_small_optim <- choose_bvhar(
   bvhar_vhar_small_spec, 
   lower = c(
     rep(1e-2, n_small), # sigma
-    .01, # lambda
+    1e-2, # lambda
     rep(1e-2, n_small), # daily
     rep(1e-2, n_small), # weekly
     rep(1e-2, n_small) # monthly
   ), 
   upper = c(
-    rep(2, n_small), # sigma
-    2, # lambda
+    rep(1, n_small), # sigma
+    Inf, # lambda
     rep(1, n_small), # daily
     rep(1, n_small), # weekly
     rep(1, n_small) # monthly
@@ -389,19 +422,19 @@ bvhar_vhar_large_spec <- set_weight_bvhar(
 ))
 ```
 
-```{r, cache=TRUE}
+```{r medbvharvharoptim, cache=TRUE}
 (bvhar_vhar_medium_optim <- choose_bvhar(
   bvhar_vhar_medium_spec, 
   lower = c(
     rep(1e-2, n_medium), # sigma
-    .01, # lambda
+    1e-2, # lambda
     rep(1e-2, n_medium), # daily
     rep(1e-2, n_medium), # weekly
     rep(1e-2, n_medium) # monthly
   ), 
   upper = c(
-    rep(2, n_medium), # sigma
-    2, # lambda
+    rep(1, n_medium), # sigma
+    1, # lambda
     rep(1, n_medium), # daily
     rep(1, n_medium), # weekly
     rep(1, n_medium) # monthly
@@ -411,19 +444,19 @@ bvhar_vhar_large_spec <- set_weight_bvhar(
 ))
 ```
 
-```{r, cache=TRUE}
+```{r largebvharvharoptim, cache=TRUE}
 (bvhar_vhar_large_optim <- choose_bvhar(
   bvhar_vhar_large_spec, 
   lower = c(
     rep(1e-2, n_large), # sigma
-    .01, # lambda
+    1e-2, # lambda
     rep(1e-2, n_large), # daily
     rep(1e-2, n_large), # weekly
     rep(1e-2, n_large) # monthly
   ), 
   upper = c(
     rep(2, n_large), # sigma
-    2, # lambda
+    1, # lambda
     rep(1, n_large), # daily
     rep(1, n_large), # weekly
     rep(1, n_large) # monthly
@@ -556,6 +589,31 @@ cv_small_20 %>%
 
 ### Tables
 
+Average (1-step):
+
+```{r smallcvonemeantab, comment=NULL, echo=FALSE}
+cv_small_1 %>% 
+  kable_lossmean(y_small_test, kable = TRUE, caption = "SMALL Simulation - 1-step ahead Rolling Window Forecasting Average Loss", label = "smallonemean") %>% 
+  writeLines()
+```
+
+Average (5-step):
+
+```{r smallcvfivemeantab, comment=NULL, echo=FALSE}
+cv_small_5 %>% 
+  kable_lossmean(y_small_test, kable = TRUE, caption = "SMALL Simulation - 5-step ahead Rolling Window Forecasting Average Loss", label = "smallfivemean") %>% 
+  writeLines()
+```
+
+Average (20-step):
+
+```{r smallcvtwentymeantab, comment=NULL, echo=FALSE}
+cv_small_20 %>% 
+  kable_lossmean(y_small_test, kable = TRUE, caption = "SMALL Simulation - 20-step ahead Rolling Window Forecasting Average Loss", label = "smalltwentyemean") %>% 
+  writeLines()
+```
+
+
 1-step:
 
 ```{r smallcvconetab, comment=NULL, echo=FALSE}
@@ -655,6 +713,31 @@ cv_medium_20 %>%
 ```
 
 ### Tables
+
+Average (1-step):
+
+```{r medcvonemeantab, comment=NULL, echo=FALSE}
+cv_medium_1 %>% 
+  kable_lossmean(y_medium_test, kable = TRUE, caption = "MEDIUM Simulation - 1-step ahead Rolling Window Forecasting Average Loss", label = "medonemean") %>% 
+  writeLines()
+```
+
+Average (5-step):
+
+```{r medcvfivemeantab, comment=NULL, echo=FALSE}
+cv_medium_5 %>% 
+  kable_lossmean(y_medium_test, kable = TRUE, caption = "MEDIUM Simulation - 5-step ahead Rolling Window Forecasting Average Loss", label = "medfivemean") %>% 
+  writeLines()
+```
+
+Average (20-step):
+
+```{r medcvtwentymeantab, comment=NULL, echo=FALSE}
+cv_medium_20 %>% 
+  kable_lossmean(y_medium_test, kable = TRUE, caption = "MEDIUM Simulation - 20-step ahead Rolling Window Forecasting Average Loss", label = "medtwentyemean") %>% 
+  writeLines()
+```
+
 
 1-step:
 
@@ -756,6 +839,31 @@ cv_large_20 %>%
 ```
 
 ### Tables
+
+Average (1-step):
+
+```{r largecvonemeantab, comment=NULL, echo=FALSE}
+cv_large_1 %>% 
+  kable_lossmean(y_large_test, kable = TRUE, caption = "LARGE Simulation - 1-step ahead Rolling Window Forecasting Average Loss", label = "largeonemean") %>% 
+  writeLines()
+```
+
+Average (5-step):
+
+```{r largecvfivemeantab, comment=NULL, echo=FALSE}
+cv_large_5 %>% 
+  kable_lossmean(y_large_test, kable = TRUE, caption = "LARGE Simulation - 5-step ahead Rolling Window Forecasting Average Loss", label = "largefivemean") %>% 
+  writeLines()
+```
+
+Average (20-step):
+
+```{r largecvtwentymeantab, comment=NULL, echo=FALSE}
+cv_large_20 %>% 
+  kable_lossmean(y_large_test, kable = TRUE, caption = "LARGE Simulation - 20-step ahead Rolling Window Forecasting Average Loss", label = "largetwentyemean") %>% 
+  writeLines()
+```
+
 
 1-step:
 
@@ -971,10 +1079,62 @@ lapply(
 # Distribution
 
 ```{r}
-(h_step <- 20)
+(h_step <- 5)
 ```
 
+<!-- ## SMALL -->
 
+<!-- ```{r} -->
+<!-- set.seed(1) -->
+<!-- pred_small <-  -->
+<!--   mod_small_list %>%  -->
+<!--   lapply(predict, n_ahead = h_step) -->
+<!-- ``` -->
+
+<!-- ```{r smallpreddensity} -->
+<!-- autoplot(pred_small[[1]], x_cut = 980, ci_alpha = .7, type = "wrap") + -->
+<!--   autolayer(pred_small[[2]], ci_alpha = .6) + -->
+<!--   # autolayer(pred_small[[3]], ci_alpha = .4) + -->
+<!--   # autolayer(pred_small[[4]], ci_alpha = .2) + -->
+<!--   # autolayer(pred_small[[5]], ci_alpha = .1) -->
+<!--   geom_eval(data = y_small_train[1:h_step,], num_train = nrow(y_small_train), alpha = .5) -->
+<!-- ``` -->
+
+<!-- ## MEDIUM -->
+
+<!-- ```{r} -->
+<!-- set.seed(1) -->
+<!-- pred_medium <-  -->
+<!--   mod_medium_list %>%  -->
+<!--   lapply(predict, n_ahead = h_step) -->
+<!-- ``` -->
+
+<!-- ```{r medpreddensity} -->
+<!-- autoplot(pred_medium[[1]], x_cut = 980, ci_alpha = .7, type = "wrap") + -->
+<!--   autolayer(pred_medium[[2]], ci_alpha = .6) + -->
+<!--   autolayer(pred_medium[[3]], ci_alpha = .4) + -->
+<!--   autolayer(pred_medium[[4]], ci_alpha = .2) + -->
+<!--   # autolayer(pred_medium[[5]], ci_alpha = .1) + -->
+<!--   geom_eval(data = y_medium_test[1:h_step,], num_train = nrow(y_medium_train), alpha = .5) -->
+<!-- ``` -->
+
+<!-- ## LARGE -->
+
+<!-- ```{r} -->
+<!-- set.seed(1) -->
+<!-- pred_large <-  -->
+<!--   mod_large_list %>%  -->
+<!--   lapply(predict, n_ahead = h_step) -->
+<!-- ``` -->
+
+<!-- ```{r largepreddensity} -->
+<!-- autoplot(pred_large[[1]], x_cut = 980, ci_alpha = .7, type = "wrap") + -->
+<!--   autolayer(pred_large[[2]], ci_alpha = .6) + -->
+<!--   # autolayer(pred_large[[3]], ci_alpha = .4) + -->
+<!--   # autolayer(pred_large[[4]], ci_alpha = .2) + -->
+<!--   # autolayer(pred_medium[[5]], ci_alpha = .1) + -->
+<!--   geom_eval(data = y_large_test[1:h_step,], num_train = nrow(y_large_train), alpha = .5) -->
+<!-- ``` -->
 
 
 
