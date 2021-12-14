@@ -122,8 +122,11 @@ y_small_train %>%
   # geom_path(aes(colour = asset), show.legend = FALSE, alpha = .5) +
   geom_path() +
   facet_grid(asset ~ ., scales = "free_y") +
-  scale_colour_viridis_d() +
+  scale_x_continuous(
+    breaks = c(nrow(y_small_train), nrow(y_small_train) + nrow(y_small_test))
+  ) +
   theme_minimal() +
+  theme(panel.border = element_rect(fill = NA)) +
   labs(
     x = element_blank(),
     y = element_blank()
@@ -153,11 +156,16 @@ y_medium_train %>%
     alpha = .7,
     fill = "grey" # test set
   ) +
-  # geom_path(aes(colour = asset), show.legend = FALSE, alpha = .5) +
   geom_path() +
   facet_grid(asset ~ ., scales = "free_y") +
-  scale_colour_viridis_d() +
+  scale_x_continuous(
+    breaks = c(nrow(y_medium_train), nrow(y_medium_train) + nrow(y_medium_test))
+  ) +
   theme_minimal() +
+  theme(
+    strip.text.y = element_text(size = 5), 
+    panel.border = element_rect(fill = NA)
+  ) +
   labs(
     x = element_blank(),
     y = element_blank()
@@ -187,11 +195,16 @@ y_large_train %>%
     alpha = .7,
     fill = "grey" # test set
   ) +
-  # geom_path(aes(colour = asset), show.legend = FALSE, alpha = .5) +
   geom_path() +
   facet_grid(asset ~ ., scales = "free_y") +
-  scale_colour_viridis_d() +
+  scale_x_continuous(
+    breaks = c(nrow(y_large_train), nrow(y_large_train) + nrow(y_large_test))
+  ) +
   theme_minimal() +
+  theme(
+    strip.text.y = element_text(size = 5), 
+    panel.border = element_rect(fill = NA)
+  ) +
   labs(
     x = element_blank(),
     y = element_blank()
@@ -589,31 +602,6 @@ cv_small_20 %>%
 
 ### Tables
 
-Average (1-step):
-
-```{r smallcvonemeantab, comment=NULL, echo=FALSE}
-cv_small_1 %>% 
-  kable_lossmean(y_small_test, kable = TRUE, caption = "SMALL Simulation - 1-step ahead Rolling Window Forecasting Average Loss", label = "smallonemean") %>% 
-  writeLines()
-```
-
-Average (5-step):
-
-```{r smallcvfivemeantab, comment=NULL, echo=FALSE}
-cv_small_5 %>% 
-  kable_lossmean(y_small_test, kable = TRUE, caption = "SMALL Simulation - 5-step ahead Rolling Window Forecasting Average Loss", label = "smallfivemean") %>% 
-  writeLines()
-```
-
-Average (20-step):
-
-```{r smallcvtwentymeantab, comment=NULL, echo=FALSE}
-cv_small_20 %>% 
-  kable_lossmean(y_small_test, kable = TRUE, caption = "SMALL Simulation - 20-step ahead Rolling Window Forecasting Average Loss", label = "smalltwentyemean") %>% 
-  writeLines()
-```
-
-
 1-step:
 
 ```{r smallcvconetab, comment=NULL, echo=FALSE}
@@ -713,31 +701,6 @@ cv_medium_20 %>%
 ```
 
 ### Tables
-
-Average (1-step):
-
-```{r medcvonemeantab, comment=NULL, echo=FALSE}
-cv_medium_1 %>% 
-  kable_lossmean(y_medium_test, kable = TRUE, caption = "MEDIUM Simulation - 1-step ahead Rolling Window Forecasting Average Loss", label = "medonemean") %>% 
-  writeLines()
-```
-
-Average (5-step):
-
-```{r medcvfivemeantab, comment=NULL, echo=FALSE}
-cv_medium_5 %>% 
-  kable_lossmean(y_medium_test, kable = TRUE, caption = "MEDIUM Simulation - 5-step ahead Rolling Window Forecasting Average Loss", label = "medfivemean") %>% 
-  writeLines()
-```
-
-Average (20-step):
-
-```{r medcvtwentymeantab, comment=NULL, echo=FALSE}
-cv_medium_20 %>% 
-  kable_lossmean(y_medium_test, kable = TRUE, caption = "MEDIUM Simulation - 20-step ahead Rolling Window Forecasting Average Loss", label = "medtwentyemean") %>% 
-  writeLines()
-```
-
 
 1-step:
 
@@ -840,31 +803,6 @@ cv_large_20 %>%
 
 ### Tables
 
-Average (1-step):
-
-```{r largecvonemeantab, comment=NULL, echo=FALSE}
-cv_large_1 %>% 
-  kable_lossmean(y_large_test, kable = TRUE, caption = "LARGE Simulation - 1-step ahead Rolling Window Forecasting Average Loss", label = "largeonemean") %>% 
-  writeLines()
-```
-
-Average (5-step):
-
-```{r largecvfivemeantab, comment=NULL, echo=FALSE}
-cv_large_5 %>% 
-  kable_lossmean(y_large_test, kable = TRUE, caption = "LARGE Simulation - 5-step ahead Rolling Window Forecasting Average Loss", label = "largefivemean") %>% 
-  writeLines()
-```
-
-Average (20-step):
-
-```{r largecvtwentymeantab, comment=NULL, echo=FALSE}
-cv_large_20 %>% 
-  kable_lossmean(y_large_test, kable = TRUE, caption = "LARGE Simulation - 20-step ahead Rolling Window Forecasting Average Loss", label = "largetwentyemean") %>% 
-  writeLines()
-```
-
-
 1-step:
 
 ```{r largecvonetab, comment=NULL, echo=FALSE}
@@ -888,6 +826,87 @@ cv_large_20 %>%
   get_losstex(y_large_test, "LARGE Simulation - 20-step ahead Rolling Window Forecasting Loss", label = "largetwenty") %>% 
   writeLines()
 ```
+
+## Average
+
+### SMALL
+
+1-step:
+
+```{r smallcvonemeantab, comment=NULL, echo=FALSE}
+cv_small_1 %>% 
+  kable_lossmean(y_small_test, kable = TRUE, caption = "SMALL Simulation - 1-step ahead Rolling Window Forecasting Average Loss", label = "smallonemean") %>% 
+  writeLines()
+```
+
+5-step:
+
+```{r smallcvfivemeantab, comment=NULL, echo=FALSE}
+cv_small_5 %>% 
+  kable_lossmean(y_small_test, kable = TRUE, caption = "SMALL Simulation - 5-step ahead Rolling Window Forecasting Average Loss", label = "smallfivemean") %>% 
+  writeLines()
+```
+
+20-step:
+
+```{r smallcvtwentymeantab, comment=NULL, echo=FALSE}
+cv_small_20 %>% 
+  kable_lossmean(y_small_test, kable = TRUE, caption = "SMALL Simulation - 20-step ahead Rolling Window Forecasting Average Loss", label = "smalltwentyemean") %>% 
+  writeLines()
+```
+
+### MEDIUM
+
+1-step:
+
+```{r medcvonemeantab, comment=NULL, echo=FALSE}
+cv_medium_1 %>% 
+  kable_lossmean(y_medium_test, kable = TRUE, caption = "MEDIUM Simulation - 1-step ahead Rolling Window Forecasting Average Loss", label = "medonemean") %>% 
+  writeLines()
+```
+
+5-step:
+
+```{r medcvfivemeantab, comment=NULL, echo=FALSE}
+cv_medium_5 %>% 
+  kable_lossmean(y_medium_test, kable = TRUE, caption = "MEDIUM Simulation - 5-step ahead Rolling Window Forecasting Average Loss", label = "medfivemean") %>% 
+  writeLines()
+```
+
+20-step:
+
+```{r medcvtwentymeantab, comment=NULL, echo=FALSE}
+cv_medium_20 %>% 
+  kable_lossmean(y_medium_test, kable = TRUE, caption = "MEDIUM Simulation - 20-step ahead Rolling Window Forecasting Average Loss", label = "medtwentyemean") %>% 
+  writeLines()
+```
+
+### LARGE
+
+1-step:
+
+```{r largecvonemeantab, comment=NULL, echo=FALSE}
+cv_large_1 %>% 
+  kable_lossmean(y_large_test, kable = TRUE, caption = "LARGE Simulation - 1-step ahead Rolling Window Forecasting Average Loss", label = "largeonemean") %>% 
+  writeLines()
+```
+
+5-step:
+
+```{r largecvfivemeantab, comment=NULL, echo=FALSE}
+cv_large_5 %>% 
+  kable_lossmean(y_large_test, kable = TRUE, caption = "LARGE Simulation - 5-step ahead Rolling Window Forecasting Average Loss", label = "largefivemean") %>% 
+  writeLines()
+```
+
+20-step:
+
+```{r largecvtwentymeantab, comment=NULL, echo=FALSE}
+cv_large_20 %>% 
+  kable_lossmean(y_large_test, kable = TRUE, caption = "LARGE Simulation - 20-step ahead Rolling Window Forecasting Average Loss", label = "largetwentyemean") %>% 
+  writeLines()
+```
+
 
 # Additional
 

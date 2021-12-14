@@ -180,7 +180,7 @@ kable_lossmean <- function(mod_list, y, kable = TRUE, caption = "", label = "") 
 # Get latex code for above loss------------------------
 # put together
 #------------------------------------------------------
-get_losstex <- function(mod_list, y, caption = "Loss for SMALL Simulation", label = "smallerr") {
+get_losstex <- function(mod_list, y, caption = "Loss for SMALL Simulation", label = "smallerr", size = NULL) {
   dim_data <- seq_along(y)
   mean_table <- kable_lossmean(mod_list, y, kable = FALSE)
   error_table <- foreach(error_type = c("mse", "mae", "mape", "mase"), .combine = rbind) %do% {
@@ -224,7 +224,7 @@ get_losstex <- function(mod_list, y, caption = "Loss for SMALL Simulation", labe
       caption = caption,
       label = label
     ) %>% 
-    kable_paper(full_width = FALSE, latex_options = c("repeat_header")) %>% 
+    kable_paper(full_width = FALSE, font_size = NULL, latex_options = c("repeat_header")) %>% 
     add_header_above(
       c(
         " " = 1,
@@ -238,3 +238,10 @@ get_losstex <- function(mod_list, y, caption = "Loss for SMALL Simulation", labe
       columns = 1
     )
 }
+
+# Get average loss for several steps-------------------
+# input nested list of models (step -> model lists)
+# returns kable
+# use kableExtra
+#------------------------------------------------------
+
