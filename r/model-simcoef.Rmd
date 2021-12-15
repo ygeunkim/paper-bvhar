@@ -195,7 +195,7 @@ y_large_train %>%
     alpha = .7,
     fill = "grey" # test set
   ) +
-  geom_path() +
+  geom_path(size = .3) +
   facet_grid(asset ~ ., scales = "free_y") +
   scale_x_continuous(
     breaks = c(nrow(y_large_train), nrow(y_large_train) + nrow(y_large_test))
@@ -203,7 +203,8 @@ y_large_train %>%
   theme_minimal() +
   theme(
     strip.text.y = element_text(size = 5), 
-    panel.border = element_rect(fill = NA)
+    panel.border = element_rect(fill = NA),
+    axis.text.y = element_text(size = 3)
   ) +
   labs(
     x = element_blank(),
@@ -564,9 +565,16 @@ cv_small_20 <-
 
 ### Plots
 
-```{r smallcvonefig}
+```{r smallcvonefig, echo=FALSE}
 cv_small_1 %>% 
-  gg_loss(y_small_test, mean_line = TRUE, mean_param = list(alpha = .5), viridis = TRUE, show.legend = FALSE) +
+  gg_loss(
+    y_small_test, 
+    mean_line = TRUE, 
+    line_param = list(size = .3), 
+    mean_param = list(alpha = .5, size = .3), 
+    viridis = TRUE, 
+    show.legend = FALSE
+  ) +
   theme_minimal() +
   theme(
     axis.text.x = element_text(angle = -30, vjust = -1),
@@ -576,9 +584,16 @@ cv_small_1 %>%
   )
 ```
 
-```{r smallcvfivefig}
+```{r smallcvfivefig, echo=FALSE}
 cv_small_5 %>% 
-  gg_loss(y_small_test, mean_line = TRUE, mean_param = list(alpha = .5), viridis = TRUE, show.legend = FALSE) +
+  gg_loss(
+    y_small_test, 
+    mean_line = TRUE, 
+    line_param = list(size = .3), 
+    mean_param = list(alpha = .5, size = .3), 
+    viridis = TRUE, 
+    show.legend = FALSE
+  ) +
   theme_minimal() +
   theme(
     axis.text.x = element_text(angle = -30, vjust = -1),
@@ -588,9 +603,16 @@ cv_small_5 %>%
   )
 ```
 
-```{r smallcvtwentyfig}
+```{r smallcvtwentyfig, echo=FALSE}
 cv_small_20 %>% 
-  gg_loss(y_small_test, mean_line = TRUE, mean_param = list(alpha = .5), viridis = TRUE, show.legend = FALSE) +
+  gg_loss(
+    y_small_test, 
+    mean_line = TRUE, 
+    line_param = list(size = .3), 
+    mean_param = list(alpha = .5, size = .3), 
+    viridis = TRUE, 
+    show.legend = FALSE
+  ) +
   theme_minimal() +
   theme(
     axis.text.x = element_text(angle = -30, vjust = -1),
@@ -666,7 +688,14 @@ cv_medium_20 <-
 
 ```{r medcvonefig}
 cv_medium_1 %>% 
-  gg_loss(y_medium_test, mean_line = TRUE, mean_param = list(alpha = .5), viridis = TRUE, show.legend = FALSE) +
+  gg_loss(
+    y_medium_test, 
+    mean_line = TRUE, 
+    line_param = list(size = .3), 
+    mean_param = list(alpha = .5, size = .3), 
+    viridis = TRUE, 
+    show.legend = FALSE
+  ) +
   theme_minimal() +
   theme(
     axis.text.x = element_text(angle = -30, vjust = -1),
@@ -678,7 +707,14 @@ cv_medium_1 %>%
 
 ```{r medcvfivefig}
 cv_medium_5 %>% 
-  gg_loss(y_medium_test, mean_line = TRUE, mean_param = list(alpha = .5), viridis = TRUE, show.legend = FALSE) +
+  gg_loss(
+    y_medium_test, 
+    mean_line = TRUE, 
+    line_param = list(size = .3), 
+    mean_param = list(alpha = .5, size = .3), 
+    viridis = TRUE, 
+    show.legend = FALSE
+  ) +
   theme_minimal() +
   theme(
     axis.text.x = element_text(angle = -30, vjust = -1),
@@ -690,7 +726,14 @@ cv_medium_5 %>%
 
 ```{r medcvtwentyfig}
 cv_medium_20 %>% 
-  gg_loss(y_medium_test, mean_line = TRUE, mean_param = list(alpha = .5), viridis = TRUE, show.legend = FALSE) +
+  gg_loss(
+    y_medium_test, 
+    mean_line = TRUE, 
+    line_param = list(size = .3), 
+    mean_param = list(alpha = .5, size = .3), 
+    viridis = TRUE, 
+    show.legend = FALSE
+  ) +
   theme_minimal() +
   theme(
     axis.text.x = element_text(angle = -30, vjust = -1),
@@ -767,7 +810,14 @@ cv_large_20 <-
 
 ```{r largecvonefig}
 cv_large_1 %>% 
-  gg_loss(y_large_test, mean_line = TRUE, mean_param = list(alpha = .5), viridis = TRUE, show.legend = FALSE) +
+  gg_loss(
+    y_large_test, 
+    mean_line = TRUE, 
+    line_param = list(size = .3),
+    mean_param = list(alpha = .5, size = .3), 
+    viridis = TRUE, 
+    show.legend = FALSE
+  ) +
   theme_minimal() +
   theme(
     axis.text.x = element_text(angle = -30, vjust = -1),
@@ -779,7 +829,14 @@ cv_large_1 %>%
 
 ```{r largecvfivefig}
 cv_large_5 %>% 
-  gg_loss(y_large_test, mean_line = TRUE, mean_param = list(alpha = .5), viridis = TRUE, show.legend = FALSE) +
+  gg_loss(
+    y_large_test, 
+    mean_line = TRUE, 
+    line_param = list(size = .3),
+    mean_param = list(alpha = .5, size = .3), 
+    viridis = TRUE, 
+    show.legend = FALSE
+  ) +
   theme_minimal() +
   theme(
     axis.text.x = element_text(angle = -30, vjust = -1),
@@ -791,7 +848,14 @@ cv_large_5 %>%
 
 ```{r largecvtwentyfig}
 cv_large_20 %>% 
-  gg_loss(y_large_test, mean_line = TRUE, mean_param = list(alpha = .5), viridis = TRUE, show.legend = FALSE) +
+  gg_loss(
+    y_large_test, 
+    mean_line = TRUE, 
+    line_param = list(size = .3),
+    mean_param = list(alpha = .5, size = .3), 
+    viridis = TRUE, 
+    show.legend = FALSE
+  ) +
   theme_minimal() +
   theme(
     axis.text.x = element_text(angle = -30, vjust = -1),
@@ -909,23 +973,6 @@ cv_large_20 %>%
 
 
 # Additional
-
-<!-- ```{r modlegend, echo=FALSE} -->
-<!-- tibble( -->
-<!--   y = 5:1, -->
-<!--   x = c("BVAR_Minnesota", "BVHAR_MN_VAR", "BVHAR_MN_VHAR", "VAR", "VHAR") -->
-<!-- ) %>%  -->
-<!--   ggplot() + -->
-<!--   geom_hline(aes(yintercept = y, color = x)) + -->
-<!--   geom_text( -->
-<!--     aes(x = -1, y = y, label = x) -->
-<!--   ) + -->
-<!--   theme_minimal() + -->
-<!--   theme( -->
-<!--     axis.text = element_blank(), -->
-<!--     axis.title = element_blank() -->
-<!--   ) -->
-<!-- ``` -->
 
 ```{r modlegend, echo=FALSE}
 tibble(
@@ -1093,67 +1140,5 @@ lapply(
   }
 )
 ```
-
-
-# Distribution
-
-```{r}
-(h_step <- 5)
-```
-
-<!-- ## SMALL -->
-
-<!-- ```{r} -->
-<!-- set.seed(1) -->
-<!-- pred_small <-  -->
-<!--   mod_small_list %>%  -->
-<!--   lapply(predict, n_ahead = h_step) -->
-<!-- ``` -->
-
-<!-- ```{r smallpreddensity} -->
-<!-- autoplot(pred_small[[1]], x_cut = 980, ci_alpha = .7, type = "wrap") + -->
-<!--   autolayer(pred_small[[2]], ci_alpha = .6) + -->
-<!--   # autolayer(pred_small[[3]], ci_alpha = .4) + -->
-<!--   # autolayer(pred_small[[4]], ci_alpha = .2) + -->
-<!--   # autolayer(pred_small[[5]], ci_alpha = .1) -->
-<!--   geom_eval(data = y_small_train[1:h_step,], num_train = nrow(y_small_train), alpha = .5) -->
-<!-- ``` -->
-
-<!-- ## MEDIUM -->
-
-<!-- ```{r} -->
-<!-- set.seed(1) -->
-<!-- pred_medium <-  -->
-<!--   mod_medium_list %>%  -->
-<!--   lapply(predict, n_ahead = h_step) -->
-<!-- ``` -->
-
-<!-- ```{r medpreddensity} -->
-<!-- autoplot(pred_medium[[1]], x_cut = 980, ci_alpha = .7, type = "wrap") + -->
-<!--   autolayer(pred_medium[[2]], ci_alpha = .6) + -->
-<!--   autolayer(pred_medium[[3]], ci_alpha = .4) + -->
-<!--   autolayer(pred_medium[[4]], ci_alpha = .2) + -->
-<!--   # autolayer(pred_medium[[5]], ci_alpha = .1) + -->
-<!--   geom_eval(data = y_medium_test[1:h_step,], num_train = nrow(y_medium_train), alpha = .5) -->
-<!-- ``` -->
-
-<!-- ## LARGE -->
-
-<!-- ```{r} -->
-<!-- set.seed(1) -->
-<!-- pred_large <-  -->
-<!--   mod_large_list %>%  -->
-<!--   lapply(predict, n_ahead = h_step) -->
-<!-- ``` -->
-
-<!-- ```{r largepreddensity} -->
-<!-- autoplot(pred_large[[1]], x_cut = 980, ci_alpha = .7, type = "wrap") + -->
-<!--   autolayer(pred_large[[2]], ci_alpha = .6) + -->
-<!--   # autolayer(pred_large[[3]], ci_alpha = .4) + -->
-<!--   # autolayer(pred_large[[4]], ci_alpha = .2) + -->
-<!--   # autolayer(pred_medium[[5]], ci_alpha = .1) + -->
-<!--   geom_eval(data = y_large_test[1:h_step,], num_train = nrow(y_large_train), alpha = .5) -->
-<!-- ``` -->
-
 
 
