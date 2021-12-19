@@ -971,6 +971,72 @@ cv_large_20 %>%
   writeLines()
 ```
 
+### RMSFE or RMAFE
+
+Set VAR as the benchmark model.
+
+```{r}
+rmafe(cv_large_20[[5]], cv_large_1[[1]], y_large_test)
+```
+
+```{r}
+# SMALL-------------------------------
+cv_small_list <- 
+  lapply(
+    c(1, 5, 20),
+    function(h) {
+      mod_small_list %>% 
+        lapply(
+          function(mod) {
+            forecast_roll(mod, h, y_small_test)
+          }
+        )
+    }
+  )
+# MEDIUM------------------------------
+cv_medium_list <- 
+  lapply(
+    c(1, 5, 20),
+    function(h) {
+      mod_small_list %>% 
+        lapply(
+          function(mod) {
+            forecast_roll(mod, h, y_medium_test)
+          }
+        )
+    }
+  )
+# LARGE-------------------------------
+cv_large_list <- 
+  lapply(
+    c(1, 5, 20),
+    function(h) {
+      mod_small_list %>% 
+        lapply(
+          function(mod) {
+            forecast_roll(mod, h, y_large_test)
+          }
+        )
+    }
+  )
+```
+
+```{r}
+get_rmfe(mod_list = cv_large_list, y = y_large_test, benchmark_id = 1)
+```
+
+```{r}
+get_rmafetex(
+  list(cv_small_list, cv_medium_list, cv_small_list), 
+  y_list = list(y_small_test, y_medium_test, y_large_test), 
+  ahead_list = c("$h = 1$", "$h = 5$", "$h = 20$"),
+  benchmark_id = 1,
+  caption = "Out-of-Sample Forecasting for Simulation", 
+  label = "simresult"
+) %>% 
+  writeLines()
+```
+
 
 # Additional
 

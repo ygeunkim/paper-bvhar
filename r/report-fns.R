@@ -224,7 +224,7 @@ get_losstex <- function(mod_list, y, caption = "Loss for SMALL Simulation", labe
       caption = caption,
       label = label
     ) %>% 
-    kable_paper(full_width = FALSE, font_size = NULL, latex_options = c("repeat_header")) %>% 
+    kable_paper(full_width = FALSE, font_size = size, latex_options = c("repeat_header")) %>% 
     add_header_above(
       c(
         " " = 1,
@@ -239,9 +239,121 @@ get_losstex <- function(mod_list, y, caption = "Loss for SMALL Simulation", labe
     )
 }
 
-# Get average loss for several steps-------------------
-# input nested list of models (step -> model lists)
+# Get RMSFE table--------------------------------------
+# nested list: sizes - (1, 5, 20)
 # returns kable
 # use kableExtra
 #------------------------------------------------------
+get_rmfe <- function(mod_list, 
+                     y, 
+                     ahead_list = c("one", "five", "twenty"), 
+                     benchmark_id,
+                     error = c("rmafe", "rmsfe")) {
+  error_type <- match.arg(error)
+  if (length(mod_list) != length(ahead_list)) {
+    stop("Wrong 'ahead_list'.")
+  }
+  # compute RMAFE--------------------------
+  error_table <- foreach(ahead = seq_along(mod_list), .combine = rbind) %do% {
+    err_vec <- 
+      sapply(
+        seq_along(mod_list[[ahead]])[-benchmark_id],
+        function(id) {
+          switch(
+            error_type,
+            "rmafe" = {
+              rmafe(mod_list[[ahead]][[id]], mod_list[[ahead]][[benchmark_id]], y)
+            },
+            "rmsfe" = {
+              rmsfe(mod_list[[ahead]][[id]], mod_list[[ahead]][[benchmark_id]], y)
+            }
+          )
+        }
+      )
+    names(err_vec) <- sapply(
+      mod_list[[ahead]][-benchmark_id],
+      function(x) x$process
+    ) %>% 
+      str_replace_all(pattern = "\\_", replacement = "-")
+    err_vec
+  }
+  rownames(error_table) <- ahead_list
+  error_table %>% as.data.frame()
+}
+# Get latex code for SMALL, MEDIUM, and LARGE----------
+# nested list of above (SMALL-MEDIUM-LARGE)
+#------------------------------------------------------
+get_rmafetex <- function(mod_list, 
+                         y_list, 
+                         ahead_list = c("One", "Five", "Twenty"), 
+                         benchmark_id, 
+                         caption = "", 
+                         label = "",
+                         font_size = NULL) {
+  if (length(mod_list) != 3) {
+    stop("Wrong 'mod_list'.")
+  }
+  if (length(y_list) != 3) {
+    stop("Wrong 'y_list'.")
+  }
+  mod_lenth <- length(mod_list[[1]][[1]]) - 1
+  error_list <- 
+    c("rmafe", "rmsfe") %>% 
+    lapply(
+      function(error) {
+        lapply(
+          1:3,
+          function(id) {
+            get_rmfe(
+              mod_list[[id]], 
+              y_list[[id]], 
+              ahead_list = ahead_list, 
+              benchmark_id = benchmark_id, 
+              error = error
+            ) %>% 
+              rownames_to_column(var = "h") %>% 
+              mutate(size = case_when(
+                id == 1 ~ "SMALL",
+                id == 2 ~ "MEDIUM",
+                id == 3 ~ "LARGE"
+              ))
+          }
+        ) %>% 
+          bind_rows() %>% 
+          pivot_longer(-c(h, size), names_to = "model", values_to = "error") %>% 
+          group_by(size, h) %>% 
+          mutate(
+            error = cell_spec(
+              format(error, nsmall = 3) %>% as.numeric(),
+              format = "latex",
+              color = ifelse(error == min(error), "red", "black")
+            )
+          ) %>% 
+          ungroup() %>% 
+          pivot_wider(names_from = c(size, model), values_from = error)
+      } %>% 
+        bind_rows() %>% 
+        add_column(Loss = str_to_upper(error), .before = 1)
+    ) %>% 
+    bind_rows()
+  # kable------------------------------------------
+  colnames(error_list) <- str_remove_all(colnames(error_list), pattern = ".*\\_")
+  colnames(error_list)[1:2] <- c("", "")
+  error_list %>% 
+    kable(
+      format = "latex",
+      booktabs = TRUE,
+      escape = FALSE,
+      caption = caption,
+      label = label
+    ) %>% 
+    kable_paper(full_width = FALSE, font_size = font_size, latex_options = c("scale_down")) %>% 
+    add_header_above(c(
+      " " = 2,
+      "SMALL" = mod_lenth,
+      "MEDIUM" = mod_lenth,
+      "LARGE" = mod_lenth
+    )) %>% 
+    collapse_rows(columns = 1)
+}
 
