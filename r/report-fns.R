@@ -155,12 +155,12 @@ kable_lossmean <- function(mod_list, y, kable = TRUE, caption = "", label = "") 
         ifelse(
           x == min(x),
           cell_spec(
-            paste0("\\numprint{", format(x, nsmall = 3) %>% as.numeric(), "}"), # numprint
+            paste0("\\num{", format(x, nsmall = 3) %>% as.numeric(), "}"), # siunitx
             format = "latex",
             escape = FALSE,
             color = "red"
           ),
-          paste0("\\numprint{", format(x, nsmall = 3) %>% as.numeric(), "}") # numprint
+          paste0("\\num{", format(x, nsmall = 3) %>% as.numeric(), "}") # siunitx
         )
       }
     ) %>% 
@@ -192,12 +192,12 @@ get_losstex <- function(mod_list, y, caption = "Loss for SMALL Simulation", labe
           ifelse(
             x == min(x),
             cell_spec(
-              paste0("\\numprint{", format(x, nsmall = 3) %>% as.numeric(), "}"), # numprint
+              paste0("\\num{", format(x, nsmall = 3) %>% as.numeric(), "}"), # siunitx
               format = "latex",
               escape = FALSE,
               color = "red"
             ),
-            paste0("\\numprint{", format(x, nsmall = 3) %>% as.numeric(), "}") # numprint
+            paste0("\\num{", format(x, nsmall = 3) %>% as.numeric(), "}") # siunitx
           )
         }
       ) %>% 
@@ -289,14 +289,14 @@ get_rmafetex <- function(mod_list,
                          benchmark_id, 
                          caption = "", 
                          label = "",
-                         font_size = NULL) {
+                         header_angle = NULL) {
   if (length(mod_list) != 3) {
     stop("Wrong 'mod_list'.")
   }
   if (length(y_list) != 3) {
     stop("Wrong 'y_list'.")
   }
-  mod_lenth <- length(mod_list[[1]][[1]]) - 1
+  mod_length <- length(mod_list[[1]][[1]]) - 1
   error_list <- 
     c("rmafe", "rmsfe") %>% 
     lapply(
@@ -324,8 +324,9 @@ get_rmafetex <- function(mod_list,
           group_by(size, h) %>% 
           mutate(
             error = cell_spec(
-              format(error, nsmall = 3) %>% as.numeric(),
+              paste0("\\num{", format(error, nsmall = 3) %>% as.numeric(), "}"), # siunitx
               format = "latex",
+              escape = FALSE,
               color = ifelse(error == min(error), "red", "black")
             )
           ) %>% 
@@ -339,21 +340,34 @@ get_rmafetex <- function(mod_list,
   # kable------------------------------------------
   colnames(error_list) <- str_remove_all(colnames(error_list), pattern = ".*\\_")
   colnames(error_list)[1:2] <- c("", "")
+  align <- 
+    c(
+      c("c", "c|"),
+      rep(
+        c(
+          rep("c", mod_length - 1), 
+          "c|"
+        ),
+        3
+      )
+    )
   error_list %>% 
     kable(
       format = "latex",
       booktabs = TRUE,
       escape = FALSE,
+      align = align,
       caption = caption,
       label = label
     ) %>% 
-    kable_paper(full_width = FALSE, font_size = font_size, latex_options = c("scale_down")) %>% 
+    kable_paper(full_width = FALSE, latex_options = c("scale_down")) %>% 
     add_header_above(c(
       " " = 2,
-      "SMALL" = mod_lenth,
-      "MEDIUM" = mod_lenth,
-      "LARGE" = mod_lenth
+      "SMALL" = mod_length,
+      "MEDIUM" = mod_length,
+      "LARGE" = mod_length
     )) %>% 
+    row_spec(0, angle = header_angle) %>% 
     collapse_rows(columns = 1)
 }
 
