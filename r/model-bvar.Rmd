@@ -66,7 +66,10 @@ bvar_small_spec <- set_bvar(
   delta = rep(0, n_small)
 )
 bvar_small_spec %>% 
-  kable_hyperparam(caption = "\\label{tab:smalltruespec}BVAR(5) and BVHAR Coefficient Simulation Setting - SMALL") %>% 
+  kable_hyperparam(
+    caption = "BVAR(5) and BVHAR True Hyperparameters - SMALL", 
+    label = "smalltruespec"
+  ) %>% 
   writeLines()
 ```
 
@@ -78,7 +81,10 @@ bvar_medium_spec <- set_bvar(
   delta = rep(0, n_medium)
 )
 bvar_small_spec %>% 
-  kable_hyperparam(caption = "\\label{tab:medtruespec}BVAR(5) and BVHAR Coefficient Simulation Setting - MEDIUM") %>% 
+  kable_hyperparam(
+    caption = "BVAR(5) and BVHAR True Hyperparameters - MEDIUM",
+    label = "medtruespec"
+  ) %>% 
   writeLines()
 ```
 
@@ -90,7 +96,10 @@ bvar_large_spec <- set_bvar(
   delta = rep(0, n_large)
 )
 bvar_large_spec %>% 
-  kable_hyperparam(caption = "\\label{tab:largetruespec}BVAR(5) and BVHAR Coefficient Simulation Setting - LARGE") %>% 
+  kable_hyperparam(
+    caption = "BVAR(5) and BVHAR True Hyperparameters - LARGE",
+    label = "largetruespec"
+  ) %>% 
   writeLines()
 ```
 

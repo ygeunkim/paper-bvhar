@@ -65,9 +65,6 @@ bvhar_small_spec <- set_bvhar(
   lambda = .2,
   delta = rep(0, n_small)
 )
-bvhar_small_spec %>% 
-  kable_hyperparam(caption = "\\label{tab:smallbvharspec}BVHAR Coefficient Simulation Setting - SMALL") %>% 
-  writeLines()
 ```
 
 ```{r medbvharsetting, comment=NULL, echo=FALSE}
@@ -77,9 +74,6 @@ bvhar_medium_spec <- set_bvhar(
   lambda = .1,
   delta = rep(0, n_medium)
 )
-bvhar_small_spec %>% 
-  kable_hyperparam(caption = "\\label{tab:medbvharspec}BVHAR Coefficient Simulation Setting - MEDIUM") %>% 
-  writeLines()
 ```
 
 ```{r largebvharsetting, comment=NULL, echo=FALSE}
@@ -89,9 +83,6 @@ bvhar_large_spec <- set_bvhar(
   lambda = .03,
   delta = rep(0, n_large)
 )
-bvhar_large_spec %>% 
-  kable_hyperparam(caption = "\\label{tab:largebvharspec}BVHAR Coefficient Simulation Setting - LARGE") %>% 
-  writeLines()
 ```
 
 ## VAR(5)
