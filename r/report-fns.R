@@ -384,7 +384,7 @@ get_rmfe_tr <- function(mod_list,
   error_table <- foreach(ahead = seq_along(mod_list), .combine = rbind) %do% {
     err_vec <- 
       sapply(
-        seq_along(mod_list[[ahead]]),
+        seq_along(mod_list[[ahead]])[-benchmark_id],
         function(id) {
           switch(
             error_type,
@@ -395,18 +395,16 @@ get_rmfe_tr <- function(mod_list,
               rmsfe(mod_list[[ahead]][[id]], mod_list[[ahead]][[benchmark_id]], y)
             },
             "mape" = {
-              mape(mod_list[[ahead]][[id]], y) %>% 
-                mean()
+              mean(mape(mod_list[[ahead]][[id]], y)) / mean(mape(mod_list[[ahead]][[benchmark_id]], y))
             },
             "mase" = {
-              mase(mod_list[[ahead]][[id]], y) %>% 
-                mean()
+              mean(mase(mod_list[[ahead]][[id]], y)) / mean(mase(mod_list[[ahead]][[benchmark_id]], y))
             }
           )
         }
       )
     names(err_vec) <- sapply(
-      mod_list[[ahead]],
+      mod_list[[ahead]][-benchmark_id],
       function(x) x$process
     ) %>% 
       str_replace_all(pattern = "\\_", replacement = "-")
@@ -434,7 +432,7 @@ get_rmafetex_tr <- function(mod_list,
   }
   ahead_length <- length(mod_list[[1]])
   error_list <- 
-    c("rmafe", "rmsfe", "mape", "mase") %>% 
+    c("rmafe", "rmsfe", "mase") %>% 
     lapply(
       function(er) {
         lapply(
@@ -484,7 +482,7 @@ get_rmafetex_tr <- function(mod_list,
           rep("c", ahead_length - 1),
           "c|"
         ),
-        4
+        3
       )
     )
   error_list %>% 
@@ -496,13 +494,12 @@ get_rmafetex_tr <- function(mod_list,
       caption = caption,
       label = label
     ) %>% 
-    kable_paper(full_width = FALSE, latex_options = c("scale_down")) %>% 
+    kable_paper(full_width = FALSE, latex_options = c("scale_down", "HOLD_position")) %>% 
     add_header_above(c(
       " " = 2,
       "RMAFE" = ahead_length,
       "RMSFE" = ahead_length,
-      "MAPE" = ahead_length,
-      "MASE" = ahead_length
+      "RMASE" = ahead_length
     )) %>%
     row_spec(0, angle = header_angle) %>% 
     collapse_rows(columns = 1)
