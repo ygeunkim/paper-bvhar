@@ -296,7 +296,7 @@ get_rmafetex <- function(mod_list,
   if (length(y_list) != 3) {
     stop("Wrong 'y_list'.")
   }
-  mod_length <- length(mod_list[[1]][[1]]) - 1
+  mod_length <- length(mod_list[[1]][[1]]) - 1 # change?
   error_list <- 
     c("rmafe", "rmsfe") %>% 
     lapply(
@@ -370,4 +370,140 @@ get_rmafetex <- function(mod_list,
     row_spec(0, angle = header_angle) %>% 
     collapse_rows(columns = 1)
 }
-
+# Transposed table including MAPE and MASE--------------------------------------------
+get_rmfe_tr <- function(mod_list, 
+                        y, 
+                        ahead_list = c("one", "five", "twenty"), 
+                        benchmark_id,
+                        error = c("rmafe", "rmsfe", "mape", "mase")) {
+  error_type <- match.arg(error)
+  if (length(mod_list) != length(ahead_list)) {
+    stop("Wrong 'ahead_list'.")
+  }
+  # compute RMAFE--------------------------
+  error_table <- foreach(ahead = seq_along(mod_list), .combine = rbind) %do% {
+    err_vec <- 
+      sapply(
+        seq_along(mod_list[[ahead]]),
+        function(id) {
+          switch(
+            error_type,
+            "rmafe" = {
+              rmafe(mod_list[[ahead]][[id]], mod_list[[ahead]][[benchmark_id]], y)
+            },
+            "rmsfe" = {
+              rmsfe(mod_list[[ahead]][[id]], mod_list[[ahead]][[benchmark_id]], y)
+            },
+            "mape" = {
+              mape(mod_list[[ahead]][[id]], y) %>% 
+                mean()
+            },
+            "mase" = {
+              mase(mod_list[[ahead]][[id]], y) %>% 
+                mean()
+            }
+          )
+        }
+      )
+    names(err_vec) <- sapply(
+      mod_list[[ahead]],
+      function(x) x$process
+    ) %>% 
+      str_replace_all(pattern = "\\_", replacement = "-")
+    err_vec
+  }
+  rownames(error_table) <- ahead_list
+  colnames(error_table) <- str_remove_all(colnames(error_table), pattern = "-Minnesota$")
+  colnames(error_table) <- str_replace_all(colnames(error_table), pattern = "MN-VAR$", replacement = "S")
+  colnames(error_table) <- str_replace_all(colnames(error_table), pattern = "MN-VHAR$", replacement = "L")
+  error_table %>% as.data.frame()
+}
+#--------------------------------------------
+get_rmafetex_tr <- function(mod_list, 
+                            y_list, 
+                            ahead_list = c("One", "Five", "Twenty"), 
+                            benchmark_id, 
+                            caption = "", 
+                            label = "",
+                            header_angle = NULL) {
+  if (length(mod_list) != 3) {
+    stop("Wrong 'mod_list'.")
+  }
+  if (length(y_list) != 3) {
+    stop("Wrong 'y_list'.")
+  }
+  ahead_length <- length(mod_list[[1]])
+  error_list <- 
+    c("rmafe", "rmsfe", "mape", "mase") %>% 
+    lapply(
+      function(er) {
+        lapply(
+          1:3,
+          function(id) {
+            get_rmfe_tr(
+              mod_list[[id]], 
+              y_list[[id]], 
+              ahead_list = ahead_list, 
+              benchmark_id = benchmark_id, 
+              error = er
+            ) %>% 
+              rownames_to_column(var = "h") %>% 
+              mutate(size = case_when(
+                id == 1 ~ "SMALL",
+                id == 2 ~ "MEDIUM",
+                id == 3 ~ "LARGE"
+              ))
+          }
+        ) %>% 
+          bind_rows() %>%
+          add_column(Loss = str_to_upper(er), .before = 1) %>%
+          pivot_longer(-c(h, size, Loss), names_to = "model", values_to = "error") %>%
+          group_by(size, h) %>%
+          mutate(
+            error = cell_spec(
+              paste0("\\num{", format(error, nsmall = 3) %>% as.numeric(), "}"), # siunitx
+              format = "latex",
+              escape = FALSE,
+              color = ifelse(error == min(error), "red", "black")
+            )
+          )
+      } %>% 
+        bind_rows()
+    ) %>% 
+    bind_rows() %>% 
+    ungroup() %>% 
+    pivot_wider(names_from = c(Loss, h), values_from = error)
+  # kable------------------------------------------
+  colnames(error_list) <- str_remove_all(colnames(error_list), pattern = ".*\\_")
+  colnames(error_list)[1:2] <- c("", "")
+  align <-
+    c(
+      c("c", "c|"),
+      rep(
+        c(
+          rep("c", ahead_length - 1),
+          "c|"
+        ),
+        4
+      )
+    )
+  error_list %>% 
+    kable(
+      format = "latex",
+      booktabs = TRUE,
+      escape = FALSE,
+      align = align,
+      caption = caption,
+      label = label
+    ) %>% 
+    kable_paper(full_width = FALSE, latex_options = c("scale_down")) %>% 
+    add_header_above(c(
+      " " = 2,
+      "RMAFE" = ahead_length,
+      "RMSFE" = ahead_length,
+      "MAPE" = ahead_length,
+      "MASE" = ahead_length
+    )) %>%
+    row_spec(0, angle = header_angle) %>% 
+    collapse_rows(columns = 1)
+}

@@ -1031,7 +1031,7 @@ cv_large_list <-
 ```
 
 ```{r simaveresult, comment=NULL, echo=FALSE}
-get_rmafetex(
+get_rmafetex_tr(
   list(cv_small_list, cv_medium_list, cv_large_list), 
   y_list = list(y_small_test, y_medium_test, y_large_test), 
   ahead_list = c("$h = 1$", "$h = 5$", "$h = 20$"),
