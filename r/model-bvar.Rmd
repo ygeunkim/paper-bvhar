@@ -1038,7 +1038,7 @@ get_rmafetex_tr(
   benchmark_id = 1,
   caption = "Out-of-Sample Forecasting - Simulation for BVAR", 
   label = "simaveresult",
-  header_angle = 15
+  header_angle = 0
 ) %>% 
   writeLines()
 ```

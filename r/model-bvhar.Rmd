@@ -1015,7 +1015,7 @@ get_rmafetex_tr(
   benchmark_id = 1,
   caption = "Out-of-Sample Forecasting - Simulation for BVHAR", 
   label = "simaveresultbvhar",
-  header_angle = 15
+  header_angle = 0
 ) %>% 
   writeLines()
 ```
