@@ -10,6 +10,6 @@ data/**/*.txt
 *.pdf
 *.html
 *_cache/
-*_files/figure-html/
+*_files/
 *.xlsx
 .DS_Store

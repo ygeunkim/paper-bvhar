@@ -105,7 +105,7 @@ bvhar_large_split <- divide_ts(bvhar_large, num_test)
 # a: small, medium, large
 # b: train, test
 #---------------------------------------------------
-dgp1 <- list(
+dgp3 <- list(
   y_small_train = bvhar_small_split$train,
   y_small_test = bvhar_small_split$test,
   y_medium_train = bvhar_medium_split$train,
@@ -113,6 +113,6 @@ dgp1 <- list(
   y_large_train = bvhar_large_split$train,
   y_large_test = bvhar_large_split$test
 )
-saveRDS(dgp1, "data/processed/bvharsim_dgp_wn.rds")
+saveRDS(dgp3, "data/processed/bvharsim_dgp_wn.rds")
 rm(list = ls())
 ls()

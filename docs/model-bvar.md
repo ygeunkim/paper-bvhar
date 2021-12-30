@@ -137,7 +137,7 @@ y_small_train %>%
   )
 ```
 
-<img src="/Users/ygeunkim/Documents/myreaserch/paper-bvhar/docs/model-bvar_files/figure-gfm/smallplot-1.png" width="70%" style="display: block; margin: auto;" />
+<img src="../output/figs/BVAR-smallplot-1.png" width="70%" style="display: block; margin: auto;" />
 
 ### MEDIUM
 
@@ -178,7 +178,7 @@ y_medium_train %>%
   )
 ```
 
-<img src="/Users/ygeunkim/Documents/myreaserch/paper-bvhar/docs/model-bvar_files/figure-gfm/medplot-1.png" width="70%" style="display: block; margin: auto;" />
+<img src="../output/figs/BVAR-medplot-1.png" width="70%" style="display: block; margin: auto;" />
 
 ### LARGE
 
@@ -220,7 +220,7 @@ y_large_train %>%
   )
 ```
 
-<img src="/Users/ygeunkim/Documents/myreaserch/paper-bvhar/docs/model-bvar_files/figure-gfm/largeplot-1.png" width="70%" style="display: block; margin: auto;" />
+<img src="../output/figs/BVAR-largeplot-1.png" width="70%" style="display: block; margin: auto;" />
 
 # Modeling
 
@@ -814,11 +814,11 @@ cv_small_20 <-
 
 ### Plots
 
-<img src="/Users/ygeunkim/Documents/myreaserch/paper-bvhar/docs/model-bvar_files/figure-gfm/smallcvonefig-1.png" width="70%" style="display: block; margin: auto;" />
+<img src="../output/figs/BVAR-smallcvonefig-1.png" width="70%" style="display: block; margin: auto;" />
 
-<img src="/Users/ygeunkim/Documents/myreaserch/paper-bvhar/docs/model-bvar_files/figure-gfm/smallcvfivefig-1.png" width="70%" style="display: block; margin: auto;" />
+<img src="../output/figs/BVAR-smallcvfivefig-1.png" width="70%" style="display: block; margin: auto;" />
 
-<img src="/Users/ygeunkim/Documents/myreaserch/paper-bvhar/docs/model-bvar_files/figure-gfm/smallcvtwentyfig-1.png" width="70%" style="display: block; margin: auto;" />
+<img src="../output/figs/BVAR-smallcvtwentyfig-1.png" width="70%" style="display: block; margin: auto;" />
 
 ### Tables
 
@@ -1038,7 +1038,7 @@ cv_medium_1 %>%
   )
 ```
 
-<img src="/Users/ygeunkim/Documents/myreaserch/paper-bvhar/docs/model-bvar_files/figure-gfm/medcvonefig-1.png" width="70%" style="display: block; margin: auto;" />
+<img src="../output/figs/BVAR-medcvonefig-1.png" width="70%" style="display: block; margin: auto;" />
 
 ``` r
 cv_medium_5 %>% 
@@ -1059,7 +1059,7 @@ cv_medium_5 %>%
   )
 ```
 
-<img src="/Users/ygeunkim/Documents/myreaserch/paper-bvhar/docs/model-bvar_files/figure-gfm/medcvfivefig-1.png" width="70%" style="display: block; margin: auto;" />
+<img src="../output/figs/BVAR-medcvfivefig-1.png" width="70%" style="display: block; margin: auto;" />
 
 ``` r
 cv_medium_20 %>% 
@@ -1080,7 +1080,7 @@ cv_medium_20 %>%
   )
 ```
 
-<img src="/Users/ygeunkim/Documents/myreaserch/paper-bvhar/docs/model-bvar_files/figure-gfm/medcvtwentyfig-1.png" width="70%" style="display: block; margin: auto;" />
+<img src="../output/figs/BVAR-medcvtwentyfig-1.png" width="70%" style="display: block; margin: auto;" />
 
 ### Tables
 
@@ -1444,7 +1444,7 @@ cv_large_1 %>%
   )
 ```
 
-<img src="/Users/ygeunkim/Documents/myreaserch/paper-bvhar/docs/model-bvar_files/figure-gfm/largecvonefig-1.png" width="70%" style="display: block; margin: auto;" />
+<img src="../output/figs/BVAR-largecvonefig-1.png" width="70%" style="display: block; margin: auto;" />
 
 ``` r
 cv_large_5 %>% 
@@ -1465,7 +1465,7 @@ cv_large_5 %>%
   )
 ```
 
-<img src="/Users/ygeunkim/Documents/myreaserch/paper-bvhar/docs/model-bvar_files/figure-gfm/largecvfivefig-1.png" width="70%" style="display: block; margin: auto;" />
+<img src="../output/figs/BVAR-largecvfivefig-1.png" width="70%" style="display: block; margin: auto;" />
 
 ``` r
 cv_large_20 %>% 
@@ -1486,7 +1486,7 @@ cv_large_20 %>%
   )
 ```
 
-<img src="/Users/ygeunkim/Documents/myreaserch/paper-bvhar/docs/model-bvar_files/figure-gfm/largecvtwentyfig-1.png" width="70%" style="display: block; margin: auto;" />
+<img src="../output/figs/BVAR-largecvtwentyfig-1.png" width="70%" style="display: block; margin: auto;" />
 
 ### Tables
 
@@ -2126,7 +2126,7 @@ cv_large_list <-
 
 # Additional
 
-<img src="/Users/ygeunkim/Documents/myreaserch/paper-bvhar/docs/model-bvar_files/figure-gfm/modlegend-1.png" width="70%" style="display: block; margin: auto;" />
+<img src="../output/figs/BVAR-modlegend-1.png" width="70%" style="display: block; margin: auto;" />
 
 # Coefficients
 

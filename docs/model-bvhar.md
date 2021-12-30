@@ -96,7 +96,7 @@ y_small_train %>%
   )
 ```
 
-<img src="/Users/ygeunkim/Documents/myreaserch/paper-bvhar/docs/model-bvhar_files/figure-gfm/bvhar-smallplot-1.png" width="70%" style="display: block; margin: auto;" />
+<img src="../output/figs/BVHAR-bvhar-smallplot-1.png" width="70%" style="display: block; margin: auto;" />
 
 ### MEDIUM
 
@@ -137,7 +137,7 @@ y_medium_train %>%
   )
 ```
 
-<img src="/Users/ygeunkim/Documents/myreaserch/paper-bvhar/docs/model-bvhar_files/figure-gfm/bvhar-medplot-1.png" width="70%" style="display: block; margin: auto;" />
+<img src="../output/figs/BVHAR-bvhar-medplot-1.png" width="70%" style="display: block; margin: auto;" />
 
 ### LARGE
 
@@ -179,7 +179,7 @@ y_large_train %>%
   )
 ```
 
-<img src="/Users/ygeunkim/Documents/myreaserch/paper-bvhar/docs/model-bvhar_files/figure-gfm/bvhar-largeplot-1.png" width="70%" style="display: block; margin: auto;" />
+<img src="../output/figs/BVHAR-bvhar-largeplot-1.png" width="70%" style="display: block; margin: auto;" />
 
 # Modeling
 
@@ -773,11 +773,11 @@ cv_small_20 <-
 
 ### Plots
 
-<img src="/Users/ygeunkim/Documents/myreaserch/paper-bvhar/docs/model-bvhar_files/figure-gfm/bvhar-smallcvonefig-1.png" width="70%" style="display: block; margin: auto;" />
+<img src="../output/figs/BVHAR-bvhar-smallcvonefig-1.png" width="70%" style="display: block; margin: auto;" />
 
-<img src="/Users/ygeunkim/Documents/myreaserch/paper-bvhar/docs/model-bvhar_files/figure-gfm/bvhar-smallcvfivefig-1.png" width="70%" style="display: block; margin: auto;" />
+<img src="../output/figs/BVHAR-bvhar-smallcvfivefig-1.png" width="70%" style="display: block; margin: auto;" />
 
-<img src="/Users/ygeunkim/Documents/myreaserch/paper-bvhar/docs/model-bvhar_files/figure-gfm/bvhar-smallcvtwentyfig-1.png" width="70%" style="display: block; margin: auto;" />
+<img src="../output/figs/BVHAR-bvhar-smallcvtwentyfig-1.png" width="70%" style="display: block; margin: auto;" />
 
 ### Tables
 
@@ -997,7 +997,7 @@ cv_medium_1 %>%
   )
 ```
 
-<img src="/Users/ygeunkim/Documents/myreaserch/paper-bvhar/docs/model-bvhar_files/figure-gfm/bvhar-medcvonefig-1.png" width="70%" style="display: block; margin: auto;" />
+<img src="../output/figs/BVHAR-bvhar-medcvonefig-1.png" width="70%" style="display: block; margin: auto;" />
 
 ``` r
 cv_medium_5 %>% 
@@ -1018,7 +1018,7 @@ cv_medium_5 %>%
   )
 ```
 
-<img src="/Users/ygeunkim/Documents/myreaserch/paper-bvhar/docs/model-bvhar_files/figure-gfm/bvhar-medcvfivefig-1.png" width="70%" style="display: block; margin: auto;" />
+<img src="../output/figs/BVHAR-bvhar-medcvfivefig-1.png" width="70%" style="display: block; margin: auto;" />
 
 ``` r
 cv_medium_20 %>% 
@@ -1039,7 +1039,7 @@ cv_medium_20 %>%
   )
 ```
 
-<img src="/Users/ygeunkim/Documents/myreaserch/paper-bvhar/docs/model-bvhar_files/figure-gfm/bvhar-medcvtwentyfig-1.png" width="70%" style="display: block; margin: auto;" />
+<img src="../output/figs/BVHAR-bvhar-medcvtwentyfig-1.png" width="70%" style="display: block; margin: auto;" />
 
 ### Tables
 
@@ -1403,7 +1403,7 @@ cv_large_1 %>%
   )
 ```
 
-<img src="/Users/ygeunkim/Documents/myreaserch/paper-bvhar/docs/model-bvhar_files/figure-gfm/bvhar-largecvonefig-1.png" width="70%" style="display: block; margin: auto;" />
+<img src="../output/figs/BVHAR-bvhar-largecvonefig-1.png" width="70%" style="display: block; margin: auto;" />
 
 ``` r
 cv_large_5 %>% 
@@ -1424,7 +1424,7 @@ cv_large_5 %>%
   )
 ```
 
-<img src="/Users/ygeunkim/Documents/myreaserch/paper-bvhar/docs/model-bvhar_files/figure-gfm/bvhar-largecvfivefig-1.png" width="70%" style="display: block; margin: auto;" />
+<img src="../output/figs/BVHAR-bvhar-largecvfivefig-1.png" width="70%" style="display: block; margin: auto;" />
 
 ``` r
 cv_large_20 %>% 
@@ -1445,7 +1445,7 @@ cv_large_20 %>%
   )
 ```
 
-<img src="/Users/ygeunkim/Documents/myreaserch/paper-bvhar/docs/model-bvhar_files/figure-gfm/bvhar-largecvtwentyfig-1.png" width="70%" style="display: block; margin: auto;" />
+<img src="../output/figs/BVHAR-bvhar-largecvtwentyfig-1.png" width="70%" style="display: block; margin: auto;" />
 
 ### Tables
 
