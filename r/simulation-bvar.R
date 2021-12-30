@@ -110,18 +110,14 @@ y_large_split <- divide_ts(y_large, num_test)
 # a: small, medium, large
 # b: train, test
 #---------------------------------------------------
-# # Save SMALL---------------------------
-# y_small_split$train %>%
-#   write_csv(file = "data/processed/bvarsim_small_train.csv")
-# y_small_split$test %>%
-#   write_csv(file = "data/processed/bvarsim_small_test.csv")
-# # Save MEDIUM--------------------------
-# y_medium_split$train %>%
-#   write_csv(file = "data/processed/bvarsim_medium_train.csv")
-# y_medium_split$test %>%
-#   write_csv(file = "data/processed/bvarsim_medium_test.csv")
-# # Save LARGE---------------------------
-# y_large_split$train %>%
-#   write_csv(file = "data/processed/bvarsim_large_train.csv")
-# y_large_split$test %>%
-#   write_csv(file = "data/processed/bvarsim_large_test.csv")
+dgp1 <- list(
+  y_small_train = y_small_split$train,
+  y_small_test = y_small_split$test,
+  y_medium_train = y_medium_split$train,
+  y_medium_test = y_medium_split$test,
+  y_large_train = y_large_split$train,
+  y_large_test = y_large_split$test
+)
+saveRDS(dgp1, "data/processed/bvarsim_dgp_wn.rds")
+rm(list = ls())
+ls()

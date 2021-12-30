@@ -52,6 +52,8 @@ set.seed(1)
 source("report-fns.R")
 # hyperparameter setting table---------
 source("param-fns.R")
+# Simulation---------------------------
+dgp <- readRDS("../data/processed/bvarsim_dgp_wn.rds")
 ```
 
 # BVAR Coefficient
@@ -108,8 +110,8 @@ bvar_large_spec %>%
 ### SMALL
 
 ```{r}
-y_small_train <- read_csv("../data/processed/bvarsim_small_train.csv")
-y_small_test <- read_csv("../data/processed/bvarsim_small_test.csv")
+y_small_train <- dgp$y_small_train
+y_small_test <- dgp$y_small_test
 ```
 
 ```{r smallplot}
@@ -145,8 +147,8 @@ y_small_train %>%
 ### MEDIUM
 
 ```{r}
-y_medium_train <- read_csv("../data/processed/bvarsim_medium_train.csv")
-y_medium_test <- read_csv("../data/processed/bvarsim_medium_test.csv")
+y_medium_train <- dgp$y_medium_train
+y_medium_test <- dgp$y_medium_test
 ```
 
 ```{r medplot}
@@ -184,8 +186,8 @@ y_medium_train %>%
 ### LARGE
 
 ```{r}
-y_large_train <- read_csv("../data/processed/bvarsim_large_train.csv")
-y_large_test <- read_csv("../data/processed/bvarsim_large_test.csv")
+y_large_train <- dgp$y_large_train
+y_large_test <- dgp$y_large_test
 ```
 
 ```{r largeplot}

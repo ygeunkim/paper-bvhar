@@ -105,18 +105,14 @@ bvhar_large_split <- divide_ts(bvhar_large, num_test)
 # a: small, medium, large
 # b: train, test
 #---------------------------------------------------
-# # Save SMALL---------------------------
-# bvhar_small_split$train %>%
-#   write_csv(file = "data/processed/bvharsim_small_train.csv")
-# bvhar_small_split$test %>%
-#   write_csv(file = "data/processed/bvharsim_small_test.csv")
-# # Save MEDIUM--------------------------
-# bvhar_medium_split$train %>%
-#   write_csv(file = "data/processed/bvharsim_medium_train.csv")
-# bvhar_medium_split$test %>%
-#   write_csv(file = "data/processed/bvharsim_medium_test.csv")
-# # Save LARGE---------------------------
-# bvhar_large_split$train %>%
-#   write_csv(file = "data/processed/bvharsim_large_train.csv")
-# bvhar_large_split$test %>%
-#   write_csv(file = "data/processed/bvharsim_large_test.csv")
+dgp1 <- list(
+  y_small_train = bvhar_small_split$train,
+  y_small_test = bvhar_small_split$test,
+  y_medium_train = bvhar_medium_split$train,
+  y_medium_test = bvhar_medium_split$test,
+  y_large_train = bvhar_large_split$train,
+  y_large_test = bvhar_large_split$test
+)
+saveRDS(dgp1, "data/processed/bvharsim_dgp_wn.rds")
+rm(list = ls())
+ls()
