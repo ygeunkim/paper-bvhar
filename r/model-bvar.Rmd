@@ -3,13 +3,13 @@ title: "Simulating Minnesota VAR"
 author: "Young Geun Kim"
 date: "`r format(Sys.time(), '%d %b, %Y')`"
 output: 
-  html_document:
+  github_document:
     toc: true
 knit:
   (function(inputFile, encoding) {
     rmarkdown::render(
       input = inputFile,
-      output_dir = "../output", 
+      output_dir = "../docs", 
       encoding = encoding
     )
   })
@@ -1112,7 +1112,7 @@ lapply(
       function(y) {
         file_name <- 
           paste0(
-            "../output/figs/small-coef/", 
+            "../output/bvar-figs/small-coef/", 
             str_replace_all(process_name, pattern = "\\_", replacement = "\\-"), 
             "-", 
             str_remove_all(y, pattern = "\\_"),
