@@ -27,10 +27,6 @@ bvar_small_spec <- set_bvar(
   lambda = .2,
   delta = rep(0, n_small)
 )
-# tex source for SMALL spec--------------
-bvar_small_spec %>% 
-  kable_hyperparam(caption = "\\label{tab:smallbvarspec}BVAR Coefficient Simulation Setting - SMALL") %>% 
-  writeLines()
 # generate SMALL coef--------------------
 set.seed(1)
 bvar_small_coef <- sim_mncoef(bvar_lag, bvar_small_spec)
@@ -55,10 +51,6 @@ bvar_medium_spec <- set_bvar(
   lambda = .1,
   delta = rep(0, n_medium)
 )
-# tex source for MEDIUM coef----------
-bvar_medium_spec %>% 
-  kable_hyperparam(caption = "\\label{tab:medbvarspec}BVAR Coefficient Simulation Setting - MEDIUM") %>% 
-  writeLines()
 # generate MEDIUM coef----------------
 set.seed(1)
 bvar_medium_coef <- sim_mncoef(bvar_lag, bvar_medium_spec)
@@ -83,10 +75,6 @@ bvar_large_spec <- set_bvar(
   lambda = .03,
   delta = rep(0, n_large)
 )
-# tex source for LARGE coef-----------
-bvar_large_spec %>% 
-  kable_hyperparam(caption = "\\label{tab:largebvarspec}BVAR Coefficient Simulation Setting - LARGE") %>% 
-  writeLines()
 # generate LARGE coef-----------------
 set.seed(1)
 bvar_large_coef <- sim_mncoef(bvar_lag, bvar_large_spec)
