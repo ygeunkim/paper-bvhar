@@ -99,10 +99,13 @@ y_large_split <- divide_ts(y_large, num_test)
 # b: train, test
 #---------------------------------------------------
 dgp1 <- list(
+  small_spec = bvar_small_spec,
   y_small_train = y_small_split$train,
   y_small_test = y_small_split$test,
+  medium_spec = bvar_medium_spec,
   y_medium_train = y_medium_split$train,
   y_medium_test = y_medium_split$test,
+  large_spec = bvar_large_spec,
   y_large_train = y_large_split$train,
   y_large_test = y_large_split$test
 )

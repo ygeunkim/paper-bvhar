@@ -94,10 +94,13 @@ bvhar_large_split <- divide_ts(bvhar_large, num_test)
 # b: train, test
 #---------------------------------------------------
 dgp3 <- list(
+  small_spec = bvhar_small_spec,
   y_small_train = bvhar_small_split$train,
   y_small_test = bvhar_small_split$test,
+  medium_spec = bvhar_medium_spec,
   y_medium_train = bvhar_medium_split$train,
   y_medium_test = bvhar_medium_split$test,
+  large_spec = bvhar_large_spec,
   y_large_train = bvhar_large_split$train,
   y_large_test = bvhar_large_split$test
 )

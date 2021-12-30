@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
   comment = "#>",
   collapse = TRUE,
   out.width = "70%",
-  fig.path = "../output/figs/BVAR-",
+  fig.path = "../output/figs/DGP-1-",
   fig.align = "center",
   fig.width = 6,
   fig.asp = .618
@@ -54,20 +54,15 @@ source("report-fns.R")
 # hyperparameter setting table---------
 source("param-fns.R")
 # Simulation---------------------------
-dgp <- readRDS("../data/processed/bvarsim_dgp_wn.rds")
+dgp <- readRDS("../data/processed/bvarsim_dgp_rw.rds")
 ```
 
 # BVAR Coefficient
 
 ## Minnesota prior
 
-```{r smallbvarsetting, comment=NULL, echo=FALSE}
-n_small <- 3
-bvar_small_spec <- set_bvar(
-  sigma = rep(.05, n_small),
-  lambda = .2,
-  delta = rep(0, n_small)
-)
+```{r smalldgp2setting, comment=NULL, echo=FALSE}
+bvar_small_spec <- dgp$small_spec
 bvar_small_spec %>% 
   kable_hyperparam(
     caption = "BVAR(5) and BVHAR True Hyperparameters - SMALL", 
@@ -76,13 +71,8 @@ bvar_small_spec %>%
   writeLines()
 ```
 
-```{r medbvarsetting, comment=NULL, echo=FALSE}
-n_medium <- 9
-bvar_medium_spec <- set_bvar(
-  sigma = rep(.05, n_medium),
-  lambda = .1,
-  delta = rep(0, n_medium)
-)
+```{r meddgp2setting, comment=NULL, echo=FALSE}
+bvar_medium_spec <- dgp$medium_spec
 bvar_small_spec %>% 
   kable_hyperparam(
     caption = "BVAR(5) and BVHAR True Hyperparameters - MEDIUM",
@@ -91,13 +81,8 @@ bvar_small_spec %>%
   writeLines()
 ```
 
-```{r largebvarsetting, comment=NULL, echo=FALSE}
-n_large <- 12
-bvar_large_spec <- set_bvar(
-  sigma = rep(.05, n_large),
-  lambda = .03,
-  delta = rep(0, n_large)
-)
+```{r largedgp2setting, comment=NULL, echo=FALSE}
+bvar_large_spec <- dgp$large_spec
 bvar_large_spec %>% 
   kable_hyperparam(
     caption = "BVAR(5) and BVHAR True Hyperparameters - LARGE",
@@ -106,16 +91,22 @@ bvar_large_spec %>%
   writeLines()
 ```
 
+```{r simulcase}
+n_small <- length(bvar_small_spec$sigma)
+n_medium <- length(bvar_medium_spec$sigma)
+n_large <- length(bvar_large_spec$sigma)
+```
+
 ## VAR(5)
 
 ### SMALL
 
-```{r}
+```{r dgp2-smalldata}
 y_small_train <- dgp$y_small_train
 y_small_test <- dgp$y_small_test
 ```
 
-```{r smallplot}
+```{r dgp2-smallplot}
 y_small_train %>% 
   mutate(train = TRUE) %>% 
   bind_rows(y_small_test %>% mutate(train = FALSE)) %>% 
@@ -147,12 +138,12 @@ y_small_train %>%
 
 ### MEDIUM
 
-```{r}
+```{r dgp2-meddata}
 y_medium_train <- dgp$y_medium_train
 y_medium_test <- dgp$y_medium_test
 ```
 
-```{r medplot}
+```{r dgp2-medplot}
 y_medium_train %>% 
   mutate(train = TRUE) %>% 
   bind_rows(y_medium_test %>% mutate(train = FALSE)) %>% 
@@ -186,12 +177,12 @@ y_medium_train %>%
 
 ### LARGE
 
-```{r}
+```{r dgp2-largedata}
 y_large_train <- dgp$y_large_train
 y_large_test <- dgp$y_large_test
 ```
 
-```{r largeplot}
+```{r dgp2-largeplot}
 y_large_train %>% 
   mutate(train = TRUE) %>% 
   bind_rows(y_large_test %>% mutate(train = FALSE)) %>% 
@@ -229,11 +220,11 @@ y_large_train %>%
 
 ## VAR
 
-```{r}
+```{r dgp2-varorder}
 (var_lag <- 5)
 ```
 
-```{r}
+```{r dgp2-varfit}
 fit_var_small <- var_lm(y_small_train, var_lag, include_mean = FALSE)
 fit_var_medium <- var_lm(y_medium_train, var_lag, include_mean = FALSE)
 fit_var_large <- var_lm(y_large_train, var_lag, include_mean = FALSE)
@@ -241,7 +232,7 @@ fit_var_large <- var_lm(y_large_train, var_lag, include_mean = FALSE)
 
 ## VHAR
 
-```{r}
+```{r dgp2-vharfit}
 fit_vhar_small <- vhar_lm(y_small_train, include_mean = FALSE)
 fit_vhar_medium <- vhar_lm(y_medium_train, include_mean = FALSE)
 fit_vhar_large <- vhar_lm(y_large_train, include_mean = FALSE)
@@ -249,7 +240,7 @@ fit_vhar_large <- vhar_lm(y_large_train, include_mean = FALSE)
 
 ## BVAR
 
-```{r}
+```{r dgp2-bvarorder}
 (bvar_lag <- 5)
 ```
 
@@ -258,7 +249,7 @@ fit_vhar_large <- vhar_lm(y_large_train, include_mean = FALSE)
   bvar_small_spec, 
   lower = c(
     rep(1e-2, n_small), # sigma
-    1e-2, # lambda
+    1e-4, # lambda
     rep(1e-2, n_small) # delta
   ), 
   upper = c(
@@ -277,12 +268,12 @@ fit_vhar_large <- vhar_lm(y_large_train, include_mean = FALSE)
   bvar_medium_spec, 
   lower = c(
     rep(1e-2, n_medium), # sigma
-    1e-2, # lambda
+    1e-4, # lambda
     rep(1e-2, n_medium) # delta
   ), 
   upper = c(
     rep(1, n_medium), # sigma
-    1, # lambda
+    Inf, # lambda
     rep(1, n_medium) # delta
   ), 
   y = y_medium_train, 
@@ -296,12 +287,12 @@ fit_vhar_large <- vhar_lm(y_large_train, include_mean = FALSE)
   bvar_large_spec, 
   lower = c(
     rep(1e-2, n_large), # sigma
-    1e-2, # lambda
+    1e-4, # lambda
     rep(1e-2, n_large) # delta
   ), 
   upper = c(
     rep(1, n_large), # sigma
-    1, # lambda
+    Inf, # lambda
     rep(1, n_large) # delta
   ), 
   y = y_large_train, 
@@ -310,7 +301,7 @@ fit_vhar_large <- vhar_lm(y_large_train, include_mean = FALSE)
 ))
 ```
 
-```{r}
+```{r bvarfit}
 fit_small_bvar <- bvar_small_optim$fit
 fit_medium_bvar <- bvar_medium_optim$fit
 fit_large_bvar <- bvar_large_optim$fit
@@ -318,23 +309,23 @@ fit_large_bvar <- bvar_large_optim$fit
 
 ## BVHAR-VAR
 
-```{r}
+```{r bvharvarsetting}
 bvhar_var_small_spec <- set_bvhar(
-  sigma = rep(.05, n_small),
-  lambda = .2,
-  delta = rep(.1, n_small)
+  sigma = bvar_small_spec$sigma,
+  lambda = bvar_small_spec$lambda,
+  delta = bvar_small_spec$delta
 )
 #----------------------------
 bvhar_var_medium_spec <- set_bvhar(
-  sigma = rep(.05, n_medium),
-  lambda = .1,
-  delta = rep(.1, n_medium)
+  sigma = bvar_medium_spec$sigma,
+  lambda = bvar_medium_spec$lambda,
+  delta = bvar_medium_spec$delta
 )
 #----------------------------
 bvhar_var_large_spec <- set_bvhar(
-  sigma = rep(.05, n_large),
-  lambda = .03,
-  delta = rep(.1, n_large)
+  sigma = bvar_large_spec$sigma,
+  lambda = bvar_large_spec$lambda,
+  delta = bvar_large_spec$delta
 )
 ```
 
@@ -343,7 +334,7 @@ bvhar_var_large_spec <- set_bvhar(
   bvhar_var_small_spec, 
   lower = c(
     rep(1e-2, n_small), # sigma
-    1e-2, # lambda
+    1e-4, # lambda
     rep(1e-2, n_small) # delta
   ), 
   upper = c(
@@ -361,12 +352,12 @@ bvhar_var_large_spec <- set_bvhar(
   bvhar_var_medium_spec, 
   lower = c(
     rep(1e-2, n_medium), # sigma
-    1e-2, # lambda
+    1e-4, # lambda
     rep(1e-2, n_medium) # delta
   ), 
   upper = c(
     rep(1, n_medium), # sigma
-    1, # lambda
+    Inf, # lambda
     rep(1, n_medium) # delta
   ), 
   y = y_medium_train, 
@@ -379,12 +370,12 @@ bvhar_var_large_spec <- set_bvhar(
   bvhar_var_large_spec, 
   lower = c(
     rep(1e-2, n_large), # sigma
-    1e-2, # lambda
+    1e-4, # lambda
     rep(1e-2, n_large) # delta
   ), 
   upper = c(
     rep(1, n_large), # sigma
-    1, # lambda
+    Inf, # lambda
     rep(1, n_large) # delta
   ), 
   y = y_large_train, 
@@ -392,7 +383,7 @@ bvhar_var_large_spec <- set_bvhar(
 ))
 ```
 
-```{r}
+```{r bvharvarfit}
 fit_bvhar_small_var <- bvhar_var_small_optim$fit
 fit_bvhar_medium_var <- bvhar_var_medium_optim$fit
 fit_bvhar_large_var <- bvhar_var_large_optim$fit
@@ -400,29 +391,29 @@ fit_bvhar_large_var <- bvhar_var_large_optim$fit
 
 ## BVHAR-VHAR
 
-```{r}
+```{r bvharvharsetting}
 bvhar_vhar_small_spec <- set_weight_bvhar(
-  sigma = rep(.05, n_small),
-  lambda = .2,
-  daily = rep(.1, n_small),
-  weekly = rep(.05, n_small),
-  monthly = rep(.1, n_small)
+  sigma = bvar_small_spec$sigma,
+  lambda = bvar_small_spec$lambda,
+  daily = bvar_small_spec$delta,
+  weekly = bvar_small_spec$delta,
+  monthly = bvar_small_spec$delta
 )
 #-----------------------------------------
 bvhar_vhar_medium_spec <- set_weight_bvhar(
-  sigma = rep(.05, n_medium),
-  lambda = .2,
-  daily = rep(.1, n_medium),
-  weekly = rep(.05, n_medium),
-  monthly = rep(.1, n_medium)
+  sigma = bvar_medium_spec$sigma,
+  lambda = bvar_medium_spec$lambda,
+  daily = bvar_medium_spec$delta,
+  weekly = bvar_medium_spec$delta,
+  monthly = bvar_medium_spec$delta
 )
 #-----------------------------------------
 bvhar_vhar_large_spec <- set_weight_bvhar(
-  sigma = rep(.05, n_large),
-  lambda = .2,
-  daily = rep(.1, n_large),
-  weekly = rep(.05, n_large),
-  monthly = rep(.1, n_large)
+  sigma = bvar_large_spec$sigma,
+  lambda = bvar_large_spec$lambda,
+  daily = bvar_large_spec$delta,
+  weekly = bvar_large_spec$delta,
+  monthly = bvar_large_spec$delta
 )
 ```
 
@@ -431,7 +422,7 @@ bvhar_vhar_large_spec <- set_weight_bvhar(
   bvhar_vhar_small_spec, 
   lower = c(
     rep(1e-2, n_small), # sigma
-    1e-2, # lambda
+    1e-4, # lambda
     rep(1e-2, n_small), # daily
     rep(1e-2, n_small), # weekly
     rep(1e-2, n_small) # monthly
@@ -453,14 +444,14 @@ bvhar_vhar_large_spec <- set_weight_bvhar(
   bvhar_vhar_medium_spec, 
   lower = c(
     rep(1e-2, n_medium), # sigma
-    1e-2, # lambda
+    1e-4, # lambda
     rep(1e-2, n_medium), # daily
     rep(1e-2, n_medium), # weekly
     rep(1e-2, n_medium) # monthly
   ), 
   upper = c(
     rep(1, n_medium), # sigma
-    1, # lambda
+    Inf, # lambda
     rep(1, n_medium), # daily
     rep(1, n_medium), # weekly
     rep(1, n_medium) # monthly
@@ -475,14 +466,14 @@ bvhar_vhar_large_spec <- set_weight_bvhar(
   bvhar_vhar_large_spec, 
   lower = c(
     rep(1e-2, n_large), # sigma
-    1e-2, # lambda
+    1e-4, # lambda
     rep(1e-2, n_large), # daily
     rep(1e-2, n_large), # weekly
     rep(1e-2, n_large) # monthly
   ), 
   upper = c(
-    rep(2, n_large), # sigma
-    1, # lambda
+    rep(1, n_large), # sigma
+    Inf, # lambda
     rep(1, n_large), # daily
     rep(1, n_large), # weekly
     rep(1, n_large) # monthly
@@ -492,7 +483,7 @@ bvhar_vhar_large_spec <- set_weight_bvhar(
 ))
 ```
 
-```{r}
+```{r bvharvharfit}
 fit_bvhar_small_vhar <- bvhar_vhar_small_optim$fit
 fit_bvhar_medium_vhar <- bvhar_vhar_medium_optim$fit
 fit_bvhar_large_vhar <- bvhar_vhar_large_optim$fit
@@ -541,7 +532,7 @@ list(
 
 ## SMALL
 
-```{r}
+```{r smallroll, cache=TRUE}
 mod_small_list <- list(
   fit_var_small,
   fit_vhar_small,
@@ -577,7 +568,7 @@ cv_small_20 <-
 
 ### Plots
 
-```{r smallcvonefig, echo=FALSE}
+```{r dgp2-smallcvonefig, echo=FALSE}
 cv_small_1 %>% 
   gg_loss(
     y_small_test, 
@@ -596,7 +587,7 @@ cv_small_1 %>%
   )
 ```
 
-```{r smallcvfivefig, echo=FALSE}
+```{r dgp2-smallcvfivefig, echo=FALSE}
 cv_small_5 %>% 
   gg_loss(
     y_small_test, 
@@ -615,7 +606,7 @@ cv_small_5 %>%
   )
 ```
 
-```{r smallcvtwentyfig, echo=FALSE}
+```{r dgp2-smallcvtwentyfig, echo=FALSE}
 cv_small_20 %>% 
   gg_loss(
     y_small_test, 
@@ -662,7 +653,7 @@ cv_small_20 %>%
 
 ## MEDIUM
 
-```{r}
+```{r medroll, cache=TRUE}
 mod_medium_list <- list(
   fit_var_medium,
   fit_vhar_medium,
@@ -698,7 +689,7 @@ cv_medium_20 <-
 
 ### Plots
 
-```{r medcvonefig}
+```{r dgp2-medcvonefig}
 cv_medium_1 %>% 
   gg_loss(
     y_medium_test, 
@@ -717,7 +708,7 @@ cv_medium_1 %>%
   )
 ```
 
-```{r medcvfivefig}
+```{r dgp2-medcvfivefig}
 cv_medium_5 %>% 
   gg_loss(
     y_medium_test, 
@@ -736,7 +727,7 @@ cv_medium_5 %>%
   )
 ```
 
-```{r medcvtwentyfig}
+```{r dgp2-medcvtwentyfig}
 cv_medium_20 %>% 
   gg_loss(
     y_medium_test, 
@@ -784,7 +775,7 @@ cv_medium_20 %>%
 
 ## LARGE
 
-```{r}
+```{r largeroll, cache=TRUE}
 mod_large_list <- list(
   fit_var_large,
   fit_vhar_large,
@@ -820,7 +811,7 @@ cv_large_20 <-
 
 ### Plots
 
-```{r largecvonefig}
+```{r dgp2-largecvonefig}
 cv_large_1 %>% 
   gg_loss(
     y_large_test, 
@@ -839,7 +830,7 @@ cv_large_1 %>%
   )
 ```
 
-```{r largecvfivefig}
+```{r dgp2-largecvfivefig}
 cv_large_5 %>% 
   gg_loss(
     y_large_test, 
@@ -858,7 +849,7 @@ cv_large_5 %>%
   )
 ```
 
-```{r largecvtwentyfig}
+```{r dgp2-largecvtwentyfig}
 cv_large_20 %>% 
   gg_loss(
     y_large_test, 
@@ -987,11 +978,7 @@ cv_large_20 %>%
 
 Set VAR as the benchmark model.
 
-```{r}
-rmafe(cv_large_20[[5]], cv_large_1[[1]], y_large_test)
-```
-
-```{r}
+```{r listroll, cache=TRUE}
 # SMALL-------------------------------
 cv_small_list <- 
   lapply(
@@ -1047,41 +1034,9 @@ get_rmafetex_tr(
 ```
 
 
-# Additional
-
-```{r modlegend, echo=FALSE}
-tibble(
-  x = 1:100,
-  BVAR_Minnesota = 5,
-  BVHAR_MN_VAR = 4,
-  BVHAR_MN_VHAR = 3,
-  VAR = 2,
-  VHAR = 1
-) %>% 
-  pivot_longer(-x, names_to = "mod", values_to = "y") %>% 
-  mutate(mod_label = ifelse(x == max(x), mod, NA_character_)) %>% 
-  ggplot(aes(y = y)) +
-  geom_path(aes(x = x, colour = mod)) +
-  geom_text(
-    aes(x = x + 3, label = mod_label),
-    na.rm = TRUE,
-    hjust = 0,
-    size = 3
-  ) +
-  scale_colour_viridis_d() +
-  theme_minimal() +
-  theme(
-    legend.position = "none",
-    axis.text = element_blank(),
-    axis.title = element_blank()
-  ) +
-  xlim(1, 125)
-```
-
-
 # Coefficients
 
-```{r, eval=FALSE}
+```{r smallplotsave, eval=FALSE}
 bayes_small_mod <- mod_small_list[3:5]
 names(bayes_small_mod) <- sapply(bayes_small_mod, function(x) x$process)
 small_vec <- names(y_small_train)
@@ -1113,7 +1068,7 @@ lapply(
       function(y) {
         file_name <- 
           paste0(
-            "../output/bvar-figs/small-coef/", 
+            "../output/dgp02-figs/small-coef/", 
             str_replace_all(process_name, pattern = "\\_", replacement = "\\-"), 
             "-", 
             str_remove_all(y, pattern = "\\_"),
@@ -1126,7 +1081,7 @@ lapply(
 )
 ```
 
-```{r, eval=FALSE}
+```{r medplotsave, eval=FALSE}
 bayes_medium_mod <- mod_medium_list[3:5]
 names(bayes_medium_mod) <- sapply(bayes_medium_mod, function(x) x$process)
 medium_vec <- names(y_medium_train)
@@ -1158,7 +1113,7 @@ lapply(
       function(y) {
         file_name <- 
           paste0(
-            "../output/figs/med-coef/", 
+            "../output/dgp02-figs/med-coef/", 
             str_replace_all(process_name, pattern = "\\_", replacement = "\\-"), 
             "-", 
             str_remove_all(y, pattern = "\\_"),
@@ -1171,7 +1126,7 @@ lapply(
 )
 ```
 
-```{r, eval=FALSE}
+```{r largeplotsave, eval=FALSE}
 bayes_large_mod <- mod_large_list[3:5]
 names(bayes_large_mod) <- sapply(bayes_large_mod, function(x) x$process)
 large_vec <- names(y_large_train)
@@ -1203,7 +1158,7 @@ lapply(
       function(y) {
         file_name <- 
           paste0(
-            "../output/figs/large-coef/", 
+            "../output/dgp02-figs/large-coef/", 
             str_replace_all(process_name, pattern = "\\_", replacement = "\\-"), 
             "-", 
             str_remove_all(y, pattern = "\\_"),

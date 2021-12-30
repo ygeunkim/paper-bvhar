@@ -8,6 +8,7 @@ output:
 knitr::opts_chunk$set(
   comment = "#>",
   collapse = TRUE,
+  fig.path = "../output/figs/README-",
   out.width = "70%",
   fig.align = "center",
   fig.width = 6,
@@ -19,15 +20,29 @@ options(digits = 3)
 
 # Bayesian Vector Autoregressive Heterogeneous Modeling
 
-This is a repo for researching Bayesian VHAR.
+<!-- badges: start -->
+<!-- badges: end -->
 
 ## Overview
+
+This is a repository for researching Bayesian VHAR.
+
+- Extend BVAR to vector HAR model
+- Two-forms of priors: BVHAR-S and BVHAR-L
+- Compare the forecasting performance
+
+### Files
 
 - [R/](https://github.com/ygeunkim/paper-bvhar/tree/master/r) Codes and R markdown
 - [data/](https://github.com/ygeunkim/paper-bvhar/tree/master/data) Simulated and real datasets used in this research
 - [docs/](https://github.com/ygeunkim/paper-bvhar/tree/master/docs) Rendered documents
 
-R packages needed:
+### Tools
+
+- `R`
+- `LaTex`
+
+### Required R packages
 
 - [tidyverse](https://www.tidyverse.org)
 - [kableExtra](https://haozhu233.github.io/kableExtra/)
@@ -37,9 +52,14 @@ R packages needed:
 
 ### Simulation
 
-- [DGP1](https://github.com/ygeunkim/paper-bvhar/blob/master/docs/model-bvar.md) BVAR(5)
-- DGP2
-- [DGP3](https://github.com/ygeunkim/paper-bvhar/blob/master/docs/model-bvhar.md) BVHAR-S
+- [DGP1](https://github.com/ygeunkim/paper-bvhar/blob/master/docs/model-dgp01.md) BVAR(5) with WN setting
+- [DGP2](https://github.com/ygeunkim/paper-bvhar/blob/master/docs/model-dgp02.md) BVAR(5) with another setting
+- [DGP3](https://github.com/ygeunkim/paper-bvhar/blob/master/docs/model-dgp03.md) BVHAR-S
 - DGP4
 
 ### Empirical analysis
+
+
+## Code of Conduct
+
+Please note that the paper-bvhar project is released with a [Contributor Code of Conduct](https://contributor-covenant.org/version/2/0/CODE_OF_CONDUCT.html). By contributing to this project, you agree to abide by its terms.
