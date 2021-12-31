@@ -54,7 +54,7 @@ source("report-fns.R")
 # hyperparameter setting table---------
 source("param-fns.R")
 # Simulation---------------------------
-dgp <- readRDS("../data/processed/bvharsim_dgp_wn.rds")
+dgp <- readRDS("../data/processed/bvharsim_dgp_s.rds")
 ```
 
 # BVHAR Coefficient
@@ -1004,8 +1004,8 @@ get_rmafetex_tr(
   y_list = list(y_small_test, y_medium_test, y_large_test), 
   ahead_list = c("$h = 1$", "$h = 5$", "$h = 20$"),
   benchmark_id = 1,
-  caption = "Out-of-Sample Forecasting - Simulation for BVHAR", 
-  label = "simaveresultbvhar",
+  caption = "Out-of-sample forecasting performance measures for DGP3.", 
+  label = "dgp2result",
   header_angle = 0
 ) %>% 
   writeLines()

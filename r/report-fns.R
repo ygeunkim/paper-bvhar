@@ -504,5 +504,5 @@ get_rmafetex_tr <- function(mod_list,
       "RMASE" = ahead_length
     )) %>%
     row_spec(0, angle = header_angle) %>% 
-    collapse_rows(columns = 1)
+    collapse_rows(columns = 1, latex_hline = "major")
 }

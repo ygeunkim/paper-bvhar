@@ -4,8 +4,6 @@ if (requireNamespace("tidyverse", quietly = TRUE)) {
 if (requireNamespace("bvhar", quietly = TRUE)) {
   library(bvhar)
 }
-# hyperparameter setting table------------------------
-source("R/param-fns.R")
 set.seed(1)
 # Minnesota prior-------------------------------------
 # p = 5

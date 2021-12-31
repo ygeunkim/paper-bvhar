@@ -97,3 +97,71 @@ report_hyperparam <- function(spec_list, caption = "Hyperparameter Lists", label
       index = c("BVAR" = 3, "BVHAR-VAR" = 3, "BVHAR-VHAR" = 5)
     )
 }
+
+report_true_hyperparam <- function(spec_list, 
+                                   kable = TRUE, 
+                                   model_name = "DGP1",
+                                   caption = "Hyperparameter Lists", 
+                                   label = "hyperparamlist") {
+  if (length(spec_list) != 3) {
+    stop("Wrong 'spec_list'.")
+  }
+  if (any(names(spec_list) != c("small", "medium", "large"))) {
+    stop("Wrong names of 'spec_list'.")
+  }
+  size_id <- c("SMALL", "MEDIUM", "LARGE")
+  large_dim <- length(spec_list$large$sigma)
+  cols_add <- list()
+  dim_add <- 0
+  hyperparam_table <- foreach(i = seq_along(spec_list), .combine = rbind) %do% {
+    error_table <- kable_hyperparam(spec_list[[i]], kable = FALSE)
+    dim_add <- large_dim - length(spec_list[[i]]$sigma)
+    cols_add <- 
+      rep(NA, dim_add) %>% 
+      as.list()
+    if (dim_add != 0) {
+      names(cols_add) <- paste0("V", (length(spec_list[[i]]$sigma) + 1):large_dim)
+    }
+    error_table %>% 
+      bind_cols(cols_add) %>% 
+      add_column(size = size_id[i], .before = 1) %>% 
+      rownames_to_column(var = "hyperparam")
+  } %>% 
+    relocate(hyperparam, .after = size) %>% 
+    mutate(
+      hyperparam = case_when(
+        hyperparam == "sigma" ~ "$\\sigma$",
+        hyperparam == "lambda" ~ "$\\lambda$",
+        hyperparam == "delta" ~ "$\\delta$ ",
+        hyperparam == "daily" ~ "$d_i$",
+        hyperparam == "weekly" ~ "$w_i$",
+        hyperparam == "monthly" ~ "$m_i$"
+      )
+    )
+  if (!kable) {
+    return(hyperparam_table)
+  }
+  title_head <- c(ncol(hyperparam_table))
+  names(title_head) <- model_name
+  hyperparam_table %>% 
+    kable(
+      format = "latex",
+      booktabs = TRUE,
+      escape = FALSE,
+      col.names = NULL,
+      align = "c",
+      caption = caption,
+      label = label
+    ) %>% 
+    kable_paper(full_width = FALSE) %>% 
+    add_header_above(
+      title_head,
+      align = "l"
+    ) %>%
+    collapse_rows(
+      columns = 1,
+      valign = "middle",
+      latex_hline = "major"
+    )
+}
+

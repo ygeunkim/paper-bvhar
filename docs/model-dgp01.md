@@ -1,7 +1,7 @@
 Simulating Minnesota VAR
 ================
 Young Geun Kim
-30 Dec, 2021
+31 Dec, 2021
 
 -   [BVAR Coefficient](#bvar-coefficient)
     -   [Minnesota prior](#minnesota-prior)
@@ -97,6 +97,20 @@ dgp <- readRDS("../data/processed/bvarsim_dgp_wn.rds")
     \bottomrule
     \end{tabular}
     \end{table}
+
+``` r
+bvar_spec_list <- list(
+  small = bvar_small_spec,
+  medium = bvar_medium_spec,
+  large = bvar_large_spec
+)
+```
+
+``` r
+n_small <- length(bvar_small_spec$sigma)
+n_medium <- length(bvar_medium_spec$sigma)
+n_large <- length(bvar_large_spec$sigma)
+```
 
 ## VAR(5)
 
@@ -2083,7 +2097,7 @@ cv_large_list <-
 
     \begin{table}[H]
 
-    \caption{\label{tab:simaveresult}Out-of-Sample Forecasting - Simulation for BVAR}
+    \caption{\label{tab:dgp1result}Out-of-sample forecasting performance measures for DGP1.}
     \centering
     \resizebox{\linewidth}{!}{
     \begin{tabular}[t]{cc|ccc|ccc|ccc|}
@@ -2093,27 +2107,27 @@ cv_large_list <-
     \rotatebox{0}{} & \rotatebox{0}{} & \rotatebox{0}{$h = 1$} & \rotatebox{0}{$h = 5$} & \rotatebox{0}{$h = 20$} & \rotatebox{0}{$h = 1$} & \rotatebox{0}{$h = 5$} & \rotatebox{0}{$h = 20$} & \rotatebox{0}{$h = 1$} & \rotatebox{0}{$h = 5$} & \rotatebox{0}{$h = 20$}\\
     \midrule
      & VHAR & \textcolor{black}{\num{0.984}} & \textcolor{black}{\num{0.957}} & \textcolor{red}{\num{0.875}} & \textcolor{black}{\num{0.971}} & \textcolor{black}{\num{0.944}} & \textcolor{red}{\num{0.772}} & \textcolor{black}{\num{0.985}} & \textcolor{black}{\num{0.952}} & \textcolor{red}{\num{0.861}}\\
-    \cmidrule{2-11}
+
      & BVAR & \textcolor{black}{\num{0.988}} & \textcolor{black}{\num{0.981}} & \textcolor{black}{\num{0.993}} & \textcolor{black}{\num{0.986}} & \textcolor{black}{\num{0.964}} & \textcolor{black}{\num{0.989}} & \textcolor{black}{\num{0.986}} & \textcolor{black}{\num{0.981}} & \textcolor{black}{\num{0.993}}\\
-    \cmidrule{2-11}
+
      & BVHAR-S & \textcolor{red}{\num{0.981}} & \textcolor{red}{\num{0.950}} & \textcolor{black}{\num{0.902}} & \textcolor{red}{\num{0.966}} & \textcolor{black}{\num{0.925}} & \textcolor{black}{\num{0.794}} & \textcolor{red}{\num{0.982}} & \textcolor{red}{\num{0.947}} & \textcolor{black}{\num{0.899}}\\
-    \cmidrule{2-11}
+
     \multirow{-4}{*}{\centering\arraybackslash SMALL} & BVHAR-L & \textcolor{black}{\num{0.984}} & \textcolor{black}{\num{0.955}} & \textcolor{black}{\num{0.889}} & \textcolor{black}{\num{0.970}} & \textcolor{red}{\num{0.924}} & \textcolor{black}{\num{0.779}} & \textcolor{black}{\num{0.986}} & \textcolor{black}{\num{0.954}} & \textcolor{black}{\num{0.884}}\\
     \cmidrule{1-11}
      & VHAR & \textcolor{black}{\num{0.622}} & \textcolor{red}{\num{0.0764}} & \textcolor{red}{\num{3.88e-05}} & \textcolor{black}{\num{0.458}} & \textcolor{red}{\num{0.00583}} & \textcolor{red}{\num{1.52e-09}} & \textcolor{black}{\num{0.642}} & \textcolor{red}{\num{0.0761}} & \textcolor{red}{\num{3.88e-05}}\\
-    \cmidrule{2-11}
+
      & BVAR & \textcolor{black}{\num{0.907}} & \textcolor{black}{\num{0.7498}} & \textcolor{black}{\num{3.17e-01}} & \textcolor{black}{\num{0.793}} & \textcolor{black}{\num{0.56240}} & \textcolor{black}{\num{1.01e-01}} & \textcolor{black}{\num{0.917}} & \textcolor{black}{\num{0.7498}} & \textcolor{black}{\num{3.17e-01}}\\
-    \cmidrule{2-11}
+
      & BVHAR-S & \textcolor{black}{\num{0.578}} & \textcolor{black}{\num{0.0837}} & \textcolor{black}{\num{5.50e-05}} & \textcolor{black}{\num{0.375}} & \textcolor{black}{\num{0.00702}} & \textcolor{black}{\num{3.05e-09}} & \textcolor{black}{\num{0.599}} & \textcolor{black}{\num{0.0835}} & \textcolor{black}{\num{5.50e-05}}\\
-    \cmidrule{2-11}
+
     \multirow{-4}{*}{\centering\arraybackslash MEDIUM} & BVHAR-L & \textcolor{red}{\num{0.571}} & \textcolor{black}{\num{0.1124}} & \textcolor{black}{\num{1.76e-04}} & \textcolor{red}{\num{0.362}} & \textcolor{black}{\num{0.01268}} & \textcolor{black}{\num{3.10e-08}} & \textcolor{red}{\num{0.592}} & \textcolor{black}{\num{0.1123}} & \textcolor{black}{\num{1.76e-04}}\\
     \cmidrule{1-11}
      & VHAR & \textcolor{black}{\num{0.778}} & \textcolor{red}{\num{0.0548}} & \textcolor{red}{\num{1.06e-05}} & \textcolor{black}{\num{0.514}} & \textcolor{red}{\num{0.00298}} & \textcolor{red}{\num{1.14e-10}} & \textcolor{black}{\num{0.739}} & \textcolor{red}{\num{0.0545}} & \textcolor{red}{\num{1.06e-05}}\\
-    \cmidrule{2-11}
+
      & BVAR & \textcolor{black}{\num{0.942}} & \textcolor{black}{\num{0.7514}} & \textcolor{black}{\num{3.21e-01}} & \textcolor{black}{\num{0.836}} & \textcolor{black}{\num{0.56468}} & \textcolor{black}{\num{1.03e-01}} & \textcolor{black}{\num{0.935}} & \textcolor{black}{\num{0.7514}} & \textcolor{black}{\num{3.21e-01}}\\
-    \cmidrule{2-11}
+
      & BVHAR-S & \textcolor{black}{\num{0.758}} & \textcolor{black}{\num{0.0653}} & \textcolor{black}{\num{2.12e-05}} & \textcolor{black}{\num{0.454}} & \textcolor{black}{\num{0.00426}} & \textcolor{black}{\num{4.52e-10}} & \textcolor{black}{\num{0.720}} & \textcolor{black}{\num{0.0651}} & \textcolor{black}{\num{2.12e-05}}\\
-    \cmidrule{2-11}
+
     \multirow{-4}{*}{\centering\arraybackslash LARGE} & BVHAR-L & \textcolor{red}{\num{0.746}} & \textcolor{black}{\num{0.0874}} & \textcolor{black}{\num{6.60e-05}} & \textcolor{red}{\num{0.428}} & \textcolor{black}{\num{0.00765}} & \textcolor{black}{\num{4.38e-09}} & \textcolor{red}{\num{0.711}} & \textcolor{black}{\num{0.0872}} & \textcolor{black}{\num{6.60e-05}}\\
     \bottomrule
     \end{tabular}}
@@ -2157,7 +2171,7 @@ lapply(
       function(y) {
         file_name <- 
           paste0(
-            "../output/bvar-figs/small-coef/", 
+            "../output/dgp01-figs/small-coef/", 
             str_replace_all(process_name, pattern = "\\_", replacement = "\\-"), 
             "-", 
             str_remove_all(y, pattern = "\\_"),
@@ -2202,7 +2216,7 @@ lapply(
       function(y) {
         file_name <- 
           paste0(
-            "../output/figs/med-coef/", 
+            "../output/dgp01-figs/med-coef/", 
             str_replace_all(process_name, pattern = "\\_", replacement = "\\-"), 
             "-", 
             str_remove_all(y, pattern = "\\_"),
@@ -2247,7 +2261,7 @@ lapply(
       function(y) {
         file_name <- 
           paste0(
-            "../output/figs/large-coef/", 
+            "../output/dgp01-figs/large-coef/", 
             str_replace_all(process_name, pattern = "\\_", replacement = "\\-"), 
             "-", 
             str_remove_all(y, pattern = "\\_"),

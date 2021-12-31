@@ -63,33 +63,27 @@ dgp <- readRDS("../data/processed/bvarsim_dgp_rw.rds")
 
 ```{r smalldgp2setting, comment=NULL, echo=FALSE}
 bvar_small_spec <- dgp$small_spec
-bvar_small_spec %>% 
-  kable_hyperparam(
-    caption = "BVAR(5) and BVHAR True Hyperparameters - SMALL", 
-    label = "smalltruespec"
-  ) %>% 
-  writeLines()
 ```
 
 ```{r meddgp2setting, comment=NULL, echo=FALSE}
 bvar_medium_spec <- dgp$medium_spec
-bvar_small_spec %>% 
-  kable_hyperparam(
-    caption = "BVAR(5) and BVHAR True Hyperparameters - MEDIUM",
-    label = "medtruespec"
-  ) %>% 
-  writeLines()
 ```
 
 ```{r largedgp2setting, comment=NULL, echo=FALSE}
 bvar_large_spec <- dgp$large_spec
-bvar_large_spec %>% 
-  kable_hyperparam(
-    caption = "BVAR(5) and BVHAR True Hyperparameters - LARGE",
-    label = "largetruespec"
-  ) %>% 
+```
+
+```{r dgp2settingtab, comment=NULL, echo=FALSE}
+bvar_spec_list <- list(
+  small = bvar_small_spec,
+  medium = bvar_medium_spec,
+  large = bvar_large_spec
+)
+bvar_spec_list %>% 
+  report_true_hyperparam(model_name = "DGP2-BVAR(5)", caption = "Hyperparameters for DGP2-BVAR(5).", label = "dgp2-truehyperparam") %>% 
   writeLines()
 ```
+
 
 ```{r simulcase}
 n_small <- length(bvar_small_spec$sigma)
@@ -529,6 +523,28 @@ list(
   report_hyperparam(caption = "LARGE Simulation - Hyperparameter Lists", label = "hyperparamlarge") %>% 
   writeLines()
 ```
+
+```{r optimhyperparam, comment=NULL, echo=FALSE}
+dgp1_spec_list <- list(
+  small = list(
+    bvar_small_optim$spec,
+    bvhar_var_small_optim$spec,
+    bvhar_vhar_small_optim$spec
+  ),
+  medium = list(
+    bvar_medium_optim$spec,
+    bvhar_var_medium_optim$spec,
+    bvhar_vhar_medium_optim$spec
+  ),
+  large = list(
+    bvar_large_optim$spec,
+    bvhar_var_large_optim$spec,
+    bvhar_vhar_large_optim$spec
+  )
+)
+```
+
+
 
 ## SMALL
 
@@ -1026,8 +1042,8 @@ get_rmafetex_tr(
   y_list = list(y_small_test, y_medium_test, y_large_test), 
   ahead_list = c("$h = 1$", "$h = 5$", "$h = 20$"),
   benchmark_id = 1,
-  caption = "Out-of-Sample Forecasting - Simulation for BVAR", 
-  label = "simaveresult",
+  caption = "Out-of-sample forecasting performance measures for DGP2.", 
+  label = "dgp2result",
   header_angle = 0
 ) %>% 
   writeLines()
