@@ -55,6 +55,12 @@ dgp <- readRDS("../data/processed/bvharsim_dgp_l.rds")
 
 ## VAR-type Minnesota prior
 
+``` r
+n_small <- length(bvhar_small_spec$sigma)
+n_medium <- length(bvhar_medium_spec$sigma)
+n_large <- length(bvhar_large_spec$sigma)
+```
+
 ## VAR(5)
 
 ### SMALL
@@ -93,7 +99,7 @@ y_small_train %>%
   )
 ```
 
-<img src="../output/figs/DGP-3-bvhar-smallplot-1.png" width="70%" style="display: block; margin: auto;" />
+<img src="../output/figs/DGP-4-smallplot-1.png" width="70%" style="display: block; margin: auto;" />
 
 ### MEDIUM
 
@@ -134,7 +140,7 @@ y_medium_train %>%
   )
 ```
 
-<img src="../output/figs/DGP-3-bvhar-medplot-1.png" width="70%" style="display: block; margin: auto;" />
+<img src="../output/figs/DGP-4-medplot-1.png" width="70%" style="display: block; margin: auto;" />
 
 ### LARGE
 
@@ -176,7 +182,7 @@ y_large_train %>%
   )
 ```
 
-<img src="../output/figs/DGP-3-bvhar-largeplot-1.png" width="70%" style="display: block; margin: auto;" />
+<img src="../output/figs/DGP-4-largeplot-1.png" width="70%" style="display: block; margin: auto;" />
 
 # Modeling
 
@@ -677,11 +683,11 @@ cv_small_20 <-
 
 ### Plots
 
-<img src="../output/figs/DGP-3-bvhar-smallcvonefig-1.png" width="70%" style="display: block; margin: auto;" />
+<img src="../output/figs/DGP-4-smallcvonefig-1.png" width="70%" style="display: block; margin: auto;" />
 
-<img src="../output/figs/DGP-3-bvhar-smallcvfivefig-1.png" width="70%" style="display: block; margin: auto;" />
+<img src="../output/figs/DGP-4-smallcvfivefig-1.png" width="70%" style="display: block; margin: auto;" />
 
-<img src="../output/figs/DGP-3-bvhar-smallcvtwentyfig-1.png" width="70%" style="display: block; margin: auto;" />
+<img src="../output/figs/DGP-4-smallcvtwentyfig-1.png" width="70%" style="display: block; margin: auto;" />
 
 ### Tables
 
@@ -901,7 +907,7 @@ cv_medium_1 %>%
   )
 ```
 
-<img src="../output/figs/DGP-3-bvhar-medcvonefig-1.png" width="70%" style="display: block; margin: auto;" />
+<img src="../output/figs/DGP-4-medcvonefig-1.png" width="70%" style="display: block; margin: auto;" />
 
 ``` r
 cv_medium_5 %>% 
@@ -922,7 +928,7 @@ cv_medium_5 %>%
   )
 ```
 
-<img src="../output/figs/DGP-3-bvhar-medcvfivefig-1.png" width="70%" style="display: block; margin: auto;" />
+<img src="../output/figs/DGP-4-medcvfivefig-1.png" width="70%" style="display: block; margin: auto;" />
 
 ``` r
 cv_medium_20 %>% 
@@ -943,7 +949,7 @@ cv_medium_20 %>%
   )
 ```
 
-<img src="../output/figs/DGP-3-bvhar-medcvtwentyfig-1.png" width="70%" style="display: block; margin: auto;" />
+<img src="../output/figs/DGP-4-medcvtwentyfig-1.png" width="70%" style="display: block; margin: auto;" />
 
 ### Tables
 
@@ -1307,7 +1313,7 @@ cv_large_1 %>%
   )
 ```
 
-<img src="../output/figs/DGP-3-bvhar-largecvonefig-1.png" width="70%" style="display: block; margin: auto;" />
+<img src="../output/figs/DGP-4-largecvonefig-1.png" width="70%" style="display: block; margin: auto;" />
 
 ``` r
 cv_large_5 %>% 
@@ -1328,7 +1334,7 @@ cv_large_5 %>%
   )
 ```
 
-<img src="../output/figs/DGP-3-bvhar-largecvfivefig-1.png" width="70%" style="display: block; margin: auto;" />
+<img src="../output/figs/DGP-4-largecvfivefig-1.png" width="70%" style="display: block; margin: auto;" />
 
 ``` r
 cv_large_20 %>% 
@@ -1349,7 +1355,7 @@ cv_large_20 %>%
   )
 ```
 
-<img src="../output/figs/DGP-3-bvhar-largecvtwentyfig-1.png" width="70%" style="display: block; margin: auto;" />
+<img src="../output/figs/DGP-4-largecvtwentyfig-1.png" width="70%" style="display: block; margin: auto;" />
 
 ### Tables
 

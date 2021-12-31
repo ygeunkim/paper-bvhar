@@ -61,29 +61,17 @@ dgp <- readRDS("../data/processed/bvarsim_dgp_rw.rds")
 
 ## Minnesota prior
 
-```{r smalldgp2setting, comment=NULL, echo=FALSE}
+```{r smalltruesetting, comment=NULL, echo=FALSE}
 bvar_small_spec <- dgp$small_spec
 ```
 
-```{r meddgp2setting, comment=NULL, echo=FALSE}
+```{r medtruesetting, comment=NULL, echo=FALSE}
 bvar_medium_spec <- dgp$medium_spec
 ```
 
-```{r largedgp2setting, comment=NULL, echo=FALSE}
+```{r largetruesetting, comment=NULL, echo=FALSE}
 bvar_large_spec <- dgp$large_spec
 ```
-
-```{r dgp2settingtab, comment=NULL, echo=FALSE}
-bvar_spec_list <- list(
-  small = bvar_small_spec,
-  medium = bvar_medium_spec,
-  large = bvar_large_spec
-)
-bvar_spec_list %>% 
-  report_true_hyperparam(model_name = "DGP2-BVAR(5)", caption = "Hyperparameters for DGP2-BVAR(5).", label = "dgp2-truehyperparam") %>% 
-  writeLines()
-```
-
 
 ```{r simulcase}
 n_small <- length(bvar_small_spec$sigma)
@@ -95,12 +83,12 @@ n_large <- length(bvar_large_spec$sigma)
 
 ### SMALL
 
-```{r dgp2-smalldata}
+```{r smalldata}
 y_small_train <- dgp$y_small_train
 y_small_test <- dgp$y_small_test
 ```
 
-```{r dgp2-smallplot}
+```{r smallplot}
 y_small_train %>% 
   mutate(train = TRUE) %>% 
   bind_rows(y_small_test %>% mutate(train = FALSE)) %>% 
@@ -132,12 +120,12 @@ y_small_train %>%
 
 ### MEDIUM
 
-```{r dgp2-meddata}
+```{r meddata}
 y_medium_train <- dgp$y_medium_train
 y_medium_test <- dgp$y_medium_test
 ```
 
-```{r dgp2-medplot}
+```{r medplot}
 y_medium_train %>% 
   mutate(train = TRUE) %>% 
   bind_rows(y_medium_test %>% mutate(train = FALSE)) %>% 
@@ -171,12 +159,12 @@ y_medium_train %>%
 
 ### LARGE
 
-```{r dgp2-largedata}
+```{r largedata}
 y_large_train <- dgp$y_large_train
 y_large_test <- dgp$y_large_test
 ```
 
-```{r dgp2-largeplot}
+```{r largeplot}
 y_large_train %>% 
   mutate(train = TRUE) %>% 
   bind_rows(y_large_test %>% mutate(train = FALSE)) %>% 
@@ -214,11 +202,11 @@ y_large_train %>%
 
 ## VAR
 
-```{r dgp2-varorder}
+```{r varorder}
 (var_lag <- 5)
 ```
 
-```{r dgp2-varfit}
+```{r varfit}
 fit_var_small <- var_lm(y_small_train, var_lag, include_mean = FALSE)
 fit_var_medium <- var_lm(y_medium_train, var_lag, include_mean = FALSE)
 fit_var_large <- var_lm(y_large_train, var_lag, include_mean = FALSE)
@@ -226,7 +214,7 @@ fit_var_large <- var_lm(y_large_train, var_lag, include_mean = FALSE)
 
 ## VHAR
 
-```{r dgp2-vharfit}
+```{r vharfit}
 fit_vhar_small <- vhar_lm(y_small_train, include_mean = FALSE)
 fit_vhar_medium <- vhar_lm(y_medium_train, include_mean = FALSE)
 fit_vhar_large <- vhar_lm(y_large_train, include_mean = FALSE)
@@ -234,7 +222,7 @@ fit_vhar_large <- vhar_lm(y_large_train, include_mean = FALSE)
 
 ## BVAR
 
-```{r dgp2-bvarorder}
+```{r bvarorder}
 (bvar_lag <- 5)
 ```
 
@@ -488,44 +476,8 @@ fit_bvhar_large_vhar <- bvhar_vhar_large_optim$fit
 
 ## Hyperparameters
 
-### SMALL
-
-```{r smallemp, comment=NULL, echo=FALSE}
-list(
-  bvar_small_optim$spec,
-  bvhar_var_small_optim$spec,
-  bvhar_vhar_small_optim$spec
-) %>% 
-  report_hyperparam(caption = "SMALL Simulation - Hyperparameter Lists", label = "hyperparamsmall") %>% 
-  writeLines()
-```
-
-### MEDIUM
-
-```{r medemp, comment=NULL, echo=FALSE}
-list(
-  bvar_medium_optim$spec,
-  bvhar_var_medium_optim$spec,
-  bvhar_vhar_medium_optim$spec
-) %>% 
-  report_hyperparam(caption = "MEDIUM Simulation - Hyperparameter Lists", label = "hyperparammed") %>% 
-  writeLines()
-```
-
-### LARGE
-
-```{r largeemp, comment=NULL, echo=FALSE}
-list(
-  bvar_large_optim$spec,
-  bvhar_var_large_optim$spec,
-  bvhar_vhar_large_optim$spec
-) %>% 
-  report_hyperparam(caption = "LARGE Simulation - Hyperparameter Lists", label = "hyperparamlarge") %>% 
-  writeLines()
-```
-
-```{r optimhyperparam, comment=NULL, echo=FALSE}
-dgp1_spec_list <- list(
+```{r reportemp, comment=NULL, echo=FALSE}
+spec_optim_list <- list(
   small = list(
     bvar_small_optim$spec,
     bvhar_var_small_optim$spec,
@@ -542,8 +494,10 @@ dgp1_spec_list <- list(
     bvhar_vhar_large_optim$spec
   )
 )
+# report-------------------
+report_hyperparam(spec_optim_list, report_true = FALSE, caption = "Empirical Bayes Results for DGP2.", label = "empdgp2") %>% 
+  writeLines()
 ```
-
 
 
 ## SMALL
@@ -584,7 +538,7 @@ cv_small_20 <-
 
 ### Plots
 
-```{r dgp2-smallcvonefig, echo=FALSE}
+```{r smallcvonefig, echo=FALSE}
 cv_small_1 %>% 
   gg_loss(
     y_small_test, 
@@ -603,7 +557,7 @@ cv_small_1 %>%
   )
 ```
 
-```{r dgp2-smallcvfivefig, echo=FALSE}
+```{r smallcvfivefig, echo=FALSE}
 cv_small_5 %>% 
   gg_loss(
     y_small_test, 
@@ -622,7 +576,7 @@ cv_small_5 %>%
   )
 ```
 
-```{r dgp2-smallcvtwentyfig, echo=FALSE}
+```{r smallcvtwentyfig, echo=FALSE}
 cv_small_20 %>% 
   gg_loss(
     y_small_test, 
@@ -705,7 +659,7 @@ cv_medium_20 <-
 
 ### Plots
 
-```{r dgp2-medcvonefig}
+```{r medcvonefig}
 cv_medium_1 %>% 
   gg_loss(
     y_medium_test, 
@@ -724,7 +678,7 @@ cv_medium_1 %>%
   )
 ```
 
-```{r dgp2-medcvfivefig}
+```{r medcvfivefig}
 cv_medium_5 %>% 
   gg_loss(
     y_medium_test, 
@@ -743,7 +697,7 @@ cv_medium_5 %>%
   )
 ```
 
-```{r dgp2-medcvtwentyfig}
+```{r medcvtwentyfig}
 cv_medium_20 %>% 
   gg_loss(
     y_medium_test, 
@@ -827,7 +781,7 @@ cv_large_20 <-
 
 ### Plots
 
-```{r dgp2-largecvonefig}
+```{r largecvonefig}
 cv_large_1 %>% 
   gg_loss(
     y_large_test, 
@@ -846,7 +800,7 @@ cv_large_1 %>%
   )
 ```
 
-```{r dgp2-largecvfivefig}
+```{r largecvfivefig}
 cv_large_5 %>% 
   gg_loss(
     y_large_test, 
@@ -865,7 +819,7 @@ cv_large_5 %>%
   )
 ```
 
-```{r dgp2-largecvtwentyfig}
+```{r largecvtwentyfig}
 cv_large_20 %>% 
   gg_loss(
     y_large_test, 

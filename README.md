@@ -42,7 +42,8 @@ This is a repository for researching Bayesian VHAR.
     BVAR(5) with another setting
 -   [DGP3](https://github.com/ygeunkim/paper-bvhar/blob/master/docs/model-dgp03.md)
     BVHAR-S
--   DGP4
+-   [DGP4](https://github.com/ygeunkim/paper-bvhar/blob/master/docs/model-dgp04.md)
+    BVHAR-L
 
 ### Empirical analysis
 

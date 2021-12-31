@@ -17,22 +17,19 @@ Young Geun Kim
     -   [BVHAR-VHAR](#bvhar-vhar)
 -   [Errors](#errors)
     -   [Hyperparameters](#hyperparameters)
-        -   [SMALL](#small-1)
-        -   [MEDIUM](#medium-1)
-        -   [LARGE](#large-1)
-    -   [SMALL](#small-2)
+    -   [SMALL](#small-1)
         -   [Plots](#plots)
         -   [Tables](#tables)
-    -   [MEDIUM](#medium-2)
+    -   [MEDIUM](#medium-1)
         -   [Plots](#plots-1)
         -   [Tables](#tables-1)
-    -   [LARGE](#large-2)
+    -   [LARGE](#large-1)
         -   [Plots](#plots-2)
         -   [Tables](#tables-2)
     -   [Average](#average)
-        -   [SMALL](#small-3)
-        -   [MEDIUM](#medium-3)
-        -   [LARGE](#large-3)
+        -   [SMALL](#small-2)
+        -   [MEDIUM](#medium-2)
+        -   [LARGE](#large-2)
         -   [RMSFE or RMAFE](#rmsfe-or-rmafe)
 -   [Coefficients](#coefficients)
 
@@ -57,6 +54,12 @@ dgp <- readRDS("../data/processed/bvharsim_dgp_s.rds")
 # BVHAR Coefficient
 
 ## VAR-type Minnesota prior
+
+``` r
+n_small <- length(bvhar_small_spec$sigma)
+n_medium <- length(bvhar_medium_spec$sigma)
+n_large <- length(bvhar_large_spec$sigma)
+```
 
 ## VAR(5)
 
@@ -96,7 +99,7 @@ y_small_train %>%
   )
 ```
 
-<img src="../output/figs/DGP-3-bvhar-smallplot-1.png" width="70%" style="display: block; margin: auto;" />
+<img src="../output/figs/DGP-3-smallplot-1.png" width="70%" style="display: block; margin: auto;" />
 
 ### MEDIUM
 
@@ -137,7 +140,7 @@ y_medium_train %>%
   )
 ```
 
-<img src="../output/figs/DGP-3-bvhar-medplot-1.png" width="70%" style="display: block; margin: auto;" />
+<img src="../output/figs/DGP-3-medplot-1.png" width="70%" style="display: block; margin: auto;" />
 
 ### LARGE
 
@@ -179,7 +182,7 @@ y_large_train %>%
   )
 ```
 
-<img src="../output/figs/DGP-3-bvhar-largeplot-1.png" width="70%" style="display: block; margin: auto;" />
+<img src="../output/figs/DGP-3-largeplot-1.png" width="70%" style="display: block; margin: auto;" />
 
 # Modeling
 
@@ -648,91 +651,85 @@ fit_bvhar_large_vhar <- bvhar_vhar_large_optim$fit
 
 ## Hyperparameters
 
-### SMALL
-
     \begin{table}
 
-    \caption{\label{tab:bvharhyperparamsmall}SMALL Simulation for BVHAR - Hyperparameter Lists}
+    \caption{\label{tab:empdgp3}Empirical Bayes Results for DGP3.}
     \centering
-    \begin{tabular}[t]{lrrr}
+    \resizebox{\linewidth}{!}{
+    \begin{tabular}[t]{lllrrrrrrrrrrrr}
     \toprule
     \addlinespace[0.3em]
-    \multicolumn{4}{l}{\textbf{BVAR}}\\
-    \hspace{1em}$\sigma$ & 0.050 & 0.05 & 0.05\\
-    \hspace{1em}$\lambda$ & 0.397 &  & \\
-    \hspace{1em}$\delta$ & 0.010 & 0.01 & 0.01\\
+    \multicolumn{15}{l}{\textbf{SMALL}}\hspace{1em}\\
+    \\
+    \hspace{1em} & BVAR & $\lambda$ & 0.397 &  &  &  &  &  &  &  &  &  &  & \\
+
+    \hspace{1em}\hspace{1em} &  & $\delta$ & 0.010 & 0.010 & 0.010 &  &  &  &  &  &  &  &  & \\
+    \cmidrule{2-15}
+    \hspace{1em} & BVHAR-S & $\sigma$ & 0.050 & 0.050 & 0.050 &  &  &  &  &  &  &  &  & \\
+
+    \hspace{1em} &  & $\lambda$ & 0.470 &  &  &  &  &  &  &  &  &  &  & \\
+
+     &  & $\delta$ & 0.010 & 0.010 & 0.010 &  &  &  &  &  &  &  &  & \\
+    \cmidrule{2-15}
+    \hspace{1em} & BVHAR-L & $\sigma$ & 0.050 & 0.050 & 0.050 &  &  &  &  &  &  &  &  & \\
+
+    \hspace{1em} &  & $\lambda$ & 0.239 &  &  &  &  &  &  &  &  &  &  & \\
+
+    \hspace{1em} &  & $d_i$ & 0.100 & 0.100 & 0.100 &  &  &  &  &  &  &  &  & \\
+
+    \hspace{1em} &  & $w_i$ & 0.050 & 0.050 & 0.050 &  &  &  &  &  &  &  &  & \\
+
     \addlinespace[0.3em]
-    \multicolumn{4}{l}{\textbf{BVHAR-VAR}}\\
-    \hspace{1em}$\sigma$1 & 0.050 & 0.05 & 0.05\\
-    \hspace{1em}$\lambda$1 & 0.470 &  & \\
-    \hspace{1em}$\delta$ 1 & 0.010 & 0.01 & 0.01\\
+    \multicolumn{15}{l}{\textbf{MEDIUM}}\\
+    \hspace{1em} &  & $m_i$ & 0.100 & 0.100 & 0.100 &  &  &  &  &  &  &  &  & \\
+    \cmidrule{1-15}
+    \hspace{1em} & BVAR & $\sigma$ & 0.040 & 0.040 & 0.035 & 0.058 & 0.051 & 0.069 & 0.072 & 0.088 & 0.110 &  &  & \\
+
+    \hspace{1em} &  & $\lambda$ & 0.198 &  &  &  &  &  &  &  &  &  &  & \\
+
+    \hspace{1em} &  & $\delta$ & 0.086 & 0.010 & 0.041 & 0.010 & 0.017 & 0.010 & 0.057 & 0.010 & 0.025 &  &  & \\
+    \cmidrule{2-15}
+    \hspace{1em} & BVHAR-S & $\sigma$ & 0.041 & 0.039 & 0.048 & 0.059 & 0.066 & 0.062 & 0.070 & 0.140 & 0.017 &  &  & \\
+
+    \hspace{1em} &  & $\lambda$ & 0.195 &  &  &  &  &  &  &  &  &  &  & \\
+
+    \hspace{1em} &  & $\delta$ & 0.052 & 0.010 & 0.049 & 0.034 & 0.010 & 0.010 & 0.048 & 0.010 & 0.010 &  &  & \\
+    \cmidrule{2-15}
+    \hspace{1em} & BVHAR-L & $\sigma$ & 0.043 & 0.037 & 0.048 & 0.059 & 0.062 & 0.062 & 0.070 & 0.149 & 0.018 &  &  & \\
+
+    \hspace{1em} &  & $\lambda$ & 0.187 &  &  &  &  &  &  &  &  &  &  & \\
+
+    \hspace{1em} &  & $d_i$ & 0.046 & 0.010 & 0.050 & 0.010 & 0.021 & 0.010 & 0.043 & 0.010 & 0.087 &  &  & \\
+
+    \hspace{1em} &  & $w_i$ & 0.164 & 0.099 & 0.010 & 0.024 & 0.020 & 0.033 & 0.047 & 0.117 & 0.039 &  &  & \\
+
     \addlinespace[0.3em]
-    \multicolumn{4}{l}{\textbf{BVHAR-VHAR}}\\
-    \hspace{1em}$\sigma$2 & 0.050 & 0.05 & 0.05\\
-    \hspace{1em}$\lambda$2 & 0.239 &  & \\
-    \hspace{1em}$d_i$ & 0.100 & 0.10 & 0.10\\
-    \hspace{1em}$w_i$ & 0.050 & 0.05 & 0.05\\
-    \hspace{1em}$m_i$ & 0.100 & 0.10 & 0.10\\
+    \multicolumn{15}{l}{\textbf{LARGE}}\\
+    \hspace{1em} &  & $m_i$ & 0.165 & 0.152 & 0.157 & 0.093 & 0.198 & 0.093 & 0.137 & 0.175 & 0.092 &  &  & \\
+    \cmidrule{1-15}
+    \hspace{1em} & BVAR & $\sigma$ & 0.046 & 0.045 & 0.019 & 0.034 & 0.064 & 0.037 & 0.069 & 0.077 & 0.101 & 0.082 & 0.080 & 0.078\\
+
+    \hspace{1em} &  & $\lambda$ & 0.142 &  &  &  &  &  &  &  &  &  &  & \\
+
+    \hspace{1em} &  & $\delta$ & 0.010 & 0.010 & 0.029 & 0.057 & 0.010 & 0.125 & 0.010 & 0.015 & 0.010 & 0.028 & 0.019 & 0.029\\
+    \cmidrule{2-15}
+    \hspace{1em} & BVHAR-S & $\sigma$ & 0.044 & 0.047 & 0.010 & 0.042 & 0.072 & 0.047 & 0.071 & 0.073 & 0.104 & 0.084 & 0.082 & 0.045\\
+
+    \hspace{1em} &  & $\lambda$ & 0.181 &  &  &  &  &  &  &  &  &  &  & \\
+
+    \hspace{1em} &  & $\delta$ & 0.010 & 0.010 & 0.053 & 0.031 & 0.010 & 0.086 & 0.010 & 0.010 & 0.010 & 0.010 & 0.010 & 0.046\\
+    \cmidrule{2-15}
+    \hspace{1em} & BVHAR-L & $\sigma$ & 0.042 & 0.046 & 0.010 & 0.055 & 0.071 & 0.045 & 0.069 & 0.073 & 0.098 & 0.086 & 0.075 & 0.083\\
+
+    \hspace{1em} &  & $\lambda$ & 0.153 &  &  &  &  &  &  &  &  &  &  & \\
+
+    \hspace{1em} &  & $d_i$ & 0.010 & 0.010 & 0.010 & 0.010 & 0.010 & 0.106 & 0.010 & 0.011 & 0.010 & 0.010 & 0.010 & 0.013\\
+
+    \hspace{1em} &  & $w_i$ & 0.010 & 0.010 & 0.393 & 0.243 & 0.136 & 0.169 & 0.040 & 0.010 & 0.010 & 0.210 & 0.047 & 0.063\\
+
+     &  & $m_i$ & 0.010 & 0.383 & 0.867 & 1.000 & 0.604 & 0.481 & 0.555 & 0.401 & 0.481 & 0.374 & 0.602 & 0.475\\
     \bottomrule
-    \end{tabular}
-    \end{table}
-
-### MEDIUM
-
-    \begin{table}
-
-    \caption{\label{tab:bvharhyperparammed}MEDIUM Simulation for BVHAR - Hyperparameter Lists}
-    \centering
-    \begin{tabular}[t]{lrrrrrrrrr}
-    \toprule
-    \addlinespace[0.3em]
-    \multicolumn{10}{l}{\textbf{BVAR}}\\
-    \hspace{1em}$\sigma$ & 0.040 & 0.040 & 0.035 & 0.058 & 0.051 & 0.069 & 0.072 & 0.088 & 0.110\\
-    \hspace{1em}$\lambda$ & 0.198 &  &  &  &  &  &  &  & \\
-    \hspace{1em}$\delta$ & 0.086 & 0.010 & 0.041 & 0.010 & 0.017 & 0.010 & 0.057 & 0.010 & 0.025\\
-    \addlinespace[0.3em]
-    \multicolumn{10}{l}{\textbf{BVHAR-VAR}}\\
-    \hspace{1em}$\sigma$1 & 0.041 & 0.039 & 0.048 & 0.059 & 0.066 & 0.062 & 0.070 & 0.140 & 0.017\\
-    \hspace{1em}$\lambda$1 & 0.195 &  &  &  &  &  &  &  & \\
-    \hspace{1em}$\delta$ 1 & 0.052 & 0.010 & 0.049 & 0.034 & 0.010 & 0.010 & 0.048 & 0.010 & 0.010\\
-    \addlinespace[0.3em]
-    \multicolumn{10}{l}{\textbf{BVHAR-VHAR}}\\
-    \hspace{1em}$\sigma$2 & 0.043 & 0.037 & 0.048 & 0.059 & 0.062 & 0.062 & 0.070 & 0.149 & 0.018\\
-    \hspace{1em}$\lambda$2 & 0.187 &  &  &  &  &  &  &  & \\
-    \hspace{1em}$d_i$ & 0.046 & 0.010 & 0.050 & 0.010 & 0.021 & 0.010 & 0.043 & 0.010 & 0.087\\
-    \hspace{1em}$w_i$ & 0.164 & 0.099 & 0.010 & 0.024 & 0.020 & 0.033 & 0.047 & 0.117 & 0.039\\
-    \hspace{1em}$m_i$ & 0.165 & 0.152 & 0.157 & 0.093 & 0.198 & 0.093 & 0.137 & 0.175 & 0.092\\
-    \bottomrule
-    \end{tabular}
-    \end{table}
-
-### LARGE
-
-    \begin{table}
-
-    \caption{\label{tab:hyperparamlarge}LARGE Simulation for BVHAR - Hyperparameter Lists}
-    \centering
-    \begin{tabular}[t]{lrrrrrrrrrrrr}
-    \toprule
-    \addlinespace[0.3em]
-    \multicolumn{13}{l}{\textbf{BVAR}}\\
-    \hspace{1em}$\sigma$ & 0.046 & 0.045 & 0.019 & 0.034 & 0.064 & 0.037 & 0.069 & 0.077 & 0.101 & 0.082 & 0.080 & 0.078\\
-    \hspace{1em}$\lambda$ & 0.142 &  &  &  &  &  &  &  &  &  &  & \\
-    \hspace{1em}$\delta$ & 0.010 & 0.010 & 0.029 & 0.057 & 0.010 & 0.125 & 0.010 & 0.015 & 0.010 & 0.028 & 0.019 & 0.029\\
-    \addlinespace[0.3em]
-    \multicolumn{13}{l}{\textbf{BVHAR-VAR}}\\
-    \hspace{1em}$\sigma$1 & 0.044 & 0.047 & 0.010 & 0.042 & 0.072 & 0.047 & 0.071 & 0.073 & 0.104 & 0.084 & 0.082 & 0.045\\
-    \hspace{1em}$\lambda$1 & 0.181 &  &  &  &  &  &  &  &  &  &  & \\
-    \hspace{1em}$\delta$ 1 & 0.010 & 0.010 & 0.053 & 0.031 & 0.010 & 0.086 & 0.010 & 0.010 & 0.010 & 0.010 & 0.010 & 0.046\\
-    \addlinespace[0.3em]
-    \multicolumn{13}{l}{\textbf{BVHAR-VHAR}}\\
-    \hspace{1em}$\sigma$2 & 0.042 & 0.046 & 0.010 & 0.055 & 0.071 & 0.045 & 0.069 & 0.073 & 0.098 & 0.086 & 0.075 & 0.083\\
-    \hspace{1em}$\lambda$2 & 0.153 &  &  &  &  &  &  &  &  &  &  & \\
-    \hspace{1em}$d_i$ & 0.010 & 0.010 & 0.010 & 0.010 & 0.010 & 0.106 & 0.010 & 0.011 & 0.010 & 0.010 & 0.010 & 0.013\\
-    \hspace{1em}$w_i$ & 0.010 & 0.010 & 0.393 & 0.243 & 0.136 & 0.169 & 0.040 & 0.010 & 0.010 & 0.210 & 0.047 & 0.063\\
-    \hspace{1em}$m_i$ & 0.010 & 0.383 & 0.867 & 1.000 & 0.604 & 0.481 & 0.555 & 0.401 & 0.481 & 0.374 & 0.602 & 0.475\\
-    \bottomrule
-    \end{tabular}
+    \end{tabular}}
     \end{table}
 
 ## SMALL
@@ -773,11 +770,11 @@ cv_small_20 <-
 
 ### Plots
 
-<img src="../output/figs/DGP-3-bvhar-smallcvonefig-1.png" width="70%" style="display: block; margin: auto;" />
+<img src="../output/figs/DGP-3-smallcvonefig-1.png" width="70%" style="display: block; margin: auto;" />
 
-<img src="../output/figs/DGP-3-bvhar-smallcvfivefig-1.png" width="70%" style="display: block; margin: auto;" />
+<img src="../output/figs/DGP-3-smallcvfivefig-1.png" width="70%" style="display: block; margin: auto;" />
 
-<img src="../output/figs/DGP-3-bvhar-smallcvtwentyfig-1.png" width="70%" style="display: block; margin: auto;" />
+<img src="../output/figs/DGP-3-smallcvtwentyfig-1.png" width="70%" style="display: block; margin: auto;" />
 
 ### Tables
 
@@ -997,7 +994,7 @@ cv_medium_1 %>%
   )
 ```
 
-<img src="../output/figs/DGP-3-bvhar-medcvonefig-1.png" width="70%" style="display: block; margin: auto;" />
+<img src="../output/figs/DGP-3-medcvonefig-1.png" width="70%" style="display: block; margin: auto;" />
 
 ``` r
 cv_medium_5 %>% 
@@ -1018,7 +1015,7 @@ cv_medium_5 %>%
   )
 ```
 
-<img src="../output/figs/DGP-3-bvhar-medcvfivefig-1.png" width="70%" style="display: block; margin: auto;" />
+<img src="../output/figs/DGP-3-medcvfivefig-1.png" width="70%" style="display: block; margin: auto;" />
 
 ``` r
 cv_medium_20 %>% 
@@ -1039,7 +1036,7 @@ cv_medium_20 %>%
   )
 ```
 
-<img src="../output/figs/DGP-3-bvhar-medcvtwentyfig-1.png" width="70%" style="display: block; margin: auto;" />
+<img src="../output/figs/DGP-3-medcvtwentyfig-1.png" width="70%" style="display: block; margin: auto;" />
 
 ### Tables
 
@@ -1403,7 +1400,7 @@ cv_large_1 %>%
   )
 ```
 
-<img src="../output/figs/DGP-3-bvhar-largecvonefig-1.png" width="70%" style="display: block; margin: auto;" />
+<img src="../output/figs/DGP-3-largecvonefig-1.png" width="70%" style="display: block; margin: auto;" />
 
 ``` r
 cv_large_5 %>% 
@@ -1424,7 +1421,7 @@ cv_large_5 %>%
   )
 ```
 
-<img src="../output/figs/DGP-3-bvhar-largecvfivefig-1.png" width="70%" style="display: block; margin: auto;" />
+<img src="../output/figs/DGP-3-largecvfivefig-1.png" width="70%" style="display: block; margin: auto;" />
 
 ``` r
 cv_large_20 %>% 
@@ -1445,7 +1442,7 @@ cv_large_20 %>%
   )
 ```
 
-<img src="../output/figs/DGP-3-bvhar-largecvtwentyfig-1.png" width="70%" style="display: block; margin: auto;" />
+<img src="../output/figs/DGP-3-largecvtwentyfig-1.png" width="70%" style="display: block; margin: auto;" />
 
 ### Tables
 

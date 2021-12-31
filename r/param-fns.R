@@ -70,39 +70,49 @@ kable_hyperparam <- function(bayes_spec, kable = TRUE, format = "latex", ...) {
       )
   }
 }
-# Report every hyperparameters---------------------------
-report_hyperparam <- function(spec_list, caption = "Hyperparameter Lists", label = "hyperparamlist") {
-  hyperparam_table <- foreach(i = seq_along(spec_list), .combine = rbind) %do% {
-    error_table <- kable_hyperparam(spec_list[[i]], kable = FALSE)
-    rownames(error_table)[1:2] <- c("$\\sigma$", "$\\lambda$")
-    if (spec_list[[i]]$prior == "MN_VHAR") {
-      rownames(error_table)[3:5] <- c("$d_i$", "$w_i$", "$m_i$")
-    } else {
-      rownames(error_table)[3] <- "$\\delta$ "
-    }
-    error_table
-  }
-  hyperparam_table %>% 
-    as.data.frame() %>% 
-    kable(
-      format = "latex",
-      booktabs = TRUE,
-      escape = FALSE,
-      col.names = NULL,
-      caption = caption,
-      label = label
-    ) %>% 
-    kable_paper(full_width = FALSE) %>% 
-    pack_rows(
-      index = c("BVAR" = 3, "BVHAR-VAR" = 3, "BVHAR-VHAR" = 5)
+#--------------------------------------------------------
+get_hyperparam <- function(spec_list, report_true = FALSE) {
+  if (report_true) {
+    mod_nm <- paste0("DGP", 1:4)
+  } else {
+    mod_nm <- sapply(
+      spec_list, function(x) {
+        paste(x$process, x$prior, sep = "-") %>% 
+          str_replace_all(pattern = "\\_", replacement = "-") %>% 
+          str_remove_all(pattern = "-Minnesota$") %>% 
+          str_replace_all(pattern = "MN-VAR$", replacement = "S") %>% 
+          str_replace_all(pattern = "MN-VHAR$", replacement = "L")
+      }
     )
+  }
+  if (length(spec_list) != length(mod_nm)) {
+    stop("Wrong 'spec_list'")
+  }
+  hyperparam_table <- foreach(i = seq_along(spec_list), .combine = rbind) %do% {
+    kable_hyperparam(spec_list[[i]], kable = FALSE) %>% 
+      rownames_to_column(var = "Hyperparameters") %>% 
+      add_column(Model = mod_nm[i], .before = 1)
+  } %>% 
+    mutate(
+      Hyperparameters = case_when(
+        Hyperparameters == "sigma" ~ "$\\sigma$",
+        Hyperparameters == "lambda" ~ "$\\lambda$",
+        Hyperparameters == "delta" ~ "$\\delta$ ",
+        Hyperparameters == "daily" ~ "$d_i$",
+        Hyperparameters == "weekly" ~ "$w_i$",
+        Hyperparameters == "monthly" ~ "$m_i$"
+      )
+    )
+  hyperparam_table %>% 
+    as_tibble() %>% 
+    rename_with(function(x) str_replace_all(x, pattern = "^V", replacement = "y"))
 }
-
-report_true_hyperparam <- function(spec_list, 
-                                   kable = TRUE, 
-                                   model_name = "DGP1",
-                                   caption = "Hyperparameter Lists", 
-                                   label = "hyperparamlist") {
+# Report every hyperparameters---------------------------
+report_hyperparam <- function(spec_list, 
+                              report_true = FALSE, 
+                              size = NULL,
+                              caption = "Hyperparameter Lists", 
+                              label = "hyperparamlist") {
   if (length(spec_list) != 3) {
     stop("Wrong 'spec_list'.")
   }
@@ -110,58 +120,42 @@ report_true_hyperparam <- function(spec_list,
     stop("Wrong names of 'spec_list'.")
   }
   size_id <- c("SMALL", "MEDIUM", "LARGE")
-  large_dim <- length(spec_list$large$sigma)
+  large_dim <- length(spec_list$large[[1]]$sigma)
   cols_add <- list()
   dim_add <- 0
   hyperparam_table <- foreach(i = seq_along(spec_list), .combine = rbind) %do% {
-    error_table <- kable_hyperparam(spec_list[[i]], kable = FALSE)
-    dim_add <- large_dim - length(spec_list[[i]]$sigma)
+    error_table <- get_hyperparam(spec_list[[i]], report_true = report_true) # small-medium-large
+    dim_add <- large_dim - length(spec_list[[i]][[1]]$sigma)
     cols_add <- 
       rep(NA, dim_add) %>% 
       as.list()
     if (dim_add != 0) {
-      names(cols_add) <- paste0("V", (length(spec_list[[i]]$sigma) + 1):large_dim)
+      names(cols_add) <- paste0("y", (length(spec_list[[i]][[1]]$sigma) + 1):large_dim)
     }
     error_table %>% 
       bind_cols(cols_add) %>% 
-      add_column(size = size_id[i], .before = 1) %>% 
-      rownames_to_column(var = "hyperparam")
-  } %>% 
-    relocate(hyperparam, .after = size) %>% 
-    mutate(
-      hyperparam = case_when(
-        hyperparam == "sigma" ~ "$\\sigma$",
-        hyperparam == "lambda" ~ "$\\lambda$",
-        hyperparam == "delta" ~ "$\\delta$ ",
-        hyperparam == "daily" ~ "$d_i$",
-        hyperparam == "weekly" ~ "$w_i$",
-        hyperparam == "monthly" ~ "$m_i$"
-      )
-    )
-  if (!kable) {
-    return(hyperparam_table)
+      add_column(size = size_id[i], .before = 1)
   }
-  title_head <- c(ncol(hyperparam_table))
-  names(title_head) <- model_name
+  colnames(hyperparam_table)[1:3] <- c(" ", "  ", "   ")
   hyperparam_table %>% 
     kable(
       format = "latex",
       booktabs = TRUE,
+      longtable = TRUE,
       escape = FALSE,
-      col.names = NULL,
-      align = "c",
+      # col.names = NULL,
       caption = caption,
       label = label
     ) %>% 
-    kable_paper(full_width = FALSE) %>% 
-    add_header_above(
-      title_head,
-      align = "l"
-    ) %>%
+    kable_paper(
+      full_width = FALSE,
+      font_size = size,
+      latex_options = c("repeat_header")
+    ) %>% 
     collapse_rows(
-      columns = 1,
-      valign = "middle",
-      latex_hline = "major"
+      columns = 1:2,
+      latex_hline = "custom",
+      custom_latex_hline = 1:2,
+      row_group_label_position = "stack"
     )
 }
-

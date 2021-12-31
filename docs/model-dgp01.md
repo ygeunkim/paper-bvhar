@@ -17,22 +17,19 @@ Young Geun Kim
     -   [BVHAR-VHAR](#bvhar-vhar)
 -   [Errors](#errors)
     -   [Hyperparameters](#hyperparameters)
-        -   [SMALL](#small-1)
-        -   [MEDIUM](#medium-1)
-        -   [LARGE](#large-1)
-    -   [SMALL](#small-2)
+    -   [SMALL](#small-1)
         -   [Plots](#plots)
         -   [Tables](#tables)
-    -   [MEDIUM](#medium-2)
+    -   [MEDIUM](#medium-1)
         -   [Plots](#plots-1)
         -   [Tables](#tables-1)
-    -   [LARGE](#large-2)
+    -   [LARGE](#large-1)
         -   [Plots](#plots-2)
         -   [Tables](#tables-2)
     -   [Average](#average)
-        -   [SMALL](#small-3)
-        -   [MEDIUM](#medium-3)
-        -   [LARGE](#large-3)
+        -   [SMALL](#small-2)
+        -   [MEDIUM](#medium-2)
+        -   [LARGE](#large-2)
         -   [RMSFE or RMAFE](#rmsfe-or-rmafe)
 -   [Additional](#additional)
 -   [Coefficients](#coefficients)
@@ -58,53 +55,6 @@ dgp <- readRDS("../data/processed/bvarsim_dgp_wn.rds")
 # BVAR Coefficient
 
 ## Minnesota prior
-
-    \begin{table}
-
-    \caption{\label{tab:smalltruespec}BVAR(5) and BVHAR True Hyperparameters - SMALL}
-    \centering
-    \begin{tabular}[t]{lrrr}
-    \toprule
-    $\sigma$ & 0.05 & 0.05 & 0.05\\
-    $\lambda$ & 0.20 &  & \\
-    $\delta$ & 0.00 & 0.00 & 0.00\\
-    \bottomrule
-    \end{tabular}
-    \end{table}
-
-    \begin{table}
-
-    \caption{\label{tab:medtruespec}BVAR(5) and BVHAR True Hyperparameters - MEDIUM}
-    \centering
-    \begin{tabular}[t]{lrrr}
-    \toprule
-    $\sigma$ & 0.05 & 0.05 & 0.05\\
-    $\lambda$ & 0.20 &  & \\
-    $\delta$ & 0.00 & 0.00 & 0.00\\
-    \bottomrule
-    \end{tabular}
-    \end{table}
-
-    \begin{table}
-
-    \caption{\label{tab:largetruespec}BVAR(5) and BVHAR True Hyperparameters - LARGE}
-    \centering
-    \begin{tabular}[t]{lrrrrrrrrrrrr}
-    \toprule
-    $\sigma$ & 0.05 & 0.05 & 0.05 & 0.05 & 0.05 & 0.05 & 0.05 & 0.05 & 0.05 & 0.05 & 0.05 & 0.05\\
-    $\lambda$ & 0.03 &  &  &  &  &  &  &  &  &  &  & \\
-    $\delta$ & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00\\
-    \bottomrule
-    \end{tabular}
-    \end{table}
-
-``` r
-bvar_spec_list <- list(
-  small = bvar_small_spec,
-  medium = bvar_medium_spec,
-  large = bvar_large_spec
-)
-```
 
 ``` r
 n_small <- length(bvar_small_spec$sigma)
@@ -703,91 +653,85 @@ fit_bvhar_large_vhar <- bvhar_vhar_large_optim$fit
 
 ## Hyperparameters
 
-### SMALL
-
     \begin{table}
 
-    \caption{\label{tab:hyperparamsmall}SMALL Simulation - Hyperparameter Lists}
+    \caption{\label{tab:empdgp1}Empirical Bayes Results for DGP1.}
     \centering
-    \begin{tabular}[t]{lrrr}
+    \resizebox{\linewidth}{!}{
+    \begin{tabular}[t]{lllrrrrrrrrrrrr}
     \toprule
     \addlinespace[0.3em]
-    \multicolumn{4}{l}{\textbf{BVAR}}\\
-    \hspace{1em}$\sigma$ & 0.071 & 0.034 & 0.099\\
-    \hspace{1em}$\lambda$ & 0.427 &  & \\
-    \hspace{1em}$\delta$ & 0.034 & 0.064 & 0.040\\
+    \multicolumn{15}{l}{\textbf{SMALL}}\hspace{1em}\\
+    \\
+    \hspace{1em} & BVAR & $\lambda$ & 0.427 &  &  &  &  &  &  &  &  &  &  & \\
+
+    \hspace{1em} &  & $\delta$ & 0.034 & 0.064 & 0.040 &  &  &  &  &  &  &  &  & \\
+    \cmidrule{2-15}
+    \hspace{1em} & BVHAR-S & $\sigma$ & 0.087 & 0.020 & 0.094 &  &  &  &  &  &  &  &  & \\
+
+    \hspace{1em} &  & $\lambda$ & 1.053 &  &  &  &  &  &  &  &  &  &  & \\
+
+    \hspace{1em} &  & $\delta$ & 0.098 & 0.099 & 0.099 &  &  &  &  &  &  &  &  & \\
+    \cmidrule{2-15}
+    \hspace{1em} & BVHAR-L & $\sigma$ & 0.095 & 0.060 & 0.243 &  &  &  &  &  &  &  &  & \\
+
+    \hspace{1em} &  & $\lambda$ & 1.772 &  &  &  &  &  &  &  &  &  &  & \\
+
+    \hspace{1em} &  & $d_i$ & 0.100 & 0.102 & 0.102 &  &  &  &  &  &  &  &  & \\
+
+    \hspace{1em} &  & $w_i$ & 0.052 & 0.052 & 0.052 &  &  &  &  &  &  &  &  & \\
+
     \addlinespace[0.3em]
-    \multicolumn{4}{l}{\textbf{BVHAR-VAR}}\\
-    \hspace{1em}$\sigma$1 & 0.087 & 0.020 & 0.094\\
-    \hspace{1em}$\lambda$1 & 1.053 &  & \\
-    \hspace{1em}$\delta$ 1 & 0.098 & 0.099 & 0.099\\
+    \multicolumn{15}{l}{\textbf{MEDIUM}}\\
+    \hspace{1em} &  & $m_i$ & 0.100 & 0.103 & 0.103 &  &  &  &  &  &  &  &  & \\
+    \cmidrule{1-15}
+    \hspace{1em} & BVAR & $\sigma$ & 0.038 & 0.042 & 0.045 & 0.063 & 0.068 & 0.030 & 0.068 & 0.121 & 0.107 &  &  & \\
+
+    \hspace{1em} &  & $\lambda$ & 0.202 &  &  &  &  &  &  &  &  &  &  & \\
+
+    \hspace{1em} &  & $\delta$ & 0.081 & 0.010 & 0.078 & 0.010 & 0.010 & 0.076 & 0.075 & 0.010 & 0.012 &  &  & \\
+    \cmidrule{2-15}
+    \hspace{1em} & BVHAR-S & $\sigma$ & 0.041 & 0.037 & 0.053 & 0.063 & 0.064 & 0.010 & 0.064 & 0.136 & 0.110 &  &  & \\
+
+    \hspace{1em} &  & $\lambda$ & 0.224 &  &  &  &  &  &  &  &  &  &  & \\
+
+    \hspace{1em} &  & $\delta$ & 0.181 & 0.079 & 0.183 & 0.082 & 0.085 & 0.089 & 0.087 & 0.080 & 0.089 &  &  & \\
+    \cmidrule{2-15}
+    \hspace{1em} & BVHAR-L & $\sigma$ & 0.047 & 0.044 & 0.062 & 0.061 & 0.076 & 0.014 & 0.089 & 0.136 & 0.082 &  &  & \\
+
+    \hspace{1em} &  & $\lambda$ & 0.274 &  &  &  &  &  &  &  &  &  &  & \\
+
+    \hspace{1em} &  & $d_i$ & 0.092 & 0.087 & 0.093 & 0.085 & 0.091 & 0.092 & 0.090 & 0.091 & 0.093 &  &  & \\
+
+    \hspace{1em} &  & $w_i$ & 0.116 & 0.100 & 0.101 & 0.044 & 0.045 & 0.113 & 0.106 & 0.047 & 0.046 &  &  & \\
+
     \addlinespace[0.3em]
-    \multicolumn{4}{l}{\textbf{BVHAR-VHAR}}\\
-    \hspace{1em}$\sigma$2 & 0.095 & 0.060 & 0.243\\
-    \hspace{1em}$\lambda$2 & 1.772 &  & \\
-    \hspace{1em}$d_i$ & 0.100 & 0.102 & 0.102\\
-    \hspace{1em}$w_i$ & 0.052 & 0.052 & 0.052\\
-    \hspace{1em}$m_i$ & 0.100 & 0.103 & 0.103\\
+    \multicolumn{15}{l}{\textbf{LARGE}}\\
+    \hspace{1em} &  & $m_i$ & 0.161 & 0.147 & 0.161 & 0.092 & 0.094 & 0.165 & 0.094 & 0.094 & 0.094 &  &  & \\
+    \cmidrule{1-15}
+    \hspace{1em} & BVAR & $\sigma$ & 0.044 & 0.047 & 0.040 & 0.062 & 0.046 & 0.050 & 0.049 & 0.066 & 0.065 & 0.086 & 0.072 & 0.092\\
+
+    \hspace{1em} &  & $\lambda$ & 0.131 &  &  &  &  &  &  &  &  &  &  & \\
+
+    \hspace{1em} &  & $\delta$ & 0.010 & 0.010 & 0.010 & 0.012 & 0.010 & 0.035 & 0.013 & 0.022 & 0.010 & 0.013 & 0.025 & 0.023\\
+    \cmidrule{2-15}
+    \hspace{1em} & BVHAR-S & $\sigma$ & 0.043 & 0.049 & 0.046 & 0.064 & 0.076 & 0.052 & 0.062 & 0.074 & 0.014 & 0.091 & 0.075 & 0.092\\
+
+    \hspace{1em} &  & $\lambda$ & 0.143 &  &  &  &  &  &  &  &  &  &  & \\
+
+    \hspace{1em} &  & $\delta$ & 0.083 & 0.083 & 0.080 & 0.083 & 0.084 & 0.087 & 0.083 & 0.136 & 0.091 & 0.083 & 0.088 & 0.143\\
+    \cmidrule{2-15}
+    \hspace{1em} & BVHAR-L & $\sigma$ & 0.041 & 0.046 & 0.049 & 0.073 & 0.069 & 0.049 & 0.064 & 0.069 & 0.024 & 0.079 & 0.071 & 0.080\\
+
+    \hspace{1em} &  & $\lambda$ & 0.206 &  &  &  &  &  &  &  &  &  &  & \\
+
+    \hspace{1em} &  & $d_i$ & 0.096 & 0.096 & 0.096 & 0.096 & 0.096 & 0.098 & 0.096 & 0.097 & 0.098 & 0.097 & 0.097 & 0.098\\
+
+    \hspace{1em} &  & $w_i$ & 0.049 & 0.049 & 0.062 & 0.062 & 0.052 & 0.049 & 0.059 & 0.049 & 0.049 & 0.060 & 0.063 & 0.049\\
+
+     &  & $m_i$ & 0.099 & 0.099 & 0.105 & 0.099 & 0.112 & 0.099 & 0.112 & 0.112 & 0.112 & 0.099 & 0.112 & 0.098\\
     \bottomrule
-    \end{tabular}
-    \end{table}
-
-### MEDIUM
-
-    \begin{table}
-
-    \caption{\label{tab:hyperparammed}MEDIUM Simulation - Hyperparameter Lists}
-    \centering
-    \begin{tabular}[t]{lrrrrrrrrr}
-    \toprule
-    \addlinespace[0.3em]
-    \multicolumn{10}{l}{\textbf{BVAR}}\\
-    \hspace{1em}$\sigma$ & 0.038 & 0.042 & 0.045 & 0.063 & 0.068 & 0.030 & 0.068 & 0.121 & 0.107\\
-    \hspace{1em}$\lambda$ & 0.202 &  &  &  &  &  &  &  & \\
-    \hspace{1em}$\delta$ & 0.081 & 0.010 & 0.078 & 0.010 & 0.010 & 0.076 & 0.075 & 0.010 & 0.012\\
-    \addlinespace[0.3em]
-    \multicolumn{10}{l}{\textbf{BVHAR-VAR}}\\
-    \hspace{1em}$\sigma$1 & 0.041 & 0.037 & 0.053 & 0.063 & 0.064 & 0.010 & 0.064 & 0.136 & 0.110\\
-    \hspace{1em}$\lambda$1 & 0.224 &  &  &  &  &  &  &  & \\
-    \hspace{1em}$\delta$ 1 & 0.181 & 0.079 & 0.183 & 0.082 & 0.085 & 0.089 & 0.087 & 0.080 & 0.089\\
-    \addlinespace[0.3em]
-    \multicolumn{10}{l}{\textbf{BVHAR-VHAR}}\\
-    \hspace{1em}$\sigma$2 & 0.047 & 0.044 & 0.062 & 0.061 & 0.076 & 0.014 & 0.089 & 0.136 & 0.082\\
-    \hspace{1em}$\lambda$2 & 0.274 &  &  &  &  &  &  &  & \\
-    \hspace{1em}$d_i$ & 0.092 & 0.087 & 0.093 & 0.085 & 0.091 & 0.092 & 0.090 & 0.091 & 0.093\\
-    \hspace{1em}$w_i$ & 0.116 & 0.100 & 0.101 & 0.044 & 0.045 & 0.113 & 0.106 & 0.047 & 0.046\\
-    \hspace{1em}$m_i$ & 0.161 & 0.147 & 0.161 & 0.092 & 0.094 & 0.165 & 0.094 & 0.094 & 0.094\\
-    \bottomrule
-    \end{tabular}
-    \end{table}
-
-### LARGE
-
-    \begin{table}
-
-    \caption{\label{tab:hyperparamlarge}LARGE Simulation - Hyperparameter Lists}
-    \centering
-    \begin{tabular}[t]{lrrrrrrrrrrrr}
-    \toprule
-    \addlinespace[0.3em]
-    \multicolumn{13}{l}{\textbf{BVAR}}\\
-    \hspace{1em}$\sigma$ & 0.044 & 0.047 & 0.040 & 0.062 & 0.046 & 0.050 & 0.049 & 0.066 & 0.065 & 0.086 & 0.072 & 0.092\\
-    \hspace{1em}$\lambda$ & 0.131 &  &  &  &  &  &  &  &  &  &  & \\
-    \hspace{1em}$\delta$ & 0.010 & 0.010 & 0.010 & 0.012 & 0.010 & 0.035 & 0.013 & 0.022 & 0.010 & 0.013 & 0.025 & 0.023\\
-    \addlinespace[0.3em]
-    \multicolumn{13}{l}{\textbf{BVHAR-VAR}}\\
-    \hspace{1em}$\sigma$1 & 0.043 & 0.049 & 0.046 & 0.064 & 0.076 & 0.052 & 0.062 & 0.074 & 0.014 & 0.091 & 0.075 & 0.092\\
-    \hspace{1em}$\lambda$1 & 0.143 &  &  &  &  &  &  &  &  &  &  & \\
-    \hspace{1em}$\delta$ 1 & 0.083 & 0.083 & 0.080 & 0.083 & 0.084 & 0.087 & 0.083 & 0.136 & 0.091 & 0.083 & 0.088 & 0.143\\
-    \addlinespace[0.3em]
-    \multicolumn{13}{l}{\textbf{BVHAR-VHAR}}\\
-    \hspace{1em}$\sigma$2 & 0.041 & 0.046 & 0.049 & 0.073 & 0.069 & 0.049 & 0.064 & 0.069 & 0.024 & 0.079 & 0.071 & 0.080\\
-    \hspace{1em}$\lambda$2 & 0.206 &  &  &  &  &  &  &  &  &  &  & \\
-    \hspace{1em}$d_i$ & 0.096 & 0.096 & 0.096 & 0.096 & 0.096 & 0.098 & 0.096 & 0.097 & 0.098 & 0.097 & 0.097 & 0.098\\
-    \hspace{1em}$w_i$ & 0.049 & 0.049 & 0.062 & 0.062 & 0.052 & 0.049 & 0.059 & 0.049 & 0.049 & 0.060 & 0.063 & 0.049\\
-    \hspace{1em}$m_i$ & 0.099 & 0.099 & 0.105 & 0.099 & 0.112 & 0.099 & 0.112 & 0.112 & 0.112 & 0.099 & 0.112 & 0.098\\
-    \bottomrule
-    \end{tabular}
+    \end{tabular}}
     \end{table}
 
 ## SMALL

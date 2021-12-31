@@ -61,44 +61,17 @@ dgp <- readRDS("../data/processed/bvarsim_dgp_wn.rds")
 
 ## Minnesota prior
 
-```{r smallbvarsetting, comment=NULL, echo=FALSE}
+```{r smalltruesetting, comment=NULL, echo=FALSE}
 bvar_small_spec <- dgp$small_spec
-bvar_small_spec %>% 
-  kable_hyperparam(
-    caption = "BVAR(5) and BVHAR True Hyperparameters - SMALL", 
-    label = "smalltruespec"
-  ) %>% 
-  writeLines()
 ```
 
-```{r medbvarsetting, comment=NULL, echo=FALSE}
+```{r medtruesetting, comment=NULL, echo=FALSE}
 bvar_medium_spec <- dgp$medium_spec
-bvar_small_spec %>% 
-  kable_hyperparam(
-    caption = "BVAR(5) and BVHAR True Hyperparameters - MEDIUM",
-    label = "medtruespec"
-  ) %>% 
-  writeLines()
 ```
 
-```{r largebvarsetting, comment=NULL, echo=FALSE}
+```{r largetruesetting, comment=NULL, echo=FALSE}
 bvar_large_spec <- dgp$large_spec
-bvar_large_spec %>% 
-  kable_hyperparam(
-    caption = "BVAR(5) and BVHAR True Hyperparameters - LARGE",
-    label = "largetruespec"
-  ) %>% 
-  writeLines()
 ```
-
-```{r}
-bvar_spec_list <- list(
-  small = bvar_small_spec,
-  medium = bvar_medium_spec,
-  large = bvar_large_spec
-)
-```
-
 
 ```{r simulcase}
 n_small <- length(bvar_small_spec$sigma)
@@ -503,41 +476,29 @@ fit_bvhar_large_vhar <- bvhar_vhar_large_optim$fit
 
 ## Hyperparameters
 
-### SMALL
-
-```{r smallemp, comment=NULL, echo=FALSE}
-list(
-  bvar_small_optim$spec,
-  bvhar_var_small_optim$spec,
-  bvhar_vhar_small_optim$spec
-) %>% 
-  report_hyperparam(caption = "SMALL Simulation - Hyperparameter Lists", label = "hyperparamsmall") %>% 
+```{r reportemp, comment=NULL, echo=FALSE}
+spec_optim_list <- list(
+  small = list(
+    bvar_small_optim$spec,
+    bvhar_var_small_optim$spec,
+    bvhar_vhar_small_optim$spec
+  ),
+  medium = list(
+    bvar_medium_optim$spec,
+    bvhar_var_medium_optim$spec,
+    bvhar_vhar_medium_optim$spec
+  ),
+  large = list(
+    bvar_large_optim$spec,
+    bvhar_var_large_optim$spec,
+    bvhar_vhar_large_optim$spec
+  )
+)
+# report-------------------
+report_hyperparam(spec_optim_list, report_true = FALSE, caption = "Empirical Bayes Results for DGP1.", label = "empdgp1") %>% 
   writeLines()
 ```
 
-### MEDIUM
-
-```{r medemp, comment=NULL, echo=FALSE}
-list(
-  bvar_medium_optim$spec,
-  bvhar_var_medium_optim$spec,
-  bvhar_vhar_medium_optim$spec
-) %>% 
-  report_hyperparam(caption = "MEDIUM Simulation - Hyperparameter Lists", label = "hyperparammed") %>% 
-  writeLines()
-```
-
-### LARGE
-
-```{r largeemp, comment=NULL, echo=FALSE}
-list(
-  bvar_large_optim$spec,
-  bvhar_var_large_optim$spec,
-  bvhar_vhar_large_optim$spec
-) %>% 
-  report_hyperparam(caption = "LARGE Simulation - Hyperparameter Lists", label = "hyperparamlarge") %>% 
-  writeLines()
-```
 
 ## SMALL
 
