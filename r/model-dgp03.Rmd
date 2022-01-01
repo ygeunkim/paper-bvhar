@@ -227,21 +227,21 @@ fit_vhar_large <- vhar_lm(y_large_train, include_mean = FALSE)
 
 ```{r bvarsetting}
 bvar_small_spec <- set_bvar(
-  sigma = rep(.05, n_small),
-  lambda = .2,
-  delta = rep(0, n_small)
+  sigma = bvhar_small_spec$sigma,
+  lambda = bvhar_small_spec$lambda,
+  delta = bvhar_small_spec$delta
 )
 #----------------------------
 bvar_medium_spec <- set_bvar(
-  sigma = rep(.05, n_medium),
-  lambda = .1,
-  delta = rep(0, n_medium)
+  sigma = bvhar_medium_spec$sigma,
+  lambda = bvhar_medium_spec$lambda,
+  delta = bvhar_medium_spec$delta
 )
 #----------------------------
 bvar_large_spec <- set_bvar(
-  sigma = rep(.05, n_large),
-  lambda = .03,
-  delta = rep(0, n_large)
+  sigma = bvhar_large_spec$sigma,
+  lambda = bvhar_large_spec$lambda,
+  delta = bvhar_large_spec$delta
 )
 ```
 
@@ -255,7 +255,7 @@ bvar_large_spec <- set_bvar(
   ), 
   upper = c(
     rep(1, n_small), # sigma
-    Inf, # lambda
+    1, # lambda
     rep(1, n_small) # delta
   ), 
   y = y_small_train, 
@@ -320,7 +320,7 @@ fit_large_bvar <- bvar_large_optim$fit
   ), 
   upper = c(
     rep(1, n_small), # sigma
-    Inf, # lambda
+    1, # lambda
     rep(1, n_small) # delta
   ), 
   y = y_small_train, 
@@ -374,27 +374,27 @@ fit_bvhar_large_var <- bvhar_var_large_optim$fit
 
 ```{r bvharvharsetting}
 bvhar_vhar_small_spec <- set_weight_bvhar(
-  sigma = rep(.05, n_small),
-  lambda = .2,
-  daily = rep(.1, n_small),
-  weekly = rep(.05, n_small),
-  monthly = rep(.1, n_small)
+  sigma = bvhar_small_spec$sigma,
+  lambda = bvhar_small_spec$lambda,
+  daily = bvhar_small_spec$delta,
+  weekly = bvhar_small_spec$delta,
+  monthly = bvhar_small_spec$delta
 )
 #-----------------------------------------
 bvhar_vhar_medium_spec <- set_weight_bvhar(
-  sigma = rep(.05, n_medium),
-  lambda = .2,
-  daily = rep(.1, n_medium),
-  weekly = rep(.05, n_medium),
-  monthly = rep(.1, n_medium)
+  sigma = bvhar_medium_spec$sigma,
+  lambda = bvhar_medium_spec$lambda,
+  daily = bvhar_medium_spec$delta,
+  weekly = bvhar_medium_spec$delta,
+  monthly = bvhar_medium_spec$delta
 )
 #-----------------------------------------
 bvhar_vhar_large_spec <- set_weight_bvhar(
-  sigma = rep(.05, n_large),
-  lambda = .2,
-  daily = rep(.1, n_large),
-  weekly = rep(.05, n_large),
-  monthly = rep(.1, n_large)
+  sigma = bvhar_large_spec$sigma,
+  lambda = bvhar_large_spec$lambda,
+  daily = bvhar_large_spec$delta,
+  weekly = bvhar_large_spec$delta,
+  monthly = bvhar_large_spec$delta
 )
 ```
 
@@ -410,7 +410,7 @@ bvhar_vhar_large_spec <- set_weight_bvhar(
   ), 
   upper = c(
     rep(1, n_small), # sigma
-    Inf, # lambda
+    1, # lambda
     rep(1, n_small), # daily
     rep(1, n_small), # weekly
     rep(1, n_small) # monthly
@@ -995,7 +995,7 @@ get_rmafetex_tr(
   ahead_list = c("$h = 1$", "$h = 5$", "$h = 20$"),
   benchmark_id = 1,
   caption = "Out-of-sample forecasting performance measures for DGP3.", 
-  label = "dgp2result",
+  label = "dgp3result",
   header_angle = 0
 ) %>% 
   writeLines()

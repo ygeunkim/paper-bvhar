@@ -33,4 +33,3 @@ dgp_true <- list(
 )
 # Report-------------------------------------------
 report_hyperparam(dgp_true, report_true = TRUE, size = 10, caption = "Hyperparameter Setting", label = "truehyperparam")
-

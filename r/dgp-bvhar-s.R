@@ -102,6 +102,6 @@ dgp3 <- list(
   y_large_train = bvhar_large_split$train,
   y_large_test = bvhar_large_split$test
 )
-saveRDS(dgp3, "data/processed/bvharsim_dgp_wn.rds")
+saveRDS(dgp3, "data/processed/bvharsim_dgp_s.rds")
 rm(list = ls())
 ls()
