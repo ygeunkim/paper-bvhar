@@ -459,9 +459,12 @@ get_rmafetex_tr <- function(mod_list,
           group_by(size, h) %>%
           mutate(
             error = cell_spec(
-              # paste0("\\num{", format(error, nsmall = 3) %>% as.numeric(), "}"), # siunitx
-              paste0("\\num{", format(error, nsmall = 3), "}"), # siunitx
-              # paste0("\\num{", formatC(error, format = "e", digits = 3), "}"), # siunitx
+              paste0(
+                "\\num{", 
+                format(error, nsmall = 3, scientific = -2) %>% 
+                  str_remove(pattern = "0(?=\\.)"), # .xxx
+                "}"
+              ), # siunitx
               format = "latex",
               escape = FALSE,
               color = ifelse(error == min(error), "red", "black")

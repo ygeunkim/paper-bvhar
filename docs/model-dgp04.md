@@ -1,7 +1,7 @@
 Simulating VAR-type Minnesota BVHAR
 ================
 Young Geun Kim
-31 Dec, 2021
+02 Jan, 2022
 
 -   [BVHAR Coefficient](#bvhar-coefficient)
     -   [VAR-type Minnesota prior](#var-type-minnesota-prior)
@@ -644,6 +644,95 @@ fit_bvhar_large_vhar <- bvhar_vhar_large_optim$fit
 # Errors
 
 ## Hyperparameters
+
+
+    \begin{longtable}[t]{lllrrrrrrrrrrrr}
+    \caption{\label{tab:empdgp4}Empirical Bayes Results for DGP4.}\\
+    \toprule
+     &    &     & y1 & y2 & y3 & y4 & y5 & y6 & y7 & y8 & y9 & y10 & y11 & y12\\
+    \midrule
+    \endfirsthead
+    \caption[]{Empirical Bayes Results for DGP4. \textit{(continued)}}\\
+    \toprule
+      &    &     & y1 & y2 & y3 & y4 & y5 & y6 & y7 & y8 & y9 & y10 & y11 & y12\\
+    \midrule
+    \endhead
+
+    \endfoot
+    \bottomrule
+    \endlastfoot
+    \addlinespace[0.3em]
+    \multicolumn{15}{l}{\textbf{SMALL}}\\
+    \hspace{1em} & BVAR & $\sigma$ & 0.087 & 0.118 & 0.176 &  &  &  &  &  &  &  &  & \\
+
+    \hspace{1em} &  & $\lambda$ & 0.250 &  &  &  &  &  &  &  &  &  &  & \\
+
+    \hspace{1em} &  & $\delta$ & 0.455 & 0.109 & 0.450 &  &  &  &  &  &  &  &  & \\
+    \cmidrule{2-15}
+    \hspace{1em} & BVHAR-S & $\sigma$ & 0.087 & 0.119 & 0.177 &  &  &  &  &  &  &  &  & \\
+
+    \hspace{1em} &  & $\lambda$ & 0.055 &  &  &  &  &  &  &  &  &  &  & \\
+
+    \hspace{1em} &  & $\delta$ & 0.456 & 0.110 & 0.451 &  &  &  &  &  &  &  &  & \\
+    \cmidrule{2-15}
+    \hspace{1em} & BVHAR-L & $\sigma$ & 0.075 & 0.100 & 0.310 &  &  &  &  &  &  &  &  & \\
+
+    \hspace{1em} &  & $\lambda$ & 0.042 &  &  &  &  &  &  &  &  &  &  & \\
+
+    \hspace{1em} &  & $d_i$ & 0.543 & 0.253 & 0.539 &  &  &  &  &  &  &  &  & \\
+
+    \hspace{1em} &  & $w_i$ & 0.558 & 0.281 & 0.429 &  &  &  &  &  &  &  &  & \\
+
+    \hspace{1em} &  & $m_i$ & 0.196 & 0.255 & 0.083 &  &  &  &  &  &  &  &  & \\
+    \cmidrule{1-15}
+    \addlinespace[0.3em]
+    \multicolumn{15}{l}{\textbf{MEDIUM}}\\
+    \hspace{1em} & BVAR & $\sigma$ & 0.030 & 0.131 & 0.256 & 0.264 & 0.014 & 0.271 & 0.025 & 0.249 & 0.195 &  &  & \\
+
+    \hspace{1em} &  & $\lambda$ & 1.011 &  &  &  &  &  &  &  &  &  &  & \\
+
+    \hspace{1em}\hspace{1em} &  & $\delta$ & 0.243 & 0.260 & 0.021 & 0.226 & 0.464 & 0.397 & 0.090 & 0.149 & 0.295 &  &  & \\
+    \cmidrule{2-15}
+    \hspace{1em} & BVHAR-S & $\sigma$ & 0.030 & 0.131 & 0.256 & 0.264 & 0.014 & 0.271 & 0.025 & 0.249 & 0.195 &  &  & \\
+
+    \hspace{1em} &  & $\lambda$ & 1.010 &  &  &  &  &  &  &  &  &  &  & \\
+
+     &  & $\delta$ & 0.243 & 0.260 & 0.021 & 0.226 & 0.464 & 0.397 & 0.090 & 0.149 & 0.295 &  &  & \\
+    \cmidrule{2-15}
+    \hspace{1em} & BVHAR-L & $\sigma$ & 0.030 & 0.131 & 0.256 & 0.264 & 0.014 & 0.271 & 0.025 & 0.249 & 0.195 &  &  & \\
+
+    \hspace{1em} &  & $\lambda$ & 0.266 &  &  &  &  &  &  &  &  &  &  & \\
+
+    \hspace{1em} &  & $d_i$ & 0.243 & 0.260 & 0.021 & 0.226 & 0.464 & 0.397 & 0.090 & 0.149 & 0.295 &  &  & \\
+
+    \hspace{1em} &  & $w_i$ & 0.363 & 0.168 & 0.091 & 0.480 & 0.484 & 0.047 & 0.444 & 0.431 & 0.430 &  &  & \\
+
+    \hspace{1em} &  & $m_i$ & 0.379 & 0.371 & 0.143 & 0.451 & 0.427 & 0.369 & 0.162 & 0.376 & 0.415 &  &  & \\
+    \cmidrule{1-15}
+    \addlinespace[0.3em]
+    \multicolumn{15}{l}{\textbf{LARGE}}\\
+    \hspace{1em} & BVAR & $\sigma$ & 0.217 & 0.192 & 0.209 & 0.215 & 0.168 & 0.222 & 0.290 & 0.182 & 0.093 & 0.082 & 0.245 & 0.046\\
+
+    \hspace{1em} &  & $\lambda$ & 1.002 &  &  &  &  &  &  &  &  &  &  & \\
+
+    \hspace{1em} &  & $\delta$ & 0.122 & 0.205 & 0.141 & 0.219 & 0.197 & 0.182 & 0.047 & 0.285 & 0.099 & 0.429 & 0.387 & 0.407\\
+    \cmidrule{2-15}
+    \hspace{1em} & BVHAR-S & $\sigma$ & 0.168 & 0.193 & 0.242 & 0.404 & 0.442 & 0.379 & 0.332 & 0.089 & 0.323 & 0.112 & 0.417 & 0.074\\
+
+    \hspace{1em} &  & $\lambda$ & 0.697 &  &  &  &  &  &  &  &  &  &  & \\
+
+    \hspace{1em} &  & $\delta$ & 0.121 & 0.276 & 0.110 & 0.283 & 0.264 & 0.275 & 0.038 & 0.264 & 0.077 & 0.448 & 0.388 & 0.481\\
+    \cmidrule{2-15}
+    \hspace{1em} & BVHAR-L & $\sigma$ & 0.202 & 0.211 & 0.194 & 0.222 & 0.160 & 0.233 & 0.311 & 0.185 & 0.105 & 0.091 & 0.250 & 0.037\\
+
+    \hspace{1em} &  & $\lambda$ & 1.008 &  &  &  &  &  &  &  &  &  &  & \\
+
+    \hspace{1em} &  & $d_i$ & 0.122 & 0.205 & 0.141 & 0.219 & 0.197 & 0.182 & 0.047 & 0.285 & 0.099 & 0.429 & 0.387 & 0.407\\
+
+    \hspace{1em} &  & $w_i$ & 0.205 & 0.066 & 0.106 & 0.359 & 0.069 & 0.310 & 0.289 & 0.305 & 0.171 & 0.348 & 0.259 & 0.386\\
+
+    \hspace{1em} &  & $m_i$ & 0.123 & 0.231 & 0.303 & 0.063 & 0.022 & 0.470 & 0.478 & 0.036 & 0.334 & 0.312 & 0.020 & 0.233\\*
+    \end{longtable}
 
 ## SMALL
 
@@ -1963,27 +2052,27 @@ cv_large_list <-
     \midrule
      & VHAR & \textcolor{black}{\num{1.139}} & \textcolor{black}{\num{1.358}} & \textcolor{black}{\num{1.337}} & \textcolor{black}{\num{1.246}} & \textcolor{black}{\num{1.844}} & \textcolor{black}{\num{1.7537}} & \textcolor{black}{\num{1.097}} & \textcolor{black}{\num{1.241}} & \textcolor{black}{\num{1.255}}\\
 
-     & BVAR & \textcolor{black}{\num{0.891}} & \textcolor{black}{\num{0.665}} & \textcolor{black}{\num{0.473}} & \textcolor{black}{\num{0.743}} & \textcolor{black}{\num{0.475}} & \textcolor{black}{\num{0.2149}} & \textcolor{black}{\num{0.865}} & \textcolor{black}{\num{0.699}} & \textcolor{black}{\num{0.529}}\\
+     & BVAR & \textcolor{black}{\num{.891}} & \textcolor{black}{\num{.665}} & \textcolor{black}{\num{.473}} & \textcolor{black}{\num{.743}} & \textcolor{black}{\num{.475}} & \textcolor{black}{\num{.2149}} & \textcolor{black}{\num{.865}} & \textcolor{black}{\num{.699}} & \textcolor{black}{\num{.529}}\\
 
-     & BVHAR-S & \textcolor{red}{\num{0.838}} & \textcolor{black}{\num{0.564}} & \textcolor{black}{\num{0.280}} & \textcolor{red}{\num{0.675}} & \textcolor{black}{\num{0.311}} & \textcolor{black}{\num{0.0745}} & \textcolor{red}{\num{0.826}} & \textcolor{black}{\num{0.562}} & \textcolor{black}{\num{0.278}}\\
+     & BVHAR-S & \textcolor{red}{\num{.838}} & \textcolor{black}{\num{.564}} & \textcolor{black}{\num{.280}} & \textcolor{red}{\num{.675}} & \textcolor{black}{\num{.311}} & \textcolor{black}{\num{.0745}} & \textcolor{red}{\num{.826}} & \textcolor{black}{\num{.562}} & \textcolor{black}{\num{.278}}\\
 
-    \multirow{-4}{*}{\centering\arraybackslash SMALL} & BVHAR-L & \textcolor{black}{\num{0.842}} & \textcolor{red}{\num{0.537}} & \textcolor{red}{\num{0.266}} & \textcolor{black}{\num{0.684}} & \textcolor{red}{\num{0.282}} & \textcolor{red}{\num{0.0707}} & \textcolor{black}{\num{0.835}} & \textcolor{red}{\num{0.530}} & \textcolor{red}{\num{0.261}}\\
+    \multirow{-4}{*}{\centering\arraybackslash SMALL} & BVHAR-L & \textcolor{black}{\num{.842}} & \textcolor{red}{\num{.537}} & \textcolor{red}{\num{.266}} & \textcolor{black}{\num{.684}} & \textcolor{red}{\num{.282}} & \textcolor{red}{\num{.0707}} & \textcolor{black}{\num{.835}} & \textcolor{red}{\num{.530}} & \textcolor{red}{\num{.261}}\\
     \cmidrule{1-11}
-     & VHAR & \textcolor{black}{\num{0.376}} & \textcolor{black}{\num{1.418890}} & \textcolor{black}{\num{4.14e+00}} & \textcolor{black}{\num{0.2552}} & \textcolor{black}{\num{2.01e+00}} & \textcolor{black}{\num{1.71e+01}} & \textcolor{black}{\num{0.412}} & \textcolor{black}{\num{1.418885}} & \textcolor{black}{\num{4.14e+00}}\\
+     & VHAR & \textcolor{black}{\num{.376}} & \textcolor{black}{\num{1.42e+00}} & \textcolor{black}{\num{4.14e+00}} & \textcolor{black}{\num{.2552}} & \textcolor{black}{\num{2.01e+00}} & \textcolor{black}{\num{1.71e+01}} & \textcolor{black}{\num{.412}} & \textcolor{black}{\num{1.42e+00}} & \textcolor{black}{\num{4.14e+00}}\\
 
-     & BVAR & \textcolor{black}{\num{0.756}} & \textcolor{black}{\num{1.809966}} & \textcolor{black}{\num{1.07e+01}} & \textcolor{black}{\num{0.5306}} & \textcolor{black}{\num{3.28e+00}} & \textcolor{black}{\num{1.15e+02}} & \textcolor{black}{\num{0.779}} & \textcolor{black}{\num{1.809974}} & \textcolor{black}{\num{1.07e+01}}\\
+     & BVAR & \textcolor{black}{\num{.756}} & \textcolor{black}{\num{1.81e+00}} & \textcolor{black}{\num{1.07e+01}} & \textcolor{black}{\num{.5306}} & \textcolor{black}{\num{3.28e+00}} & \textcolor{black}{\num{1.15e+02}} & \textcolor{black}{\num{.779}} & \textcolor{black}{\num{1.81e+00}} & \textcolor{black}{\num{1.07e+01}}\\
 
-     & BVHAR-S & \textcolor{black}{\num{0.261}} & \textcolor{black}{\num{0.222499}} & \textcolor{black}{\num{2.51e-03}} & \textcolor{black}{\num{0.1136}} & \textcolor{black}{\num{4.95e-02}} & \textcolor{black}{\num{6.30e-06}} & \textcolor{black}{\num{0.288}} & \textcolor{black}{\num{0.222497}} & \textcolor{black}{\num{2.51e-03}}\\
+     & BVHAR-S & \textcolor{black}{\num{.261}} & \textcolor{black}{\num{2.22e-01}} & \textcolor{black}{\num{2.51e-03}} & \textcolor{black}{\num{.1136}} & \textcolor{black}{\num{4.95e-02}} & \textcolor{black}{\num{6.30e-06}} & \textcolor{black}{\num{.288}} & \textcolor{black}{\num{2.22e-01}} & \textcolor{black}{\num{2.51e-03}}\\
 
-    \multirow{-4}{*}{\centering\arraybackslash MEDIUM} & BVHAR-L & \textcolor{red}{\num{0.134}} & \textcolor{red}{\num{0.000522}} & \textcolor{red}{\num{8.53e-14}} & \textcolor{red}{\num{0.0134}} & \textcolor{red}{\num{2.71e-07}} & \textcolor{red}{\num{7.27e-27}} & \textcolor{red}{\num{0.132}} & \textcolor{red}{\num{0.000521}} & \textcolor{red}{\num{8.53e-14}}\\
+    \multirow{-4}{*}{\centering\arraybackslash MEDIUM} & BVHAR-L & \textcolor{red}{\num{.134}} & \textcolor{red}{\num{5.22e-04}} & \textcolor{red}{\num{8.53e-14}} & \textcolor{red}{\num{.0134}} & \textcolor{red}{\num{2.71e-07}} & \textcolor{red}{\num{7.27e-27}} & \textcolor{red}{\num{.132}} & \textcolor{red}{\num{5.21e-04}} & \textcolor{red}{\num{8.53e-14}}\\
     \cmidrule{1-11}
-     & VHAR & \textcolor{black}{\num{0.244}} & \textcolor{black}{\num{2.48257}} & \textcolor{black}{\num{3.97e+01}} & \textcolor{black}{\num{0.1620}} & \textcolor{black}{\num{6.17e+00}} & \textcolor{black}{\num{1.57e+03}} & \textcolor{black}{\num{0.328}} & \textcolor{black}{\num{2.48337}} & \textcolor{black}{\num{3.97e+01}}\\
+     & VHAR & \textcolor{black}{\num{.244}} & \textcolor{black}{\num{2.48e+00}} & \textcolor{black}{\num{3.97e+01}} & \textcolor{black}{\num{.1620}} & \textcolor{black}{\num{6.17e+00}} & \textcolor{black}{\num{1.57e+03}} & \textcolor{black}{\num{.328}} & \textcolor{black}{\num{2.48e+00}} & \textcolor{black}{\num{3.97e+01}}\\
 
-     & BVAR & \textcolor{black}{\num{0.755}} & \textcolor{black}{\num{2.71066}} & \textcolor{black}{\num{5.49e+01}} & \textcolor{black}{\num{0.5775}} & \textcolor{black}{\num{7.35e+00}} & \textcolor{black}{\num{3.01e+03}} & \textcolor{black}{\num{0.775}} & \textcolor{black}{\num{2.71128}} & \textcolor{black}{\num{5.49e+01}}\\
+     & BVAR & \textcolor{black}{\num{.755}} & \textcolor{black}{\num{2.71e+00}} & \textcolor{black}{\num{5.49e+01}} & \textcolor{black}{\num{.5775}} & \textcolor{black}{\num{7.35e+00}} & \textcolor{black}{\num{3.01e+03}} & \textcolor{black}{\num{.775}} & \textcolor{black}{\num{2.71e+00}} & \textcolor{black}{\num{5.49e+01}}\\
 
-     & BVHAR-S & \textcolor{black}{\num{0.207}} & \textcolor{black}{\num{0.69048}} & \textcolor{black}{\num{2.40e-01}} & \textcolor{black}{\num{0.1024}} & \textcolor{black}{\num{4.77e-01}} & \textcolor{black}{\num{5.74e-02}} & \textcolor{black}{\num{0.273}} & \textcolor{black}{\num{0.69070}} & \textcolor{black}{\num{2.40e-01}}\\
+     & BVHAR-S & \textcolor{black}{\num{.207}} & \textcolor{black}{\num{6.90e-01}} & \textcolor{black}{\num{2.40e-01}} & \textcolor{black}{\num{.1024}} & \textcolor{black}{\num{4.77e-01}} & \textcolor{black}{\num{5.74e-02}} & \textcolor{black}{\num{.273}} & \textcolor{black}{\num{6.91e-01}} & \textcolor{black}{\num{2.40e-01}}\\
 
-    \multirow{-4}{*}{\centering\arraybackslash LARGE} & BVHAR-L & \textcolor{red}{\num{0.102}} & \textcolor{red}{\num{0.00729}} & \textcolor{red}{\num{3.15e-09}} & \textcolor{red}{\num{0.0176}} & \textcolor{red}{\num{5.31e-05}} & \textcolor{red}{\num{9.90e-18}} & \textcolor{red}{\num{0.128}} & \textcolor{red}{\num{0.00729}} & \textcolor{red}{\num{3.15e-09}}\\
+    \multirow{-4}{*}{\centering\arraybackslash LARGE} & BVHAR-L & \textcolor{red}{\num{.102}} & \textcolor{red}{\num{7.29e-03}} & \textcolor{red}{\num{3.15e-09}} & \textcolor{red}{\num{.0176}} & \textcolor{red}{\num{5.31e-05}} & \textcolor{red}{\num{9.90e-18}} & \textcolor{red}{\num{.128}} & \textcolor{red}{\num{7.29e-03}} & \textcolor{red}{\num{3.15e-09}}\\
     \bottomrule
     \end{tabular}}
     \end{table}
