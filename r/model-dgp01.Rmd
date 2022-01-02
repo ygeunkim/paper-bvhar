@@ -255,7 +255,7 @@ fit_vhar_large <- vhar_lm(y_large_train, include_mean = FALSE)
   ), 
   upper = c(
     rep(1, n_medium), # sigma
-    1, # lambda
+    Inf, # lambda
     rep(1, n_medium) # delta
   ), 
   y = y_medium_train, 
@@ -274,7 +274,7 @@ fit_vhar_large <- vhar_lm(y_large_train, include_mean = FALSE)
   ), 
   upper = c(
     rep(1, n_large), # sigma
-    1, # lambda
+    Inf, # lambda
     rep(1, n_large) # delta
   ), 
   y = y_large_train, 
@@ -293,21 +293,21 @@ fit_large_bvar <- bvar_large_optim$fit
 
 ```{r bvharvarsetting}
 bvhar_var_small_spec <- set_bvhar(
-  sigma = rep(.05, n_small),
-  lambda = .2,
-  delta = rep(.1, n_small)
+  sigma = bvar_small_spec$sigma,
+  lambda = bvar_small_spec$lambda,
+  delta = bvar_small_spec$delta
 )
 #----------------------------
 bvhar_var_medium_spec <- set_bvhar(
-  sigma = rep(.05, n_medium),
-  lambda = .1,
-  delta = rep(.1, n_medium)
+  sigma = bvar_medium_spec$sigma,
+  lambda = bvar_medium_spec$lambda,
+  delta = bvar_medium_spec$delta
 )
 #----------------------------
 bvhar_var_large_spec <- set_bvhar(
-  sigma = rep(.05, n_large),
-  lambda = .03,
-  delta = rep(.1, n_large)
+  sigma = bvar_large_spec$sigma,
+  lambda = bvar_large_spec$lambda,
+  delta = bvar_large_spec$delta
 )
 ```
 
@@ -339,7 +339,7 @@ bvhar_var_large_spec <- set_bvhar(
   ), 
   upper = c(
     rep(1, n_medium), # sigma
-    1, # lambda
+    Inf, # lambda
     rep(1, n_medium) # delta
   ), 
   y = y_medium_train, 
@@ -357,7 +357,7 @@ bvhar_var_large_spec <- set_bvhar(
   ), 
   upper = c(
     rep(1, n_large), # sigma
-    1, # lambda
+    Inf, # lambda
     rep(1, n_large) # delta
   ), 
   y = y_large_train, 
@@ -375,27 +375,27 @@ fit_bvhar_large_var <- bvhar_var_large_optim$fit
 
 ```{r bvharvharsetting}
 bvhar_vhar_small_spec <- set_weight_bvhar(
-  sigma = rep(.05, n_small),
-  lambda = .2,
-  daily = rep(.1, n_small),
-  weekly = rep(.05, n_small),
-  monthly = rep(.1, n_small)
+  sigma = bvar_small_spec$sigma,
+  lambda = bvar_small_spec$lambda,
+  daily = bvar_small_spec$delta,
+  weekly = bvar_small_spec$delta,
+  monthly = bvar_small_spec$delta
 )
 #-----------------------------------------
 bvhar_vhar_medium_spec <- set_weight_bvhar(
-  sigma = rep(.05, n_medium),
-  lambda = .2,
-  daily = rep(.1, n_medium),
-  weekly = rep(.05, n_medium),
-  monthly = rep(.1, n_medium)
+  sigma = bvar_medium_spec$sigma,
+  lambda = bvar_medium_spec$lambda,
+  daily = bvar_medium_spec$delta,
+  weekly = bvar_medium_spec$delta,
+  monthly = bvar_medium_spec$delta
 )
 #-----------------------------------------
 bvhar_vhar_large_spec <- set_weight_bvhar(
-  sigma = rep(.05, n_large),
-  lambda = .2,
-  daily = rep(.1, n_large),
-  weekly = rep(.05, n_large),
-  monthly = rep(.1, n_large)
+  sigma = bvar_large_spec$sigma,
+  lambda = bvar_large_spec$lambda,
+  daily = bvar_large_spec$delta,
+  weekly = bvar_large_spec$delta,
+  monthly = bvar_large_spec$delta
 )
 ```
 
@@ -433,7 +433,7 @@ bvhar_vhar_large_spec <- set_weight_bvhar(
   ), 
   upper = c(
     rep(1, n_medium), # sigma
-    1, # lambda
+    Inf, # lambda
     rep(1, n_medium), # daily
     rep(1, n_medium), # weekly
     rep(1, n_medium) # monthly
@@ -455,7 +455,7 @@ bvhar_vhar_large_spec <- set_weight_bvhar(
   ), 
   upper = c(
     rep(2, n_large), # sigma
-    1, # lambda
+    Inf, # lambda
     rep(1, n_large), # daily
     rep(1, n_large), # weekly
     rep(1, n_large) # monthly
