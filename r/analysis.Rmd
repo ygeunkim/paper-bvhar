@@ -1,0 +1,372 @@
+---
+title: "Empirical Analysis"
+author: "Young Geun Kim"
+date: "`r format(Sys.time(), '%d %b, %Y')`"
+output: 
+  github_document:
+    toc: true
+knit:
+  (function(inputFile, encoding) {
+    rmarkdown::render(
+      input = inputFile,
+      output_dir = "../docs", 
+      encoding = encoding
+    )
+  })
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  comment = "#>",
+  collapse = TRUE,
+  out.width = "70%",
+  fig.path = "../output/figs/analysis-",
+  fig.align = "center",
+  fig.width = 6,
+  fig.asp = .618
+)
+knitr::knit_hooks$set(
+  document = function(x) {
+    sub("\\usepackage[]{color}", "\\usepackage{xcolor}", x, fixed = TRUE)
+  }
+)
+options(digits = 3)
+# options(scipen = -2) # scientific notation digits
+options(knitr.kable.NA = "")
+options(kableExtra.latex.load_packages = FALSE)
+is_html <- knitr::opts_knit$get("rmarkdown.pandoc.to") == "html"
+is_latex <- knitr::opts_knit$get("rmarkdown.pandoc.to") == "latex"
+kable_format <- ifelse(!is_html, "latex", "html")
+kable_format <- ifelse(length(kable_format) == 0, "html", kable_format) # for excecutable
+```
+
+```{r pkgs, message=FALSE}
+# tidyverse----------------------------
+library(tidyverse)
+# BVHAR custom package-----------------
+library(bvhar)
+# set seed for reproducible result-----
+set.seed(1)
+```
+
+```{r fns, message=FALSE}
+# result table-------------------------
+source("report-fns.R")
+# hyperparameter setting table---------
+source("param-fns.R")
+```
+
+# Data
+
+## Split
+
+```{r testsize}
+(h <- 42)
+```
+
+```{r splittest}
+etf_split <- divide_ts(etf_vix, h)
+etf_train <- etf_split$train
+etf_test <- etf_split$test
+```
+
+```{r dataplot}
+bvhar:::etf_vix_raw %>% 
+  mutate(
+    train = c(
+      rep(TRUE, nrow(etf_train)),
+      rep(FALSE, nrow(etf_test))
+    )
+  ) %>% 
+  pivot_longer(-c(DATE, train), names_to = "asset", values_to = "value") %>% 
+  mutate(
+    xmin = min(DATE[train == FALSE]),
+    xmax = max(DATE)
+  ) %>% 
+  ggplot(aes(x = DATE, y = value)) +
+  geom_rect(
+    aes(xmin = xmin, xmax = xmax, ymin = -Inf, ymax = Inf),
+    alpha = .7,
+    fill = "grey" # test set
+  ) +
+  geom_path() +
+  facet_grid(asset ~ ., scales = "free_y") +
+  # scale_x_date(
+  #   breaks = c(nrow(etf_train), nrow(etf_train) + nrow(etf_test))
+  # ) +
+  theme_minimal() +
+  theme(panel.border = element_rect(fill = NA)) +
+  labs(
+    x = element_blank(),
+    y = element_blank()
+  )
+```
+
+
+# Model
+
+## VAR
+
+```{r varic}
+choose_var(etf_train, lag_max = 10)
+```
+
+```{r varlag}
+(var_lag <- 2)
+```
+
+```{r fitvar}
+fit_var <- var_lm(etf_train, 2)
+```
+
+## VHAR
+
+```{r fitvhar}
+fit_vhar <- vhar_lm(etf_train)
+```
+
+## BVAR
+
+```{r bvarlag}
+(bvar_lag <- 2)
+```
+
+```{r bvarinit}
+n_asset <- ncol(etf_train)
+bvar_init <- set_bvar(
+  sigma = apply(etf_train, 2, sd),
+  lambda = .2,
+  delta = rep(.1, n_asset)
+)
+```
+
+```{r bvaroptim, cache=TRUE}
+(bvar_optim <- choose_bvar(
+  bvar_init, 
+  lower = c(
+    rep(1, n_asset), # sigma
+    1e-4, # lambda
+    rep(1e-2, n_asset) # delta
+  ), 
+  upper = c(
+    rep(15, n_asset), # sigma
+    Inf, # lambda
+    rep(1, n_asset) # delta
+  ), 
+  y = etf_train, 
+  p = bvar_lag, 
+  include_mean = TRUE
+))
+```
+
+```{r bvarfit}
+fit_bvar <- bvar_optim$fit
+```
+
+## BVHAR-S
+
+```{r bvharinit}
+bvhar_init <- set_bvhar(
+  sigma = apply(etf_train, 2, sd),
+  lambda = .2,
+  delta = rep(.1, n_asset)
+)
+```
+
+```{r bvharvaroptim, cache=TRUE}
+(bvhar_var_optim <- choose_bvhar(
+  bvhar_init, 
+  lower = c(
+    rep(1, n_asset), # sigma
+    1e-4, # lambda
+    rep(1e-2, n_asset) # delta
+  ), 
+  upper = c(
+    rep(15, n_asset), # sigma
+    Inf, # lambda
+    rep(1, n_asset) # delta
+  ), 
+  y = etf_train, 
+  include_mean = TRUE
+))
+```
+
+```{r bvharvarfit}
+fit_bvhar <- bvhar_var_optim$fit
+```
+
+## BVHAR-L
+
+```{r bvharvharinit}
+bvhar_vhar_init <- set_weight_bvhar(
+  sigma = apply(etf_train, 2, sd),
+  lambda = .2,
+  daily = rep(.1, n_asset),
+  weekly = rep(.1, n_asset),
+  monthly = rep(.1, n_asset)
+)
+```
+
+```{r bvharvharoptim, cache=TRUE}
+(bvhar_vhar_optim <- choose_bvhar(
+  bvhar_vhar_init, 
+  lower = c(
+    rep(1, n_asset), # sigma
+    1e-4, # lambda
+    rep(1e-2, n_asset), # daily
+    rep(1e-2, n_asset), # weekly
+    rep(1e-2, n_asset) # monthly
+  ), 
+  upper = c(
+    rep(15, n_asset), # sigma
+    Inf, # lambda
+    rep(1, n_asset), # daily
+    rep(1, n_asset), # weekly
+    rep(1, n_asset) # monthly
+  ), 
+  y = etf_train, 
+  include_mean = TRUE
+))
+```
+
+```{r bvharvharfit}
+fit_bvhar_vhar <- bvhar_vhar_optim$fit
+```
+
+
+## Hyperparamers
+
+
+# Errors
+
+```{r modroll}
+mod_list <- list(
+  fit_var,
+  fit_vhar,
+  fit_bvar,
+  fit_bvhar,
+  fit_bvhar_vhar
+)
+# 1-step-----------
+roll1 <- 
+  mod_list %>% 
+  lapply(
+    function(mod) {
+      forecast_roll(mod, 1, etf_test)
+    }
+  )
+# 5-step-----------
+roll2 <- 
+  mod_list %>% 
+  lapply(
+    function(mod) {
+      forecast_roll(mod, 5, etf_test)
+    }
+  )
+# 20-step----------
+roll3 <- 
+  mod_list %>% 
+  lapply(
+    function(mod) {
+      forecast_roll(mod, 20, etf_test)
+    }
+  )
+```
+
+```{r listroll}
+roll_list <- 
+  lapply(
+    c(1, 5, 20),
+    function(h) {
+      mod_list %>% 
+        lapply(
+          function(mod) {
+            forecast_roll(mod, h, etf_test)
+          }
+        )
+    }
+  )
+```
+
+
+## Relative Errors
+
+```{r rmafetab}
+get_rmfe_tr(
+  roll_list,
+  etf_test,
+  ahead_list = c("$h = 1$", "$h = 5$", "$h = 20$"),
+  benchmark_id = 1
+)
+```
+
+```{r rmsfetab}
+get_rmfe_tr(
+  roll_list,
+  etf_test,
+  ahead_list = c("$h = 1$", "$h = 5$", "$h = 20$"),
+  benchmark_id = 1,
+  error = "rmsfe"
+)
+```
+
+```{r mapetab}
+get_rmfe_tr(
+  roll_list,
+  etf_test,
+  ahead_list = c("$h = 1$", "$h = 5$", "$h = 20$"),
+  benchmark_id = 1,
+  error = "mape"
+)
+```
+
+```{r masetab}
+get_rmfe_tr(
+  roll_list,
+  etf_test,
+  ahead_list = c("$h = 1$", "$h = 5$", "$h = 20$"),
+  benchmark_id = 1,
+  error = "mase"
+)
+```
+
+## Piecewise Errors
+
+
+
+
+# Intervals
+
+```{r predictclass}
+pred_var <- predict(fit_var, h)
+pred_vhar <- predict(fit_vhar, h)
+pred_bvar <- predict(fit_bvar, h)
+pred_bvhar <- predict(fit_bvhar, h)
+pred_bvhar_vhar <- predict(fit_bvhar_vhar, h)
+```
+
+```{r credplot}
+autoplot(pred_var, x_cut = 950, ci_alpha = .8, type = "wrap") +
+  autolayer(pred_vhar, ci_alpha = .7) +
+  autolayer(pred_bvar, ci_alpha = .6) +
+  autolayer(pred_bvhar, ci_alpha = .5) +
+  autolayer(pred_bvhar_vhar, ci_alpha = .4) +
+  geom_eval(etf_test, num_train = nrow(etf_train), alpha = .3) +
+  theme_minimal() +
+  theme(
+    panel.border = element_rect(fill = NA),
+    axis.text.x = element_blank(),
+    legend.position = "top"
+  ) +
+  scale_fill_discrete(labels = c("BVAR", "BVHAR-S", "BVHAR-L", "VAR", "VHAR"))
+```
+
+
+
+
+
+
+
+
+
+
