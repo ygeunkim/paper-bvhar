@@ -45,6 +45,8 @@ kable_format <- ifelse(length(kable_format) == 0, "html", kable_format) # for ex
 library(tidyverse)
 # BVHAR custom package-----------------
 library(bvhar)
+# Set the number of processor cores----
+cl <- parallel::makeCluster(8, type = "FORK")
 # set seed for reproducible result-----
 set.seed(1)
 ```
@@ -242,7 +244,8 @@ fit_vhar_large <- vhar_lm(y_large_train, include_mean = FALSE)
   ), 
   y = y_small_train, 
   p = bvar_lag, 
-  include_mean = FALSE
+  include_mean = FALSE,
+  parallel = list(cl = cl, forward = FALSE, loginfo = FALSE)
 ))
 ```
 
@@ -261,7 +264,8 @@ fit_vhar_large <- vhar_lm(y_large_train, include_mean = FALSE)
   ), 
   y = y_medium_train, 
   p = bvar_lag, 
-  include_mean = FALSE
+  include_mean = FALSE,
+  parallel = list(cl = cl, forward = FALSE, loginfo = FALSE)
 ))
 ```
 
@@ -280,7 +284,8 @@ fit_vhar_large <- vhar_lm(y_large_train, include_mean = FALSE)
   ), 
   y = y_large_train, 
   p = bvar_lag, 
-  include_mean = FALSE
+  include_mean = FALSE,
+  parallel = list(cl = cl, forward = FALSE, loginfo = FALSE)
 ))
 ```
 
@@ -326,7 +331,8 @@ bvhar_var_large_spec <- set_bvhar(
     rep(1, n_small) # delta
   ), 
   y = y_small_train, 
-  include_mean = FALSE
+  include_mean = FALSE,
+  parallel = list(cl = cl, forward = FALSE, loginfo = FALSE)
 ))
 ```
 
@@ -344,7 +350,8 @@ bvhar_var_large_spec <- set_bvhar(
     rep(1, n_medium) # delta
   ), 
   y = y_medium_train, 
-  include_mean = FALSE
+  include_mean = FALSE,
+  parallel = list(cl = cl, forward = FALSE, loginfo = FALSE)
 ))
 ```
 
@@ -362,7 +369,8 @@ bvhar_var_large_spec <- set_bvhar(
     rep(1, n_large) # delta
   ), 
   y = y_large_train, 
-  include_mean = FALSE
+  include_mean = FALSE,
+  parallel = list(cl = cl, forward = FALSE, loginfo = FALSE)
 ))
 ```
 
@@ -418,7 +426,8 @@ bvhar_vhar_large_spec <- set_weight_bvhar(
     rep(1, n_small) # monthly
   ), 
   y = y_small_train, 
-  include_mean = FALSE
+  include_mean = FALSE,
+  parallel = list(cl = cl, forward = FALSE, loginfo = FALSE)
 ))
 ```
 
@@ -440,7 +449,8 @@ bvhar_vhar_large_spec <- set_weight_bvhar(
     rep(1, n_medium) # monthly
   ), 
   y = y_medium_train, 
-  include_mean = FALSE
+  include_mean = FALSE,
+  parallel = list(cl = cl, forward = FALSE, loginfo = FALSE)
 ))
 ```
 
@@ -462,7 +472,8 @@ bvhar_vhar_large_spec <- set_weight_bvhar(
     rep(1, n_large) # monthly
   ), 
   y = y_large_train, 
-  include_mean = FALSE
+  include_mean = FALSE,
+  parallel = list(cl = cl, forward = FALSE, loginfo = FALSE)
 ))
 ```
 
@@ -470,6 +481,10 @@ bvhar_vhar_large_spec <- set_weight_bvhar(
 fit_bvhar_small_vhar <- bvhar_vhar_small_optim$fit
 fit_bvhar_medium_vhar <- bvhar_vhar_medium_optim$fit
 fit_bvhar_large_vhar <- bvhar_vhar_large_optim$fit
+```
+
+```{r stopcl}
+parallel::stopCluster(cl)
 ```
 
 
@@ -1017,14 +1032,20 @@ tibble(
   VHAR = 1
 ) %>% 
   pivot_longer(-x, names_to = "mod", values_to = "y") %>% 
-  mutate(mod_label = ifelse(x == max(x), mod, NA_character_)) %>% 
+  mutate(
+    mod = str_replace_all(mod, pattern = "\\_", replacement = "-"),
+    mod = str_remove_all(mod, pattern = "-Minnesota$"),
+    mod = str_replace_all(mod, pattern = "MN-VAR$", replacement = "S"),
+    mod = str_replace_all(mod, pattern = "MN-VHAR$", replacement = "L"),
+    mod_label = ifelse(x == max(x), mod, NA_character_)
+  ) %>% 
   ggplot(aes(y = y)) +
   geom_path(aes(x = x, colour = mod)) +
   geom_text(
     aes(x = x + 3, label = mod_label),
     na.rm = TRUE,
     hjust = 0,
-    size = 3
+    size = 5
   ) +
   scale_colour_viridis_d() +
   theme_minimal() +

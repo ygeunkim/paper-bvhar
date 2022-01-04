@@ -1,7 +1,7 @@
 Simulating Minnesota VAR
 ================
 Young Geun Kim
-02 Jan, 2022
+04 Jan, 2022
 
 -   [BVAR Coefficient](#bvar-coefficient)
     -   [Minnesota prior](#minnesota-prior)
@@ -39,6 +39,8 @@ Young Geun Kim
 library(tidyverse)
 # BVHAR custom package-----------------
 library(bvhar)
+# Set the number of processor cores----
+cl <- parallel::makeCluster(8, type = "FORK")
 # set seed for reproducible result-----
 set.seed(1)
 ```
@@ -231,7 +233,8 @@ fit_vhar_large <- vhar_lm(y_large_train, include_mean = FALSE)
   ), 
   y = y_small_train, 
   p = bvar_lag, 
-  include_mean = FALSE
+  include_mean = FALSE,
+  parallel = list(cl = cl, forward = FALSE, loginfo = FALSE)
 ))
 #> Model Specification for BVAR
 #> 
@@ -268,7 +271,8 @@ fit_vhar_large <- vhar_lm(y_large_train, include_mean = FALSE)
   ), 
   y = y_medium_train, 
   p = bvar_lag, 
-  include_mean = FALSE
+  include_mean = FALSE,
+  parallel = list(cl = cl, forward = FALSE, loginfo = FALSE)
 ))
 #> Model Specification for BVAR
 #> 
@@ -278,13 +282,13 @@ fit_vhar_large <- vhar_lm(y_large_train, include_mean = FALSE)
 #> ========================================================
 #> 
 #> Setting for 'sigma':
-#> [1]  0.0380  0.0418  0.0454  0.0627  0.0676  0.0296  0.0679  0.1182  0.1057
+#> [1]  0.0379  0.0420  0.0459  0.0635  0.0690  0.0310  0.0693  0.1225  0.1098
 #> 
 #> Setting for 'lambda':
-#> [1]  0.202
+#> [1]  0.209
 #> 
 #> Setting for 'delta':
-#> [1]  0.0960  0.0100  0.0734  0.0100  0.0100  0.0228  0.0700  0.0100  0.0259
+#> [1]  0.0804  0.0100  0.0656  0.0100  0.0100  0.0339  0.0611  0.0100  0.0319
 #> 
 #> Setting for 'eps':
 #> [1]  1e-04
@@ -305,7 +309,8 @@ fit_vhar_large <- vhar_lm(y_large_train, include_mean = FALSE)
   ), 
   y = y_large_train, 
   p = bvar_lag, 
-  include_mean = FALSE
+  include_mean = FALSE,
+  parallel = list(cl = cl, forward = FALSE, loginfo = FALSE)
 ))
 #> Model Specification for BVAR
 #> 
@@ -315,15 +320,15 @@ fit_vhar_large <- vhar_lm(y_large_train, include_mean = FALSE)
 #> ========================================================
 #> 
 #> Setting for 'sigma':
-#>  [1]  0.0435  0.0475  0.0387  0.0594  0.0448  0.0491  0.0490  0.0651  0.0632
-#> [10]  0.0885  0.0700  0.0920
+#>  [1]  0.0455  0.0490  0.0411  0.0604  0.0479  0.0500  0.0509  0.0645  0.0619
+#> [10]  0.0866  0.0670  0.0993
 #> 
 #> Setting for 'lambda':
-#> [1]  0.128
+#> [1]  0.133
 #> 
 #> Setting for 'delta':
-#>  [1]  0.0100  0.0100  0.0100  0.0108  0.0100  0.0241  0.0100  0.0121  0.0100
-#> [10]  0.0106  0.0135  0.0124
+#>  [1]  0.0100  0.0100  0.0100  0.0109  0.0100  0.0239  0.0100  0.0119  0.0100
+#> [10]  0.0105  0.0136  0.0125
 #> 
 #> Setting for 'eps':
 #> [1]  1e-04
@@ -371,7 +376,8 @@ bvhar_var_large_spec <- set_bvhar(
     rep(1, n_small) # delta
   ), 
   y = y_small_train, 
-  include_mean = FALSE
+  include_mean = FALSE,
+  parallel = list(cl = cl, forward = FALSE, loginfo = FALSE)
 ))
 #> Model Specification for BVHAR
 #> 
@@ -381,13 +387,13 @@ bvhar_var_large_spec <- set_bvhar(
 #> ========================================================
 #> 
 #> Setting for 'sigma':
-#> [1]  0.0619  0.0311  0.0811
+#> [1]  0.0872  0.0293  0.0734
 #> 
 #> Setting for 'lambda':
-#> [1]  1.5
+#> [1]  1.4
 #> 
 #> Setting for 'delta':
-#> [1]  0.0117  0.0109  0.0116
+#> [1]  0.0115  0.0111  0.0116
 #> 
 #> Setting for 'eps':
 #> [1]  1e-04
@@ -407,7 +413,8 @@ bvhar_var_large_spec <- set_bvhar(
     rep(1, n_medium) # delta
   ), 
   y = y_medium_train, 
-  include_mean = FALSE
+  include_mean = FALSE,
+  parallel = list(cl = cl, forward = FALSE, loginfo = FALSE)
 ))
 #> Model Specification for BVHAR
 #> 
@@ -417,13 +424,13 @@ bvhar_var_large_spec <- set_bvhar(
 #> ========================================================
 #> 
 #> Setting for 'sigma':
-#> [1]  0.0430  0.0421  0.0622  0.0602  0.0596  0.0100  0.0745  0.1259  0.1053
+#> [1]  0.0526  0.0553  0.0703  0.0706  0.0958  0.0539  0.1041  0.1919  0.1461
 #> 
 #> Setting for 'lambda':
-#> [1]  0.206
+#> [1]  0.891
 #> 
 #> Setting for 'delta':
-#> [1]  0.0293  0.0100  0.0286  0.0100  0.0100  0.0100  0.0282  0.0100  0.0257
+#> [1]  0.0222  0.0100  0.0261  0.0100  0.0100  0.0100  0.0278  0.0100  0.0201
 #> 
 #> Setting for 'eps':
 #> [1]  1e-04
@@ -443,7 +450,8 @@ bvhar_var_large_spec <- set_bvhar(
     rep(1, n_large) # delta
   ), 
   y = y_large_train, 
-  include_mean = FALSE
+  include_mean = FALSE,
+  parallel = list(cl = cl, forward = FALSE, loginfo = FALSE)
 ))
 #> Model Specification for BVHAR
 #> 
@@ -453,14 +461,14 @@ bvhar_var_large_spec <- set_bvhar(
 #> ========================================================
 #> 
 #> Setting for 'sigma':
-#>  [1]  0.0782  0.0367  0.0402  0.0513  0.0497  0.0531  0.0614  0.0464  0.0410
-#> [10]  0.0504  0.0394  0.0562
+#>  [1]  0.0500  0.0500  0.0500  0.0501  0.0500  0.0500  0.0500  0.0500  0.0500
+#> [10]  0.0501  0.0500  0.0500
 #> 
 #> Setting for 'lambda':
-#> [1]  0.948
+#> [1]  1.03
 #> 
 #> Setting for 'delta':
-#>  [1]  0.0101  0.0100  0.0100  0.0101  0.0100  0.0101  0.0101  0.0100  0.0100
+#>  [1]  0.0101  0.0100  0.0100  0.0101  0.0100  0.0101  0.0101  0.0101  0.0100
 #> [10]  0.0100  0.0101  0.0101
 #> 
 #> Setting for 'eps':
@@ -519,7 +527,8 @@ bvhar_vhar_large_spec <- set_weight_bvhar(
     rep(1, n_small) # monthly
   ), 
   y = y_small_train, 
-  include_mean = FALSE
+  include_mean = FALSE,
+  parallel = list(cl = cl, forward = FALSE, loginfo = FALSE)
 ))
 #> Model Specification for BVHAR
 #> 
@@ -529,22 +538,22 @@ bvhar_vhar_large_spec <- set_weight_bvhar(
 #> ========================================================
 #> 
 #> Setting for 'sigma':
-#> [1]  0.0766  0.0161  0.0835
+#> [1]  0.0792  0.0217  0.0815
 #> 
 #> Setting for 'lambda':
-#> [1]  0.966
+#> [1]  0.984
 #> 
 #> Setting for 'eps':
 #> [1]  1e-04
 #> 
 #> Setting for 'daily':
-#> [1]  0.0112  0.0113  0.0111
+#> [1]  0.0112  0.0112  0.0111
 #> 
 #> Setting for 'weekly':
-#> [1]  0.0112  0.0116  0.0111
+#> [1]  0.0112  0.0114  0.0111
 #> 
 #> Setting for 'monthly':
-#> [1]  0.0106  0.0137  0.0113
+#> [1]  0.0106  0.0135  0.0113
 ```
 
 ``` r
@@ -565,7 +574,8 @@ bvhar_vhar_large_spec <- set_weight_bvhar(
     rep(1, n_medium) # monthly
   ), 
   y = y_medium_train, 
-  include_mean = FALSE
+  include_mean = FALSE,
+  parallel = list(cl = cl, forward = FALSE, loginfo = FALSE)
 ))
 #> Model Specification for BVHAR
 #> 
@@ -575,22 +585,22 @@ bvhar_vhar_large_spec <- set_weight_bvhar(
 #> ========================================================
 #> 
 #> Setting for 'sigma':
-#> [1]  0.0459  0.0489  0.0570  0.0611  0.0831  0.0155  0.0900  0.1453  0.1160
+#> [1]  0.0524  0.0514  0.0644  0.0801  0.0829  0.0447  0.0932  0.1943  0.1622
 #> 
 #> Setting for 'lambda':
-#> [1]  0.32
+#> [1]  0.8
 #> 
 #> Setting for 'eps':
 #> [1]  1e-04
 #> 
 #> Setting for 'daily':
-#> [1]  0.0144  0.0100  0.0136  0.0100  0.0100  0.0109  0.0123  0.0100  0.0107
+#> [1]  0.0129  0.0100  0.0125  0.0100  0.0100  0.0105  0.0112  0.0100  0.0105
 #> 
 #> Setting for 'weekly':
-#> [1]  0.0174  0.0124  0.0126  0.0100  0.0100  0.0157  0.0127  0.0108  0.0100
+#> [1]  0.0147  0.0117  0.0118  0.0100  0.0100  0.0154  0.0116  0.0107  0.0100
 #> 
 #> Setting for 'monthly':
-#> [1]  0.0124  0.0103  0.0143  0.0100  0.0100  0.0202  0.0100  0.0100  0.0100
+#> [1]  0.0120  0.0104  0.0132  0.0100  0.0104  0.0189  0.0100  0.0100  0.0100
 ```
 
 ``` r
@@ -611,7 +621,8 @@ bvhar_vhar_large_spec <- set_weight_bvhar(
     rep(1, n_large) # monthly
   ), 
   y = y_large_train, 
-  include_mean = FALSE
+  include_mean = FALSE,
+  parallel = list(cl = cl, forward = FALSE, loginfo = FALSE)
 ))
 #> Model Specification for BVHAR
 #> 
@@ -621,32 +632,36 @@ bvhar_vhar_large_spec <- set_weight_bvhar(
 #> ========================================================
 #> 
 #> Setting for 'sigma':
-#>  [1]  0.0503  0.0839  0.0667  0.0784  0.0867  0.1055  0.0646  0.0838  0.0710
-#> [10]  0.0524  0.0729  0.0677
+#>  [1]  0.0514  0.0527  0.0479  0.0479  0.0506  0.0716  0.0504  0.0458  0.0518
+#> [10]  0.0546  0.0555  0.0523
 #> 
 #> Setting for 'lambda':
-#> [1]  1.02
+#> [1]  1.04
 #> 
 #> Setting for 'eps':
 #> [1]  1e-04
 #> 
 #> Setting for 'daily':
-#>  [1]  0.0101  0.0100  0.0100  0.0101  0.0100  0.0161  0.0101  0.0101  0.0100
-#> [10]  0.0100  0.0101  0.0103
+#>  [1]  0.0101  0.0100  0.0100  0.0101  0.0100  0.0101  0.0101  0.0101  0.0100
+#> [10]  0.0100  0.0101  0.0101
 #> 
 #> Setting for 'weekly':
-#>  [1]  0.0101  0.0100  0.0206  0.0286  0.0101  0.0100  0.0243  0.0101  0.0101
-#> [10]  0.0148  0.0101  0.0101
+#>  [1]  0.0101  0.0100  0.0101  0.0100  0.0101  0.0100  0.0101  0.0101  0.0101
+#> [10]  0.0101  0.0101  0.0101
 #> 
 #> Setting for 'monthly':
-#>  [1]  0.0101  0.0171  0.0101  0.0170  0.0101  0.0141  0.0287  0.0275  0.0138
-#> [10]  0.0100  0.0264  0.0101
+#>  [1]  0.0101  0.0100  0.0101  0.0100  0.0101  0.0100  0.0101  0.0101  0.0101
+#> [10]  0.0100  0.0101  0.0101
 ```
 
 ``` r
 fit_bvhar_small_vhar <- bvhar_vhar_small_optim$fit
 fit_bvhar_medium_vhar <- bvhar_vhar_medium_optim$fit
 fit_bvhar_large_vhar <- bvhar_vhar_large_optim$fit
+```
+
+``` r
+parallel::stopCluster(cl)
 ```
 
 # Errors
@@ -677,69 +692,69 @@ fit_bvhar_large_vhar <- bvhar_vhar_large_optim$fit
 
     \hspace{1em} &  & $\delta$ & 0.034 & 0.064 & 0.040 &  &  &  &  &  &  &  &  & \\
     \cmidrule{2-15}
-    \hspace{1em} & BVHAR-S & $\sigma$ & 0.062 & 0.031 & 0.081 &  &  &  &  &  &  &  &  & \\
+    \hspace{1em} & BVHAR-S & $\sigma$ & 0.087 & 0.029 & 0.073 &  &  &  &  &  &  &  &  & \\
 
-    \hspace{1em} &  & $\lambda$ & 1.500 &  &  &  &  &  &  &  &  &  &  & \\
+    \hspace{1em} &  & $\lambda$ & 1.397 &  &  &  &  &  &  &  &  &  &  & \\
 
     \hspace{1em} &  & $\delta$ & 0.012 & 0.011 & 0.012 &  &  &  &  &  &  &  &  & \\
     \cmidrule{2-15}
-    \hspace{1em} & BVHAR-L & $\sigma$ & 0.077 & 0.016 & 0.083 &  &  &  &  &  &  &  &  & \\
+    \hspace{1em} & BVHAR-L & $\sigma$ & 0.079 & 0.022 & 0.082 &  &  &  &  &  &  &  &  & \\
 
-    \hspace{1em} &  & $\lambda$ & 0.966 &  &  &  &  &  &  &  &  &  &  & \\
+    \hspace{1em} &  & $\lambda$ & 0.984 &  &  &  &  &  &  &  &  &  &  & \\
 
     \hspace{1em} &  & $d_i$ & 0.011 & 0.011 & 0.011 &  &  &  &  &  &  &  &  & \\
 
-    \hspace{1em} &  & $w_i$ & 0.011 & 0.012 & 0.011 &  &  &  &  &  &  &  &  & \\
+    \hspace{1em} &  & $w_i$ & 0.011 & 0.011 & 0.011 &  &  &  &  &  &  &  &  & \\
 
-    \hspace{1em} &  & $m_i$ & 0.011 & 0.014 & 0.011 &  &  &  &  &  &  &  &  & \\
+    \hspace{1em} &  & $m_i$ & 0.011 & 0.013 & 0.011 &  &  &  &  &  &  &  &  & \\
     \cmidrule{1-15}
     \addlinespace[0.3em]
     \multicolumn{15}{l}{\textbf{MEDIUM}}\\
-    \hspace{1em} & BVAR & $\sigma$ & 0.038 & 0.042 & 0.045 & 0.063 & 0.068 & 0.030 & 0.068 & 0.118 & 0.106 &  &  & \\
+    \hspace{1em} & BVAR & $\sigma$ & 0.038 & 0.042 & 0.046 & 0.063 & 0.069 & 0.031 & 0.069 & 0.122 & 0.110 &  &  & \\
 
-    \hspace{1em} &  & $\lambda$ & 0.202 &  &  &  &  &  &  &  &  &  &  & \\
+    \hspace{1em} &  & $\lambda$ & 0.209 &  &  &  &  &  &  &  &  &  &  & \\
 
-    \hspace{1em} &  & $\delta$ & 0.096 & 0.010 & 0.073 & 0.010 & 0.010 & 0.023 & 0.070 & 0.010 & 0.026 &  &  & \\
+    \hspace{1em} &  & $\delta$ & 0.080 & 0.010 & 0.066 & 0.010 & 0.010 & 0.034 & 0.061 & 0.010 & 0.032 &  &  & \\
     \cmidrule{2-15}
-    \hspace{1em} & BVHAR-S & $\sigma$ & 0.043 & 0.042 & 0.062 & 0.060 & 0.060 & 0.010 & 0.075 & 0.126 & 0.105 &  &  & \\
+    \hspace{1em} & BVHAR-S & $\sigma$ & 0.053 & 0.055 & 0.070 & 0.071 & 0.096 & 0.054 & 0.104 & 0.192 & 0.146 &  &  & \\
 
-    \hspace{1em} &  & $\lambda$ & 0.206 &  &  &  &  &  &  &  &  &  &  & \\
+    \hspace{1em} &  & $\lambda$ & 0.891 &  &  &  &  &  &  &  &  &  &  & \\
 
-    \hspace{1em} &  & $\delta$ & 0.029 & 0.010 & 0.029 & 0.010 & 0.010 & 0.010 & 0.028 & 0.010 & 0.026 &  &  & \\
+    \hspace{1em} &  & $\delta$ & 0.022 & 0.010 & 0.026 & 0.010 & 0.010 & 0.010 & 0.028 & 0.010 & 0.020 &  &  & \\
     \cmidrule{2-15}
-    \hspace{1em} & BVHAR-L & $\sigma$ & 0.046 & 0.049 & 0.057 & 0.061 & 0.083 & 0.015 & 0.090 & 0.145 & 0.116 &  &  & \\
+    \hspace{1em} & BVHAR-L & $\sigma$ & 0.052 & 0.051 & 0.064 & 0.080 & 0.083 & 0.045 & 0.093 & 0.194 & 0.162 &  &  & \\
 
-    \hspace{1em} &  & $\lambda$ & 0.320 &  &  &  &  &  &  &  &  &  &  & \\
+    \hspace{1em} &  & $\lambda$ & 0.800 &  &  &  &  &  &  &  &  &  &  & \\
 
-    \hspace{1em} &  & $d_i$ & 0.014 & 0.010 & 0.014 & 0.010 & 0.010 & 0.011 & 0.012 & 0.010 & 0.011 &  &  & \\
+    \hspace{1em} &  & $d_i$ & 0.013 & 0.010 & 0.012 & 0.010 & 0.010 & 0.011 & 0.011 & 0.010 & 0.010 &  &  & \\
 
-    \hspace{1em} &  & $w_i$ & 0.017 & 0.012 & 0.013 & 0.010 & 0.010 & 0.016 & 0.013 & 0.011 & 0.010 &  &  & \\
+    \hspace{1em} &  & $w_i$ & 0.015 & 0.012 & 0.012 & 0.010 & 0.010 & 0.015 & 0.012 & 0.011 & 0.010 &  &  & \\
 
-    \hspace{1em} &  & $m_i$ & 0.012 & 0.010 & 0.014 & 0.010 & 0.010 & 0.020 & 0.010 & 0.010 & 0.010 &  &  & \\
+    \hspace{1em} &  & $m_i$ & 0.012 & 0.010 & 0.013 & 0.010 & 0.010 & 0.019 & 0.010 & 0.010 & 0.010 &  &  & \\
     \cmidrule{1-15}
     \addlinespace[0.3em]
     \multicolumn{15}{l}{\textbf{LARGE}}\\
-    \hspace{1em} & BVAR & $\sigma$ & 0.043 & 0.048 & 0.039 & 0.059 & 0.045 & 0.049 & 0.049 & 0.065 & 0.063 & 0.089 & 0.070 & 0.092\\
+    \hspace{1em} & BVAR & $\sigma$ & 0.045 & 0.049 & 0.041 & 0.060 & 0.048 & 0.050 & 0.051 & 0.064 & 0.062 & 0.087 & 0.067 & 0.099\\
 
-    \hspace{1em} &  & $\lambda$ & 0.128 &  &  &  &  &  &  &  &  &  &  & \\
+    \hspace{1em} &  & $\lambda$ & 0.133 &  &  &  &  &  &  &  &  &  &  & \\
 
     \hspace{1em} &  & $\delta$ & 0.010 & 0.010 & 0.010 & 0.011 & 0.010 & 0.024 & 0.010 & 0.012 & 0.010 & 0.011 & 0.014 & 0.012\\
     \cmidrule{2-15}
-    \hspace{1em} & BVHAR-S & $\sigma$ & 0.078 & 0.037 & 0.040 & 0.051 & 0.050 & 0.053 & 0.061 & 0.046 & 0.041 & 0.050 & 0.039 & 0.056\\
+    \hspace{1em} & BVHAR-S & $\sigma$ & 0.050 & 0.050 & 0.050 & 0.050 & 0.050 & 0.050 & 0.050 & 0.050 & 0.050 & 0.050 & 0.050 & 0.050\\
 
-    \hspace{1em} &  & $\lambda$ & 0.948 &  &  &  &  &  &  &  &  &  &  & \\
+    \hspace{1em} &  & $\lambda$ & 1.030 &  &  &  &  &  &  &  &  &  &  & \\
 
     \hspace{1em} &  & $\delta$ & 0.010 & 0.010 & 0.010 & 0.010 & 0.010 & 0.010 & 0.010 & 0.010 & 0.010 & 0.010 & 0.010 & 0.010\\
     \cmidrule{2-15}
-    \hspace{1em} & BVHAR-L & $\sigma$ & 0.050 & 0.084 & 0.067 & 0.078 & 0.087 & 0.105 & 0.065 & 0.084 & 0.071 & 0.052 & 0.073 & 0.068\\
+    \hspace{1em} & BVHAR-L & $\sigma$ & 0.051 & 0.053 & 0.048 & 0.048 & 0.051 & 0.072 & 0.050 & 0.046 & 0.052 & 0.055 & 0.056 & 0.052\\
 
-    \hspace{1em} &  & $\lambda$ & 1.015 &  &  &  &  &  &  &  &  &  &  & \\
+    \hspace{1em} &  & $\lambda$ & 1.036 &  &  &  &  &  &  &  &  &  &  & \\
 
-    \hspace{1em} &  & $d_i$ & 0.010 & 0.010 & 0.010 & 0.010 & 0.010 & 0.016 & 0.010 & 0.010 & 0.010 & 0.010 & 0.010 & 0.010\\
+    \hspace{1em} &  & $d_i$ & 0.010 & 0.010 & 0.010 & 0.010 & 0.010 & 0.010 & 0.010 & 0.010 & 0.010 & 0.010 & 0.010 & 0.010\\
 
-    \hspace{1em} &  & $w_i$ & 0.010 & 0.010 & 0.021 & 0.029 & 0.010 & 0.010 & 0.024 & 0.010 & 0.010 & 0.015 & 0.010 & 0.010\\
+    \hspace{1em} &  & $w_i$ & 0.010 & 0.010 & 0.010 & 0.010 & 0.010 & 0.010 & 0.010 & 0.010 & 0.010 & 0.010 & 0.010 & 0.010\\
 
-    \hspace{1em} &  & $m_i$ & 0.010 & 0.017 & 0.010 & 0.017 & 0.010 & 0.014 & 0.029 & 0.027 & 0.014 & 0.010 & 0.026 & 0.010\\*
+    \hspace{1em} &  & $m_i$ & 0.010 & 0.010 & 0.010 & 0.010 & 0.010 & 0.010 & 0.010 & 0.010 & 0.010 & 0.010 & 0.010 & 0.010\\*
     \end{longtable}
 
 ## SMALL
