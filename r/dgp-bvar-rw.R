@@ -33,7 +33,7 @@ set.seed(1)
 y_small <- sim_var(
   num_train + num_test,
   num_burin,
-  bvar_small_coef$coefficients,
+  bvar_small_coef$coefficients[seq_len(n_small * bvar_lag),],
   bvar_lag,
   bvar_small_coef$covmat,
   matrix(0L, nrow = bvar_lag, ncol = n_small)
@@ -58,7 +58,7 @@ set.seed(1)
 y_medium <- sim_var(
   num_train + num_test,
   num_burin,
-  bvar_medium_coef$coefficients,
+  bvar_medium_coef$coefficients[seq_len(n_medium * bvar_lag),],
   bvar_lag,
   bvar_medium_coef$covmat,
   matrix(0L, nrow = bvar_lag, ncol = n_medium)
@@ -83,7 +83,7 @@ set.seed(1)
 y_large <- sim_var(
   num_train + num_test,
   num_burin,
-  bvar_large_coef$coefficients,
+  bvar_large_coef$coefficients[seq_len(n_large * bvar_lag),],
   bvar_lag,
   bvar_large_coef$covmat,
   matrix(0L, nrow = bvar_lag, ncol = n_large)

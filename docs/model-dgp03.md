@@ -1,7 +1,7 @@
 Simulating VAR-type Minnesota BVHAR
 ================
 Young Geun Kim
-02 Jan, 2022
+05 Jan, 2022
 
 -   [BVHAR Coefficient](#bvhar-coefficient)
     -   [VAR-type Minnesota prior](#var-type-minnesota-prior)
@@ -38,6 +38,8 @@ Young Geun Kim
 library(tidyverse)
 # BVHAR custom package-----------------
 library(bvhar)
+# Set the number of processor cores----
+cl <- parallel::makeCluster(8, type = "FORK")
 # set seed for reproducible result-----
 set.seed(1)
 ```
@@ -239,17 +241,18 @@ bvar_large_spec <- set_bvar(
   bvar_small_spec, 
   lower = c(
     rep(1e-2, n_small), # sigma
-    1e-2, # lambda
+    1e-4, # lambda
     rep(1e-2, n_small) # delta
   ), 
   upper = c(
     rep(1, n_small), # sigma
-    1, # lambda
+    Inf, # lambda
     rep(1, n_small) # delta
   ), 
   y = y_small_train, 
   p = bvar_lag, 
-  include_mean = FALSE
+  include_mean = FALSE,
+  parallel = list(cl = cl, forward = FALSE, loginfo = FALSE)
 ))
 #> Model Specification for BVAR
 #> 
@@ -259,13 +262,13 @@ bvar_large_spec <- set_bvar(
 #> ========================================================
 #> 
 #> Setting for 'sigma':
-#> [1]  0.2112  0.2112  0.0432
+#> [1]  0.0550  0.0527  0.0878
 #> 
 #> Setting for 'lambda':
-#> [1]  0.336
+#> [1]  0.109
 #> 
 #> Setting for 'delta':
-#> [1]  0.178  0.178  0.010
+#> [1]  0.147  0.130  0.120
 #> 
 #> Setting for 'eps':
 #> [1]  1e-04
@@ -276,17 +279,18 @@ bvar_large_spec <- set_bvar(
   bvar_medium_spec, 
   lower = c(
     rep(1e-2, n_medium), # sigma
-    1e-2, # lambda
+    1e-4, # lambda
     rep(1e-2, n_medium) # delta
   ), 
   upper = c(
     rep(1, n_medium), # sigma
-    1, # lambda
+    Inf, # lambda
     rep(1, n_medium) # delta
   ), 
   y = y_medium_train, 
   p = bvar_lag, 
-  include_mean = FALSE
+  include_mean = FALSE,
+  parallel = list(cl = cl, forward = FALSE, loginfo = FALSE)
 ))
 #> Model Specification for BVAR
 #> 
@@ -296,13 +300,13 @@ bvar_large_spec <- set_bvar(
 #> ========================================================
 #> 
 #> Setting for 'sigma':
-#> [1]  0.0403  0.0403  0.0349  0.0583  0.0505  0.0690  0.0716  0.0880  0.1100
+#> [1]  0.0393  0.0396  0.0489  0.0544  0.0635  0.0580  0.0636  0.1167  0.0956
 #> 
 #> Setting for 'lambda':
-#> [1]  0.198
+#> [1]  0.0649
 #> 
 #> Setting for 'delta':
-#> [1]  0.0857  0.0100  0.0410  0.0100  0.0175  0.0100  0.0574  0.0100  0.0254
+#> [1]  0.1323  0.0492  0.0860  0.0647  0.0504  0.0598  0.1374  0.0636  0.1067
 #> 
 #> Setting for 'eps':
 #> [1]  1e-04
@@ -313,17 +317,18 @@ bvar_large_spec <- set_bvar(
   bvar_large_spec, 
   lower = c(
     rep(1e-2, n_large), # sigma
-    1e-2, # lambda
+    1e-4, # lambda
     rep(1e-2, n_large) # delta
   ), 
   upper = c(
     rep(1, n_large), # sigma
-    1, # lambda
+    Inf, # lambda
     rep(1, n_large) # delta
   ), 
   y = y_large_train, 
   p = bvar_lag, 
-  include_mean = FALSE
+  include_mean = FALSE,
+  parallel = list(cl = cl, forward = FALSE, loginfo = FALSE)
 ))
 #> Model Specification for BVAR
 #> 
@@ -333,15 +338,15 @@ bvar_large_spec <- set_bvar(
 #> ========================================================
 #> 
 #> Setting for 'sigma':
-#>  [1]  0.0465  0.0454  0.0190  0.0341  0.0637  0.0369  0.0688  0.0770  0.1011
-#> [10]  0.0817  0.0803  0.0785
+#>  [1]  0.0378  0.0403  0.0438  0.0555  0.0666  0.0420  0.0651  0.0599  0.0887
+#> [10]  0.0788  0.0714  0.0990
 #> 
 #> Setting for 'lambda':
-#> [1]  0.142
+#> [1]  1e-04
 #> 
 #> Setting for 'delta':
-#>  [1]  0.0100  0.0100  0.0291  0.0568  0.0100  0.1248  0.0100  0.0152  0.0100
-#> [10]  0.0275  0.0186  0.0286
+#>  [1]  0.0800  0.0851  0.0695  0.0981  0.0664  0.0815  0.0525  0.1100  0.0897
+#> [10]  0.0871  0.0826  0.0896
 #> 
 #> Setting for 'eps':
 #> [1]  1e-04
@@ -360,16 +365,17 @@ fit_large_bvar <- bvar_large_optim$fit
   bvhar_small_spec, 
   lower = c(
     rep(1e-2, n_small), # sigma
-    1e-2, # lambda
+    1e-4, # lambda
     rep(1e-2, n_small) # delta
   ), 
   upper = c(
     rep(1, n_small), # sigma
-    1, # lambda
+    Inf, # lambda
     rep(1, n_small) # delta
   ), 
   y = y_small_train, 
-  include_mean = FALSE
+  include_mean = FALSE,
+  parallel = list(cl = cl, forward = FALSE, loginfo = FALSE)
 ))
 #> Model Specification for BVHAR
 #> 
@@ -379,13 +385,13 @@ fit_large_bvar <- bvar_large_optim$fit
 #> ========================================================
 #> 
 #> Setting for 'sigma':
-#> [1]  0.141  0.105  0.122
+#> [1]  0.0552  0.0524  0.0926
 #> 
 #> Setting for 'lambda':
-#> [1]  0.271
+#> [1]  0.139
 #> 
 #> Setting for 'delta':
-#> [1]  0.0881  0.0430  0.0100
+#> [1]  0.149  0.117  0.115
 #> 
 #> Setting for 'eps':
 #> [1]  1e-04
@@ -396,16 +402,17 @@ fit_large_bvar <- bvar_large_optim$fit
   bvhar_medium_spec, 
   lower = c(
     rep(1e-2, n_medium), # sigma
-    1e-2, # lambda
+    1e-4, # lambda
     rep(1e-2, n_medium) # delta
   ), 
   upper = c(
     rep(1, n_medium), # sigma
-    1, # lambda
+    Inf, # lambda
     rep(1, n_medium) # delta
   ), 
   y = y_medium_train, 
-  include_mean = FALSE
+  include_mean = FALSE,
+  parallel = list(cl = cl, forward = FALSE, loginfo = FALSE)
 ))
 #> Model Specification for BVHAR
 #> 
@@ -415,13 +422,13 @@ fit_large_bvar <- bvar_large_optim$fit
 #> ========================================================
 #> 
 #> Setting for 'sigma':
-#> [1]  0.0410  0.0391  0.0478  0.0586  0.0660  0.0620  0.0698  0.1403  0.0172
+#> [1]  0.0380  0.0389  0.0481  0.0516  0.0650  0.0571  0.0629  0.1339  0.1008
 #> 
 #> Setting for 'lambda':
-#> [1]  0.195
+#> [1]  0.0459
 #> 
 #> Setting for 'delta':
-#> [1]  0.0518  0.0100  0.0492  0.0343  0.0100  0.0100  0.0478  0.0100  0.0101
+#> [1]  0.1219  0.0576  0.0854  0.0665  0.0488  0.0585  0.1382  0.0565  0.1048
 #> 
 #> Setting for 'eps':
 #> [1]  1e-04
@@ -432,16 +439,17 @@ fit_large_bvar <- bvar_large_optim$fit
   bvhar_large_spec, 
   lower = c(
     rep(1e-2, n_large), # sigma
-    1e-2, # lambda
+    1e-4, # lambda
     rep(1e-2, n_large) # delta
   ), 
   upper = c(
     rep(1, n_large), # sigma
-    1, # lambda
+    Inf, # lambda
     rep(1, n_large) # delta
   ), 
   y = y_large_train, 
-  include_mean = FALSE
+  include_mean = FALSE,
+  parallel = list(cl = cl, forward = FALSE, loginfo = FALSE)
 ))
 #> Model Specification for BVHAR
 #> 
@@ -451,15 +459,15 @@ fit_large_bvar <- bvar_large_optim$fit
 #> ========================================================
 #> 
 #> Setting for 'sigma':
-#>  [1]  0.0441  0.0472  0.0100  0.0425  0.0721  0.0469  0.0711  0.0734  0.1036
-#> [10]  0.0842  0.0822  0.0447
+#>  [1]  0.0379  0.0404  0.0438  0.0557  0.0664  0.0419  0.0648  0.0593  0.0885
+#> [10]  0.0783  0.0713  0.0994
 #> 
 #> Setting for 'lambda':
-#> [1]  0.181
+#> [1]  1e-04
 #> 
 #> Setting for 'delta':
-#>  [1]  0.0100  0.0100  0.0529  0.0307  0.0100  0.0860  0.0100  0.0100  0.0100
-#> [10]  0.0100  0.0100  0.0457
+#>  [1]  0.0836  0.0846  0.0710  0.0984  0.0721  0.0774  0.0511  0.1155  0.0940
+#> [10]  0.0805  0.0869  0.0926
 #> 
 #> Setting for 'eps':
 #> [1]  1e-04
@@ -504,20 +512,21 @@ bvhar_vhar_large_spec <- set_weight_bvhar(
   bvhar_vhar_small_spec, 
   lower = c(
     rep(1e-2, n_small), # sigma
-    1e-2, # lambda
+    1e-4, # lambda
     rep(1e-2, n_small), # daily
     rep(1e-2, n_small), # weekly
     rep(1e-2, n_small) # monthly
   ), 
   upper = c(
     rep(1, n_small), # sigma
-    1, # lambda
+    Inf, # lambda
     rep(1, n_small), # daily
     rep(1, n_small), # weekly
     rep(1, n_small) # monthly
   ), 
   y = y_small_train, 
-  include_mean = FALSE
+  include_mean = FALSE,
+  parallel = list(cl = cl, forward = FALSE, loginfo = FALSE)
 ))
 #> Model Specification for BVHAR
 #> 
@@ -527,22 +536,22 @@ bvhar_vhar_large_spec <- set_weight_bvhar(
 #> ========================================================
 #> 
 #> Setting for 'sigma':
-#> [1]  0.216  0.157  0.154
+#> [1]  0.0557  0.0527  0.0882
 #> 
 #> Setting for 'lambda':
-#> [1]  0.279
+#> [1]  0.126
 #> 
 #> Setting for 'eps':
 #> [1]  1e-04
 #> 
 #> Setting for 'daily':
-#> [1]  0.1349  0.0495  0.0100
+#> [1]  0.139  0.114  0.108
 #> 
 #> Setting for 'weekly':
-#> [1]  0.135  0.010  0.135
+#> [1]  0.0946  0.0100  0.1222
 #> 
 #> Setting for 'monthly':
-#> [1]  0.135  0.010  0.010
+#> [1]  0.0519  0.0224  0.0100
 ```
 
 ``` r
@@ -550,20 +559,21 @@ bvhar_vhar_large_spec <- set_weight_bvhar(
   bvhar_vhar_medium_spec, 
   lower = c(
     rep(1e-2, n_medium), # sigma
-    1e-2, # lambda
+    1e-4, # lambda
     rep(1e-2, n_medium), # daily
     rep(1e-2, n_medium), # weekly
     rep(1e-2, n_medium) # monthly
   ), 
   upper = c(
     rep(1, n_medium), # sigma
-    1, # lambda
+    Inf, # lambda
     rep(1, n_medium), # daily
     rep(1, n_medium), # weekly
     rep(1, n_medium) # monthly
   ), 
   y = y_medium_train, 
-  include_mean = FALSE
+  include_mean = FALSE,
+  parallel = list(cl = cl, forward = FALSE, loginfo = FALSE)
 ))
 #> Model Specification for BVHAR
 #> 
@@ -573,22 +583,22 @@ bvhar_vhar_large_spec <- set_weight_bvhar(
 #> ========================================================
 #> 
 #> Setting for 'sigma':
-#> [1]  0.0434  0.0393  0.0491  0.0597  0.0612  0.0624  0.0701  0.1367  0.0178
+#> [1]  0.0380  0.0391  0.0482  0.0514  0.0649  0.0568  0.0630  0.1344  0.1003
 #> 
 #> Setting for 'lambda':
-#> [1]  0.191
+#> [1]  0.0443
 #> 
 #> Setting for 'eps':
 #> [1]  1e-04
 #> 
 #> Setting for 'daily':
-#> [1]  0.0270  0.0100  0.0290  0.0100  0.0100  0.0100  0.0229  0.0100  0.0126
+#> [1]  0.0995  0.0482  0.0802  0.0653  0.0448  0.0569  0.1366  0.0409  0.0993
 #> 
 #> Setting for 'weekly':
-#> [1]  0.2913  0.0883  0.0100  0.0101  0.0100  0.0111  0.0618  0.1527  0.0100
+#> [1]  0.1814  0.0847  0.0292  0.0100  0.0100  0.0100  0.0100  0.1422  0.0100
 #> 
 #> Setting for 'monthly':
-#> [1]  0.1277  0.0867  0.0939  0.0526  0.2076  0.0168  0.0387  0.1525  0.0101
+#> [1]  0.0100  0.0100  0.0914  0.0100  0.0100  0.0100  0.0100  0.0100  0.1473
 ```
 
 ``` r
@@ -596,20 +606,21 @@ bvhar_vhar_large_spec <- set_weight_bvhar(
   bvhar_vhar_large_spec, 
   lower = c(
     rep(1e-2, n_large), # sigma
-    1e-2, # lambda
+    1e-4, # lambda
     rep(1e-2, n_large), # daily
     rep(1e-2, n_large), # weekly
     rep(1e-2, n_large) # monthly
   ), 
   upper = c(
     rep(2, n_large), # sigma
-    1, # lambda
+    Inf, # lambda
     rep(1, n_large), # daily
     rep(1, n_large), # weekly
     rep(1, n_large) # monthly
   ), 
   y = y_large_train, 
-  include_mean = FALSE
+  include_mean = FALSE,
+  parallel = list(cl = cl, forward = FALSE, loginfo = FALSE)
 ))
 #> Model Specification for BVHAR
 #> 
@@ -619,32 +630,36 @@ bvhar_vhar_large_spec <- set_weight_bvhar(
 #> ========================================================
 #> 
 #> Setting for 'sigma':
-#>  [1]  0.0418  0.0459  0.0100  0.0510  0.0698  0.0456  0.0673  0.0724  0.0932
-#> [10]  0.0851  0.0740  0.0805
+#>  [1]  0.0380  0.0402  0.0437  0.0557  0.0665  0.0419  0.0647  0.0592  0.0883
+#> [10]  0.0781  0.0711  0.0991
 #> 
 #> Setting for 'lambda':
-#> [1]  0.15
+#> [1]  1e-04
 #> 
 #> Setting for 'eps':
 #> [1]  1e-04
 #> 
 #> Setting for 'daily':
-#>  [1]  0.0100  0.0100  0.0100  0.0100  0.0100  0.1187  0.0100  0.0101  0.0100
-#> [10]  0.0100  0.0100  0.0152
+#>  [1]  0.0813  0.0826  0.0522  0.0905  0.0708  0.0753  0.0486  0.1111  0.0894
+#> [10]  0.0579  0.0776  0.0913
 #> 
 #> Setting for 'weekly':
-#>  [1]  0.0100  0.0100  0.3753  0.2162  0.1081  0.1626  0.0278  0.0100  0.0100
-#> [10]  0.1926  0.0759  0.0465
+#>  [1]  0.0100  0.0100  0.1579  0.0524  0.0140  0.0100  0.0100  0.0100  0.0100
+#> [10]  0.1606  0.0449  0.0100
 #> 
 #> Setting for 'monthly':
-#>  [1]  0.010  0.396  0.902  1.000  0.627  0.492  0.581  0.415  0.500  0.379
-#> [11]  0.621  0.486
+#>  [1]  0.0989  0.0100  0.0100  0.1417  0.0100  0.0100  0.0100  0.1688  0.1708
+#> [10]  0.1520  0.2342  0.0100
 ```
 
 ``` r
 fit_bvhar_small_vhar <- bvhar_vhar_small_optim$fit
 fit_bvhar_medium_vhar <- bvhar_vhar_medium_optim$fit
 fit_bvhar_large_vhar <- bvhar_vhar_large_optim$fit
+```
+
+``` r
+parallel::stopCluster(cl)
 ```
 
 # Errors
@@ -669,75 +684,75 @@ fit_bvhar_large_vhar <- bvhar_vhar_large_optim$fit
     \endlastfoot
     \addlinespace[0.3em]
     \multicolumn{15}{l}{\textbf{SMALL}}\\
-    \hspace{1em} & BVAR & $\sigma$ & 0.211 & 0.211 & 0.043 &  &  &  &  &  &  &  &  & \\
+    \hspace{1em} & BVAR & $\sigma$ & 0.055 & 0.053 & 0.088 &  &  &  &  &  &  &  &  & \\
 
-    \hspace{1em} &  & $\lambda$ & 0.336 &  &  &  &  &  &  &  &  &  &  & \\
+    \hspace{1em} &  & $\lambda$ & 0.109 &  &  &  &  &  &  &  &  &  &  & \\
 
-    \hspace{1em} &  & $\delta$ & 0.178 & 0.178 & 0.010 &  &  &  &  &  &  &  &  & \\
+    \hspace{1em} &  & $\delta$ & 0.147 & 0.130 & 0.120 &  &  &  &  &  &  &  &  & \\
     \cmidrule{2-15}
-    \hspace{1em} & BVHAR-S & $\sigma$ & 0.141 & 0.105 & 0.122 &  &  &  &  &  &  &  &  & \\
+    \hspace{1em} & BVHAR-S & $\sigma$ & 0.055 & 0.052 & 0.093 &  &  &  &  &  &  &  &  & \\
 
-    \hspace{1em} &  & $\lambda$ & 0.271 &  &  &  &  &  &  &  &  &  &  & \\
+    \hspace{1em} &  & $\lambda$ & 0.139 &  &  &  &  &  &  &  &  &  &  & \\
 
-    \hspace{1em} &  & $\delta$ & 0.088 & 0.043 & 0.010 &  &  &  &  &  &  &  &  & \\
+    \hspace{1em} &  & $\delta$ & 0.149 & 0.117 & 0.115 &  &  &  &  &  &  &  &  & \\
     \cmidrule{2-15}
-    \hspace{1em} & BVHAR-L & $\sigma$ & 0.216 & 0.157 & 0.154 &  &  &  &  &  &  &  &  & \\
+    \hspace{1em} & BVHAR-L & $\sigma$ & 0.056 & 0.053 & 0.088 &  &  &  &  &  &  &  &  & \\
 
-    \hspace{1em} &  & $\lambda$ & 0.279 &  &  &  &  &  &  &  &  &  &  & \\
+    \hspace{1em} &  & $\lambda$ & 0.126 &  &  &  &  &  &  &  &  &  &  & \\
 
-    \hspace{1em} &  & $d_i$ & 0.135 & 0.049 & 0.010 &  &  &  &  &  &  &  &  & \\
+    \hspace{1em} &  & $d_i$ & 0.139 & 0.114 & 0.108 &  &  &  &  &  &  &  &  & \\
 
-    \hspace{1em} &  & $w_i$ & 0.135 & 0.010 & 0.135 &  &  &  &  &  &  &  &  & \\
+    \hspace{1em} &  & $w_i$ & 0.095 & 0.010 & 0.122 &  &  &  &  &  &  &  &  & \\
 
-    \hspace{1em} &  & $m_i$ & 0.135 & 0.010 & 0.010 &  &  &  &  &  &  &  &  & \\
+    \hspace{1em} &  & $m_i$ & 0.052 & 0.022 & 0.010 &  &  &  &  &  &  &  &  & \\
     \cmidrule{1-15}
     \addlinespace[0.3em]
     \multicolumn{15}{l}{\textbf{MEDIUM}}\\
-    \hspace{1em} & BVAR & $\sigma$ & 0.040 & 0.040 & 0.035 & 0.058 & 0.051 & 0.069 & 0.072 & 0.088 & 0.110 &  &  & \\
+    \hspace{1em} & BVAR & $\sigma$ & 0.039 & 0.040 & 0.049 & 0.054 & 0.063 & 0.058 & 0.064 & 0.117 & 0.096 &  &  & \\
 
-    \hspace{1em} &  & $\lambda$ & 0.198 &  &  &  &  &  &  &  &  &  &  & \\
+    \hspace{1em} &  & $\lambda$ & 0.065 &  &  &  &  &  &  &  &  &  &  & \\
 
-    \hspace{1em} &  & $\delta$ & 0.086 & 0.010 & 0.041 & 0.010 & 0.017 & 0.010 & 0.057 & 0.010 & 0.025 &  &  & \\
+    \hspace{1em} &  & $\delta$ & 0.132 & 0.049 & 0.086 & 0.065 & 0.050 & 0.060 & 0.137 & 0.064 & 0.107 &  &  & \\
     \cmidrule{2-15}
-    \hspace{1em} & BVHAR-S & $\sigma$ & 0.041 & 0.039 & 0.048 & 0.059 & 0.066 & 0.062 & 0.070 & 0.140 & 0.017 &  &  & \\
+    \hspace{1em} & BVHAR-S & $\sigma$ & 0.038 & 0.039 & 0.048 & 0.052 & 0.065 & 0.057 & 0.063 & 0.134 & 0.101 &  &  & \\
 
-    \hspace{1em} &  & $\lambda$ & 0.195 &  &  &  &  &  &  &  &  &  &  & \\
+    \hspace{1em} &  & $\lambda$ & 0.046 &  &  &  &  &  &  &  &  &  &  & \\
 
-    \hspace{1em} &  & $\delta$ & 0.052 & 0.010 & 0.049 & 0.034 & 0.010 & 0.010 & 0.048 & 0.010 & 0.010 &  &  & \\
+    \hspace{1em} &  & $\delta$ & 0.122 & 0.058 & 0.085 & 0.067 & 0.049 & 0.059 & 0.138 & 0.056 & 0.105 &  &  & \\
     \cmidrule{2-15}
-    \hspace{1em} & BVHAR-L & $\sigma$ & 0.043 & 0.039 & 0.049 & 0.060 & 0.061 & 0.062 & 0.070 & 0.137 & 0.018 &  &  & \\
+    \hspace{1em} & BVHAR-L & $\sigma$ & 0.038 & 0.039 & 0.048 & 0.051 & 0.065 & 0.057 & 0.063 & 0.134 & 0.100 &  &  & \\
 
-    \hspace{1em} &  & $\lambda$ & 0.191 &  &  &  &  &  &  &  &  &  &  & \\
+    \hspace{1em} &  & $\lambda$ & 0.044 &  &  &  &  &  &  &  &  &  &  & \\
 
-    \hspace{1em} &  & $d_i$ & 0.027 & 0.010 & 0.029 & 0.010 & 0.010 & 0.010 & 0.023 & 0.010 & 0.013 &  &  & \\
+    \hspace{1em} &  & $d_i$ & 0.099 & 0.048 & 0.080 & 0.065 & 0.045 & 0.057 & 0.137 & 0.041 & 0.099 &  &  & \\
 
-    \hspace{1em} &  & $w_i$ & 0.291 & 0.088 & 0.010 & 0.010 & 0.010 & 0.011 & 0.062 & 0.153 & 0.010 &  &  & \\
+    \hspace{1em} &  & $w_i$ & 0.181 & 0.085 & 0.029 & 0.010 & 0.010 & 0.010 & 0.010 & 0.142 & 0.010 &  &  & \\
 
-    \hspace{1em} &  & $m_i$ & 0.128 & 0.087 & 0.094 & 0.053 & 0.208 & 0.017 & 0.039 & 0.152 & 0.010 &  &  & \\
+    \hspace{1em} &  & $m_i$ & 0.010 & 0.010 & 0.091 & 0.010 & 0.010 & 0.010 & 0.010 & 0.010 & 0.147 &  &  & \\
     \cmidrule{1-15}
     \addlinespace[0.3em]
     \multicolumn{15}{l}{\textbf{LARGE}}\\
-    \hspace{1em} & BVAR & $\sigma$ & 0.046 & 0.045 & 0.019 & 0.034 & 0.064 & 0.037 & 0.069 & 0.077 & 0.101 & 0.082 & 0.080 & 0.078\\
+    \hspace{1em} & BVAR & $\sigma$ & 0.038 & 0.040 & 0.044 & 0.056 & 0.067 & 0.042 & 0.065 & 0.060 & 0.089 & 0.079 & 0.071 & 0.099\\
 
-    \hspace{1em} &  & $\lambda$ & 0.142 &  &  &  &  &  &  &  &  &  &  & \\
+    \hspace{1em}\hspace{1em}\hspace{1em} &  & $\lambda$ & 0.000 &  &  &  &  &  &  &  &  &  &  & \\
 
-    \hspace{1em} &  & $\delta$ & 0.010 & 0.010 & 0.029 & 0.057 & 0.010 & 0.125 & 0.010 & 0.015 & 0.010 & 0.028 & 0.019 & 0.029\\
+    \hspace{1em} &  & $\delta$ & 0.080 & 0.085 & 0.070 & 0.098 & 0.066 & 0.081 & 0.053 & 0.110 & 0.090 & 0.087 & 0.083 & 0.090\\
     \cmidrule{2-15}
-    \hspace{1em} & BVHAR-S & $\sigma$ & 0.044 & 0.047 & 0.010 & 0.042 & 0.072 & 0.047 & 0.071 & 0.073 & 0.104 & 0.084 & 0.082 & 0.045\\
+    \hspace{1em} & BVHAR-S & $\sigma$ & 0.038 & 0.040 & 0.044 & 0.056 & 0.066 & 0.042 & 0.065 & 0.059 & 0.088 & 0.078 & 0.071 & 0.099\\
 
-    \hspace{1em} &  & $\lambda$ & 0.181 &  &  &  &  &  &  &  &  &  &  & \\
+     &  & $\lambda$ & 0.000 &  &  &  &  &  &  &  &  &  &  & \\
 
-    \hspace{1em} &  & $\delta$ & 0.010 & 0.010 & 0.053 & 0.031 & 0.010 & 0.086 & 0.010 & 0.010 & 0.010 & 0.010 & 0.010 & 0.046\\
+    \hspace{1em} &  & $\delta$ & 0.084 & 0.085 & 0.071 & 0.098 & 0.072 & 0.077 & 0.051 & 0.115 & 0.094 & 0.081 & 0.087 & 0.093\\
     \cmidrule{2-15}
-    \hspace{1em} & BVHAR-L & $\sigma$ & 0.042 & 0.046 & 0.010 & 0.051 & 0.070 & 0.046 & 0.067 & 0.072 & 0.093 & 0.085 & 0.074 & 0.080\\
+    \hspace{1em} & BVHAR-L & $\sigma$ & 0.038 & 0.040 & 0.044 & 0.056 & 0.066 & 0.042 & 0.065 & 0.059 & 0.088 & 0.078 & 0.071 & 0.099\\
 
-    \hspace{1em} &  & $\lambda$ & 0.150 &  &  &  &  &  &  &  &  &  &  & \\
+     &  & $\lambda$ & 0.000 &  &  &  &  &  &  &  &  &  &  & \\
 
-    \hspace{1em} &  & $d_i$ & 0.010 & 0.010 & 0.010 & 0.010 & 0.010 & 0.119 & 0.010 & 0.010 & 0.010 & 0.010 & 0.010 & 0.015\\
+    \hspace{1em} &  & $d_i$ & 0.081 & 0.083 & 0.052 & 0.091 & 0.071 & 0.075 & 0.049 & 0.111 & 0.089 & 0.058 & 0.078 & 0.091\\
 
-    \hspace{1em} &  & $w_i$ & 0.010 & 0.010 & 0.375 & 0.216 & 0.108 & 0.163 & 0.028 & 0.010 & 0.010 & 0.193 & 0.076 & 0.047\\
+    \hspace{1em} &  & $w_i$ & 0.010 & 0.010 & 0.158 & 0.052 & 0.014 & 0.010 & 0.010 & 0.010 & 0.010 & 0.161 & 0.045 & 0.010\\
 
-    \hspace{1em} &  & $m_i$ & 0.010 & 0.396 & 0.902 & 1.000 & 0.627 & 0.492 & 0.581 & 0.415 & 0.500 & 0.379 & 0.621 & 0.486\\*
+    \hspace{1em} &  & $m_i$ & 0.099 & 0.010 & 0.010 & 0.142 & 0.010 & 0.010 & 0.010 & 0.169 & 0.171 & 0.152 & 0.234 & 0.010\\*
     \end{longtable}
 
 ## SMALL
@@ -806,37 +821,37 @@ cv_small_20 <-
     \endfoot
     \bottomrule
     \endlastfoot
-     & asset01 & \num{0.01252} & \num{2.02976} & \num{0.00246} & \num{0.00319} & \textcolor{red}{\num{0.00194}}\\
+     & asset01 & \num{0.00097} & \num{0.000924} & \num{0.000933} & \textcolor{red}{\num{0.000916}} & \num{0.000917}\\
     \cmidrule{2-7}\nopagebreak
-     & asset02 & \num{0.00671} & \num{0.96958} & \textcolor{red}{\num{0.00139}} & \num{0.00211} & \num{0.00145}\\
+     & asset02 & \num{0.000892} & \num{0.000879} & \textcolor{red}{\num{0.000855}} & \num{0.000868} & \num{0.000869}\\
     \cmidrule{2-7}\nopagebreak
-     & asset03 & \num{0.1509} & \num{23.4826} & \num{0.0302} & \num{0.0393} & \textcolor{red}{\num{0.0263}}\\
+     & asset03 & \num{0.0148} & \num{0.0145} & \num{0.0145} & \textcolor{red}{\num{0.0144}} & \num{0.0144}\\
     \cmidrule{2-7}\nopagebreak
-    \multirow{-4}{*}{\raggedright\arraybackslash MSE} & \cellcolor{gray}{Average} & \num{0.0567} & \num{8.8273} & \num{0.0114} & \num{0.0149} & \textcolor{red}{\num{0.0099}}\\
+    \multirow{-4}{*}{\raggedright\arraybackslash MSE} & \cellcolor{gray}{Average} & \num{0.00556} & \num{0.00543} & \num{0.00542} & \textcolor{red}{\num{0.00539}} & \num{0.00539}\\
     \cmidrule{1-7}\pagebreak[0]
-     & asset01 & \num{0.0857} & \num{1.1756} & \num{0.0384} & \num{0.0448} & \textcolor{red}{\num{0.0354}}\\
+     & asset01 & \num{0.0253} & \textcolor{red}{\num{0.0245}} & \num{0.0248} & \num{0.0246} & \num{0.0246}\\
     \cmidrule{2-7}\nopagebreak
-     & asset02 & \num{0.0608} & \num{0.8114} & \textcolor{red}{\num{0.0293}} & \num{0.0372} & \num{0.0304}\\
+     & asset02 & \num{0.0237} & \num{0.024} & \textcolor{red}{\num{0.0234}} & \num{0.0237} & \num{0.0237}\\
     \cmidrule{2-7}\nopagebreak
-     & asset03 & \num{0.287} & \num{3.995} & \num{0.139} & \num{0.159} & \textcolor{red}{\num{0.127}}\\
+     & asset03 & \num{0.101} & \num{0.0987} & \num{0.098} & \textcolor{red}{\num{0.0976}} & \num{0.0977}\\
     \cmidrule{2-7}\nopagebreak
-    \multirow{-4}{*}{\raggedright\arraybackslash MAE} & \cellcolor{gray}{Average} & \num{0.1444} & \num{1.9941} & \num{0.0689} & \num{0.0802} & \textcolor{red}{\num{0.0643}}\\
+    \multirow{-4}{*}{\raggedright\arraybackslash MAE} & \cellcolor{gray}{Average} & \num{0.05} & \num{0.049} & \num{0.0487} & \textcolor{red}{\num{0.0486}} & \num{0.0487}\\
     \cmidrule{1-7}\pagebreak[0]
-     & asset01 & \num{0.001748} & \num{0.023982} & \num{0.000783} & \num{0.000913} & \textcolor{red}{\num{0.000722}}\\
+     & asset01 & \num{179.757} & \textcolor{red}{\num{148.191}} & \num{162.914} & \num{160.074} & \num{159.12}\\
     \cmidrule{2-7}\nopagebreak
-     & asset02 & \num{0.001794} & \num{0.023922} & \textcolor{red}{\num{0.000864}} & \num{0.001097} & \num{0.000895}\\
+     & asset02 & \num{156.045} & \num{166.118} & \textcolor{red}{\num{155.151}} & \num{162.883} & \num{162.8}\\
     \cmidrule{2-7}\nopagebreak
-     & asset03 & \num{0.001722} & \num{0.023993} & \num{0.000834} & \num{0.000953} & \textcolor{red}{\num{0.000763}}\\
+     & asset03 & \num{173.366} & \num{160.399} & \num{161.089} & \num{159.478} & \textcolor{red}{\num{159.385}}\\
     \cmidrule{2-7}\nopagebreak
-    \multirow{-4}{*}{\raggedright\arraybackslash MAPE} & \cellcolor{gray}{Average} & \num{0.001755} & \num{0.023966} & \num{0.000827} & \num{0.000988} & \textcolor{red}{\num{0.000793}}\\
+    \multirow{-4}{*}{\raggedright\arraybackslash MAPE} & \cellcolor{gray}{Average} & \num{169.723} & \textcolor{red}{\num{158.236}} & \num{159.718} & \num{160.812} & \num{160.435}\\
     \cmidrule{1-7}\pagebreak[0]
-     & asset01 & \num{195.739} & \num{2621.46} & \num{90.881} & \num{107.679} & \textcolor{red}{\num{82.242}}\\
+     & asset01 & \num{57.806} & \num{56.926} & \num{56.943} & \textcolor{red}{\num{56.662}} & \num{56.812}\\
     \cmidrule{2-7}\nopagebreak
-     & asset02 & \num{139.773} & \num{1853.089} & \textcolor{red}{\num{65.59}} & \num{80.198} & \num{67.333}\\
+     & asset02 & \num{52.693} & \num{53.784} & \textcolor{red}{\num{51.955}} & \num{53.026} & \num{53.06}\\
     \cmidrule{2-7}\nopagebreak
-     & asset03 & \num{653.174} & \num{9330.211} & \num{311.953} & \num{372.484} & \textcolor{red}{\num{286.584}}\\
+     & asset03 & \num{228.109} & \num{220.686} & \num{220.371} & \textcolor{red}{\num{219.407}} & \num{219.613}\\
     \cmidrule{2-7}\nopagebreak
-    \multirow{-4}{*}{\raggedright\arraybackslash MASE} & \cellcolor{gray}{Average} & \num{329.562} & \num{4601.587} & \num{156.141} & \num{186.787} & \textcolor{red}{\num{145.386}}\\*
+    \multirow{-4}{*}{\raggedright\arraybackslash MASE} & \cellcolor{gray}{Average} & \num{112.869} & \num{110.465} & \num{109.757} & \textcolor{red}{\num{109.698}} & \num{109.828}\\*
     \end{longtable}
 
 5-step:
@@ -859,37 +874,37 @@ cv_small_20 <-
     \endfoot
     \bottomrule
     \endlastfoot
-     & asset01 & \num{0.2294} & \num{40.1395} & \num{0.0267} & \num{0.0424} & \textcolor{red}{\num{0.0247}}\\
+     & asset01 & \num{0.00161} & \num{0.00161} & \num{0.00155} & \num{0.00155} & \textcolor{red}{\num{0.00155}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset02 & \num{0.1274} & \num{23.8079} & \num{0.0156} & \num{0.0259} & \textcolor{red}{\num{0.0144}}\\
+     & asset02 & \num{0.00137} & \num{0.00134} & \textcolor{red}{\num{0.00132}} & \num{0.00132} & \num{0.00132}\\
     \cmidrule{2-7}\nopagebreak
-     & asset03 & \num{2.775} & \num{491.704} & \num{0.323} & \num{0.525} & \textcolor{red}{\num{0.304}}\\
+     & asset03 & \num{0.0214} & \num{0.0213} & \num{0.0209} & \num{0.0209} & \textcolor{red}{\num{0.0208}}\\
     \cmidrule{2-7}\nopagebreak
-    \multirow{-4}{*}{\raggedright\arraybackslash MSE} & \cellcolor{gray}{Average} & \num{1.044} & \num{185.217} & \num{0.122} & \num{0.198} & \textcolor{red}{\num{0.114}}\\
+    \multirow{-4}{*}{\raggedright\arraybackslash MSE} & \cellcolor{gray}{Average} & \num{0.00814} & \num{0.00809} & \num{0.00791} & \num{0.00792} & \textcolor{red}{\num{0.0079}}\\
     \cmidrule{1-7}\pagebreak[0]
-     & asset01 & \num{0.366} & \num{5.236} & \num{0.129} & \num{0.166} & \textcolor{red}{\num{0.121}}\\
+     & asset01 & \num{0.0329} & \num{0.0327} & \textcolor{red}{\num{0.0323}} & \num{0.0323} & \num{0.0323}\\
     \cmidrule{2-7}\nopagebreak
-     & asset02 & \num{0.272} & \num{4.0296} & \num{0.0983} & \num{0.1309} & \textcolor{red}{\num{0.0922}}\\
+     & asset02 & \num{0.0296} & \num{0.0295} & \textcolor{red}{\num{0.029}} & \num{0.029} & \num{0.029}\\
     \cmidrule{2-7}\nopagebreak
-     & asset03 & \num{1.276} & \num{18.319} & \num{0.45} & \num{0.586} & \textcolor{red}{\num{0.422}}\\
+     & asset03 & \num{0.116} & \num{0.116} & \num{0.115} & \num{0.115} & \textcolor{red}{\num{0.115}}\\
     \cmidrule{2-7}\nopagebreak
-    \multirow{-4}{*}{\raggedright\arraybackslash MAE} & \cellcolor{gray}{Average} & \num{0.638} & \num{9.195} & \num{0.226} & \num{0.294} & \textcolor{red}{\num{0.212}}\\
+    \multirow{-4}{*}{\raggedright\arraybackslash MAE} & \cellcolor{gray}{Average} & \num{0.0594} & \num{0.0595} & \num{0.0589} & \num{0.0589} & \textcolor{red}{\num{0.0588}}\\
     \cmidrule{1-7}\pagebreak[0]
-     & asset01 & \num{0.00746} & \num{0.10682} & \num{0.00262} & \num{0.00339} & \textcolor{red}{\num{0.00246}}\\
+     & asset01 & \num{120.296} & \num{128.473} & \textcolor{red}{\num{101.686}} & \num{102.317} & \num{102.906}\\
     \cmidrule{2-7}\nopagebreak
-     & asset02 & \num{0.00802} & \num{0.11879} & \num{0.0029} & \num{0.00386} & \textcolor{red}{\num{0.00272}}\\
+     & asset02 & \num{109.384} & \num{132.168} & \textcolor{red}{\num{100.52}} & \num{102.372} & \num{102.597}\\
     \cmidrule{2-7}\nopagebreak
-     & asset03 & \num{0.00766} & \num{0.11001} & \num{0.0027} & \num{0.00352} & \textcolor{red}{\num{0.00253}}\\
+     & asset03 & \num{102.434} & \num{108.832} & \num{100.7} & \textcolor{red}{\num{100.026}} & \num{100.108}\\
     \cmidrule{2-7}\nopagebreak
-    \multirow{-4}{*}{\raggedright\arraybackslash MAPE} & \cellcolor{gray}{Average} & \num{0.00771} & \num{0.11188} & \num{0.00274} & \num{0.00359} & \textcolor{red}{\num{0.00257}}\\
+    \multirow{-4}{*}{\raggedright\arraybackslash MAPE} & \cellcolor{gray}{Average} & \num{110.705} & \num{123.158} & \textcolor{red}{\num{100.969}} & \num{101.572} & \num{101.87}\\
     \cmidrule{1-7}\pagebreak[0]
-     & asset01 & \num{815.761} & \num{11684.827} & \num{305.17} & \num{398.004} & \textcolor{red}{\num{280.646}}\\
+     & asset01 & \num{72.196} & \num{70.457} & \textcolor{red}{\num{70.079}} & \num{70.166} & \num{70.16}\\
     \cmidrule{2-7}\nopagebreak
-     & asset02 & \num{608.396} & \num{8987.717} & \num{233.095} & \num{316.007} & \textcolor{red}{\num{214.276}}\\
+     & asset02 & \num{67.698} & \textcolor{red}{\num{65.903}} & \num{66.282} & \num{66.434} & \num{66.357}\\
     \cmidrule{2-7}\nopagebreak
-     & asset03 & \num{2851.604} & \num{40877.618} & \num{1067.162} & \num{1414.731} & \textcolor{red}{\num{976.448}}\\
+     & asset03 & \num{263.182} & \textcolor{red}{\num{260.445}} & \num{261.15} & \num{261.089} & \num{260.849}\\
     \cmidrule{2-7}\nopagebreak
-    \multirow{-4}{*}{\raggedright\arraybackslash MASE} & \cellcolor{gray}{Average} & \num{1425.254} & \num{20516.721} & \num{535.142} & \num{709.581} & \textcolor{red}{\num{490.457}}\\*
+    \multirow{-4}{*}{\raggedright\arraybackslash MASE} & \cellcolor{gray}{Average} & \num{134.359} & \textcolor{red}{\num{132.268}} & \num{132.504} & \num{132.563} & \num{132.456}\\*
     \end{longtable}
 
 20-step:
@@ -912,37 +927,37 @@ cv_small_20 <-
     \endfoot
     \bottomrule
     \endlastfoot
-     & asset01 & \num{3.616} & \num{463.485} & \num{0.346} & \num{0.456} & \textcolor{red}{\num{0.202}}\\
+     & asset01 & \num{0.00166} & \textcolor{red}{\num{0.00166}} & \num{0.00166} & \num{0.00167} & \num{0.00167}\\
     \cmidrule{2-7}\nopagebreak
-     & asset02 & \num{1.7868} & \num{233.9074} & \num{0.1735} & \num{0.2284} & \textcolor{red}{\num{0.0999}}\\
+     & asset02 & \num{0.00124} & \textcolor{red}{\num{0.00124}} & \num{0.00124} & \num{0.00124} & \num{0.00124}\\
     \cmidrule{2-7}\nopagebreak
-     & asset03 & \num{41.99} & \num{5502.171} & \num{3.941} & \num{5.35} & \textcolor{red}{\num{2.364}}\\
+     & asset03 & \num{0.02} & \num{0.0201} & \textcolor{red}{\num{0.02}} & \num{0.0201} & \num{0.0201}\\
     \cmidrule{2-7}\nopagebreak
-    \multirow{-4}{*}{\raggedright\arraybackslash MSE} & \cellcolor{gray}{Average} & \num{15.798} & \num{2066.521} & \num{1.487} & \num{2.011} & \textcolor{red}{\num{0.889}}\\
+    \multirow{-4}{*}{\raggedright\arraybackslash MSE} & \cellcolor{gray}{Average} & \num{0.00764} & \num{0.00766} & \textcolor{red}{\num{0.00764}} & \num{0.00766} & \num{0.00766}\\
     \cmidrule{1-7}\pagebreak[0]
-     & asset01 & \num{1.459} & \num{17.767} & \num{0.445} & \num{0.549} & \textcolor{red}{\num{0.342}}\\
+     & asset01 & \num{0.0332} & \textcolor{red}{\num{0.033}} & \num{0.0332} & \num{0.0332} & \num{0.0332}\\
     \cmidrule{2-7}\nopagebreak
-     & asset02 & \num{1.028} & \num{12.622} & \num{0.315} & \num{0.391} & \textcolor{red}{\num{0.241}}\\
+     & asset02 & \num{0.028} & \textcolor{red}{\num{0.0278}} & \num{0.028} & \num{0.028} & \num{0.028}\\
     \cmidrule{2-7}\nopagebreak
-     & asset03 & \num{4.971} & \num{61.215} & \num{1.503} & \num{1.882} & \textcolor{red}{\num{1.17}}\\
+     & asset03 & \num{0.112} & \num{0.112} & \textcolor{red}{\num{0.112}} & \num{0.112} & \num{0.112}\\
     \cmidrule{2-7}\nopagebreak
-    \multirow{-4}{*}{\raggedright\arraybackslash MAE} & \cellcolor{gray}{Average} & \num{2.486} & \num{30.535} & \num{0.754} & \num{0.941} & \textcolor{red}{\num{0.585}}\\
+    \multirow{-4}{*}{\raggedright\arraybackslash MAE} & \cellcolor{gray}{Average} & \num{0.0576} & \num{0.0577} & \textcolor{red}{\num{0.0576}} & \num{0.0577} & \num{0.0577}\\
     \cmidrule{1-7}\pagebreak[0]
-     & asset01 & \num{0.02975} & \num{0.36244} & \num{0.00909} & \num{0.0112} & \textcolor{red}{\num{0.00699}}\\
+     & asset01 & \textcolor{red}{\num{99.991}} & \num{115.267} & \num{99.999} & \num{101.518} & \num{101.456}\\
     \cmidrule{2-7}\nopagebreak
-     & asset02 & \num{0.0303} & \num{0.3721} & \num{0.00927} & \num{0.01152} & \textcolor{red}{\num{0.00712}}\\
+     & asset02 & \num{100.023} & \num{100.29} & \textcolor{red}{\num{100}} & \num{100.47} & \num{100.407}\\
     \cmidrule{2-7}\nopagebreak
-     & asset03 & \num{0.02985} & \num{0.36763} & \num{0.00903} & \num{0.0113} & \textcolor{red}{\num{0.00703}}\\
+     & asset03 & \num{100.027} & \num{106.981} & \textcolor{red}{\num{100}} & \num{100.438} & \num{100.365}\\
     \cmidrule{2-7}\nopagebreak
-    \multirow{-4}{*}{\raggedright\arraybackslash MAPE} & \cellcolor{gray}{Average} & \num{0.02997} & \num{0.36739} & \num{0.00913} & \num{0.01134} & \textcolor{red}{\num{0.00704}}\\
+    \multirow{-4}{*}{\raggedright\arraybackslash MAPE} & \cellcolor{gray}{Average} & \num{100.014} & \num{107.513} & \textcolor{red}{\num{100}} & \num{100.809} & \num{100.743}\\
     \cmidrule{1-7}\pagebreak[0]
-     & asset01 & \num{3247.797} & \num{39067.462} & \num{1052.379} & \num{1279.649} & \textcolor{red}{\num{759.397}}\\
+     & asset01 & \num{71.438} & \textcolor{red}{\num{71.024}} & \num{71.438} & \num{71.571} & \num{71.569}\\
     \cmidrule{2-7}\nopagebreak
-     & asset02 & \num{2288.116} & \num{27758.512} & \num{749.655} & \num{916.329} & \textcolor{red}{\num{533.53}}\\
+     & asset02 & \num{64.304} & \textcolor{red}{\num{63.5}} & \num{64.302} & \num{64.384} & \num{64.384}\\
     \cmidrule{2-7}\nopagebreak
-     & asset03 & \num{11074.86} & \num{134626.959} & \num{3547.97} & \num{4401.129} & \textcolor{red}{\num{2598.633}}\\
+     & asset03 & \num{251.847} & \num{253.298} & \textcolor{red}{\num{251.824}} & \num{252.386} & \num{252.285}\\
     \cmidrule{2-7}\nopagebreak
-    \multirow{-4}{*}{\raggedright\arraybackslash MASE} & \cellcolor{gray}{Average} & \num{5536.925} & \num{67150.978} & \num{1783.335} & \num{2199.036} & \textcolor{red}{\num{1297.187}}\\*
+    \multirow{-4}{*}{\raggedright\arraybackslash MASE} & \cellcolor{gray}{Average} & \num{129.196} & \num{129.274} & \textcolor{red}{\num{129.188}} & \num{129.447} & \num{129.413}\\*
     \end{longtable}
 
 ## MEDIUM
@@ -1068,85 +1083,85 @@ cv_medium_20 %>%
     \endfoot
     \bottomrule
     \endlastfoot
-     & asset01 & \num{0.000384} & \num{0.000382} & \num{0.000361} & \num{0.000354} & \textcolor{red}{\num{0.000354}}\\
+     & asset01 & \num{0.000377} & \num{0.000372} & \num{0.000347} & \textcolor{red}{\num{0.000346}} & \num{0.000346}\\
     \cmidrule{2-7}\nopagebreak
-     & asset02 & \num{0.00024} & \num{0.000248} & \num{0.00023} & \num{0.000222} & \textcolor{red}{\num{0.000222}}\\
+     & asset02 & \num{0.000234} & \num{0.000237} & \num{0.000215} & \num{0.000214} & \textcolor{red}{\num{0.000214}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset03 & \num{0.000355} & \num{0.000355} & \num{0.000343} & \num{0.000338} & \textcolor{red}{\num{0.000337}}\\
+     & asset03 & \num{0.000348} & \num{0.000344} & \num{0.000327} & \textcolor{red}{\num{0.000326}} & \num{0.000326}\\
     \cmidrule{2-7}\nopagebreak
-     & asset04 & \num{0.000501} & \num{0.000512} & \num{0.000495} & \num{0.000492} & \textcolor{red}{\num{0.000491}}\\
+     & asset04 & \num{0.00051} & \num{0.00053} & \num{0.000501} & \num{0.000501} & \textcolor{red}{\num{5e-04}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset05 & \num{0.00106} & \textcolor{red}{\num{0.00101}} & \num{0.00108} & \num{0.00104} & \num{0.00104}\\
+     & asset05 & \num{0.000962} & \num{0.000975} & \textcolor{red}{\num{0.000955}} & \num{0.000969} & \num{0.000969}\\
     \cmidrule{2-7}\nopagebreak
-     & asset06 & \num{0.000887} & \num{0.000867} & \textcolor{red}{\num{0.000855}} & \num{0.000885} & \num{0.000883}\\
+     & asset06 & \num{0.000856} & \textcolor{red}{\num{0.000824}} & \num{0.000844} & \num{0.000857} & \num{0.000857}\\
     \cmidrule{2-7}\nopagebreak
-     & asset07 & \num{0.000572} & \num{0.000562} & \num{0.000554} & \textcolor{red}{\num{0.00054}} & \num{0.000543}\\
+     & asset07 & \num{0.000532} & \num{0.000529} & \textcolor{red}{\num{0.000518}} & \num{0.000521} & \num{0.000522}\\
     \cmidrule{2-7}\nopagebreak
-     & asset08 & \num{0.00668} & \textcolor{red}{\num{0.00602}} & \num{0.00638} & \num{0.00614} & \num{0.00612}\\
+     & asset08 & \num{0.00604} & \num{0.00596} & \textcolor{red}{\num{0.00579}} & \num{0.00584} & \num{0.00586}\\
     \cmidrule{2-7}\nopagebreak
-     & asset09 & \num{0.00494} & \num{0.0047} & \num{0.00486} & \num{0.00468} & \textcolor{red}{\num{0.00468}}\\
+     & asset09 & \textcolor{red}{\num{0.00411}} & \num{0.00414} & \num{0.00416} & \num{0.00426} & \num{0.00427}\\
     \cmidrule{2-7}\nopagebreak
-    \multirow{-10}{*}{\raggedright\arraybackslash MSE} & \cellcolor{gray}{Average} & \num{0.00174} & \textcolor{red}{\num{0.00163}} & \num{0.00168} & \num{0.00163} & \num{0.00163}\\
+    \multirow{-10}{*}{\raggedright\arraybackslash MSE} & \cellcolor{gray}{Average} & \num{0.00155} & \num{0.00155} & \textcolor{red}{\num{0.00152}} & \num{0.00154} & \num{0.00154}\\
     \cmidrule{1-7}\pagebreak[0]
-     & asset01 & \num{0.0153} & \num{0.0153} & \num{0.0147} & \textcolor{red}{\num{0.0146}} & \num{0.0146}\\
+     & asset01 & \num{0.0152} & \num{0.0151} & \num{0.0145} & \textcolor{red}{\num{0.0145}} & \num{0.0145}\\
     \cmidrule{2-7}\nopagebreak
-     & asset02 & \num{0.0127} & \num{0.0127} & \num{0.0123} & \num{0.012} & \textcolor{red}{\num{0.012}}\\
+     & asset02 & \num{0.0127} & \num{0.0124} & \num{0.0119} & \num{0.0118} & \textcolor{red}{\num{0.0118}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset03 & \num{0.0152} & \num{0.0153} & \textcolor{red}{\num{0.0149}} & \num{0.0149} & \num{0.0149}\\
+     & asset03 & \num{0.0151} & \num{0.015} & \textcolor{red}{\num{0.0148}} & \num{0.0148} & \num{0.0148}\\
     \cmidrule{2-7}\nopagebreak
-     & asset04 & \num{0.0174} & \num{0.0175} & \num{0.0172} & \num{0.0171} & \textcolor{red}{\num{0.0171}}\\
+     & asset04 & \num{0.0174} & \num{0.0178} & \textcolor{red}{\num{0.0173}} & \num{0.0174} & \num{0.0174}\\
     \cmidrule{2-7}\nopagebreak
-     & asset05 & \num{0.0253} & \textcolor{red}{\num{0.0252}} & \num{0.0258} & \num{0.0257} & \num{0.0257}\\
+     & asset05 & \textcolor{red}{\num{0.0237}} & \num{0.0243} & \num{0.0241} & \num{0.0245} & \num{0.0245}\\
     \cmidrule{2-7}\nopagebreak
-     & asset06 & \num{0.0242} & \num{0.0243} & \textcolor{red}{\num{0.024}} & \num{0.0241} & \num{0.0241}\\
+     & asset06 & \num{0.0241} & \textcolor{red}{\num{0.0236}} & \num{0.0238} & \num{0.0239} & \num{0.0239}\\
     \cmidrule{2-7}\nopagebreak
-     & asset07 & \num{0.0184} & \num{0.018} & \num{0.0175} & \textcolor{red}{\num{0.0173}} & \num{0.0174}\\
+     & asset07 & \num{0.0177} & \num{0.0174} & \textcolor{red}{\num{0.017}} & \num{0.017} & \num{0.017}\\
     \cmidrule{2-7}\nopagebreak
-     & asset08 & \num{0.0685} & \textcolor{red}{\num{0.0643}} & \num{0.0666} & \num{0.0647} & \num{0.0647}\\
+     & asset08 & \num{0.0646} & \num{0.0643} & \textcolor{red}{\num{0.0627}} & \num{0.0628} & \num{0.0629}\\
     \cmidrule{2-7}\nopagebreak
-     & asset09 & \num{0.0588} & \textcolor{red}{\num{0.0562}} & \num{0.0578} & \num{0.0562} & \num{0.0562}\\
+     & asset09 & \num{0.0529} & \textcolor{red}{\num{0.0525}} & \num{0.0534} & \num{0.0538} & \num{0.0538}\\
     \cmidrule{2-7}\nopagebreak
-    \multirow{-10}{*}{\raggedright\arraybackslash MAE} & \cellcolor{gray}{Average} & \num{0.0284} & \num{0.0276} & \num{0.0279} & \num{0.0274} & \textcolor{red}{\num{0.0274}}\\
+    \multirow{-10}{*}{\raggedright\arraybackslash MAE} & \cellcolor{gray}{Average} & \num{0.027} & \num{0.0269} & \textcolor{red}{\num{0.0266}} & \num{0.0267} & \num{0.0267}\\
     \cmidrule{1-7}\pagebreak[0]
-     & asset01 & \num{0.0123} & \num{0.0122} & \num{0.0118} & \textcolor{red}{\num{0.0117}} & \num{0.0117}\\
+     & asset01 & \num{178.846} & \num{198.001} & \num{152.95} & \num{153.637} & \textcolor{red}{\num{135.009}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset02 & \num{0.0112} & \num{0.0112} & \num{0.0109} & \num{0.0106} & \textcolor{red}{\num{0.0106}}\\
+     & asset02 & \num{160.555} & \num{154.378} & \textcolor{red}{\num{116.087}} & \num{120.767} & \num{119.476}\\
     \cmidrule{2-7}\nopagebreak
-     & asset03 & \num{0.00647} & \num{0.00653} & \textcolor{red}{\num{0.00633}} & \num{0.00635} & \num{0.00635}\\
+     & asset03 & \num{119.546} & \num{109.266} & \num{102.435} & \textcolor{red}{\num{99.916}} & \num{100.504}\\
     \cmidrule{2-7}\nopagebreak
-     & asset04 & \num{0.0126} & \num{0.0127} & \num{0.0125} & \num{0.0124} & \textcolor{red}{\num{0.0124}}\\
+     & asset04 & \num{333.328} & \num{146.636} & \num{153.482} & \textcolor{red}{\num{141.664}} & \num{142.564}\\
     \cmidrule{2-7}\nopagebreak
-     & asset05 & \num{0.00709} & \textcolor{red}{\num{0.00706}} & \num{0.00724} & \num{0.00721} & \num{0.00721}\\
+     & asset05 & \num{123.68} & \num{108.692} & \textcolor{red}{\num{104.05}} & \num{108.602} & \num{108.083}\\
     \cmidrule{2-7}\nopagebreak
-     & asset06 & \num{0.0263} & \num{0.0264} & \textcolor{red}{\num{0.0261}} & \num{0.0262} & \num{0.0262}\\
+     & asset06 & \num{143.894} & \num{121.224} & \num{105.485} & \num{96.644} & \textcolor{red}{\num{96.456}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset07 & \num{0.0114} & \num{0.0112} & \num{0.0109} & \textcolor{red}{\num{0.0108}} & \num{0.0108}\\
+     & asset07 & \num{156.428} & \num{176.808} & \num{115.509} & \num{111.618} & \textcolor{red}{\num{111.508}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset08 & \num{0.00738} & \textcolor{red}{\num{0.00693}} & \num{0.00718} & \num{0.00698} & \num{0.00697}\\
+     & asset08 & \num{205.694} & \num{200.817} & \num{128.345} & \num{127.938} & \textcolor{red}{\num{121.069}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset09 & \num{0.00654} & \textcolor{red}{\num{0.00625}} & \num{0.00643} & \num{0.00625} & \num{0.00625}\\
+     & asset09 & \num{135.898} & \num{138.286} & \num{122.446} & \textcolor{red}{\num{115.01}} & \num{115.075}\\
     \cmidrule{2-7}\nopagebreak
-    \multirow{-10}{*}{\raggedright\arraybackslash MAPE} & \cellcolor{gray}{Average} & \num{0.0113} & \num{0.0112} & \num{0.011} & \num{0.0109} & \textcolor{red}{\num{0.0109}}\\
+    \multirow{-10}{*}{\raggedright\arraybackslash MAPE} & \cellcolor{gray}{Average} & \num{173.097} & \num{150.456} & \num{122.31} & \num{119.533} & \textcolor{red}{\num{116.638}}\\
     \cmidrule{1-7}\pagebreak[0]
-     & asset01 & \num{51.577} & \num{52.291} & \num{50.036} & \num{49.919} & \textcolor{red}{\num{49.791}}\\
+     & asset01 & \num{55.173} & \num{55.904} & \num{53.131} & \num{53.102} & \textcolor{red}{\num{52.948}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset02 & \num{41.697} & \num{41.137} & \num{40.196} & \num{38.765} & \textcolor{red}{\num{38.609}}\\
+     & asset02 & \num{45.125} & \num{44.008} & \num{41.934} & \num{41.533} & \textcolor{red}{\num{41.438}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset03 & \num{51.676} & \num{51.753} & \num{50.409} & \num{50.15} & \textcolor{red}{\num{50.134}}\\
+     & asset03 & \num{55.27} & \num{54.795} & \num{53.809} & \textcolor{red}{\num{53.771}} & \num{53.794}\\
     \cmidrule{2-7}\nopagebreak
-     & asset04 & \num{57.095} & \num{58.262} & \num{56.838} & \num{56.729} & \textcolor{red}{\num{56.63}}\\
+     & asset04 & \num{61.998} & \num{64.147} & \textcolor{red}{\num{61.916}} & \num{62.256} & \num{62.229}\\
     \cmidrule{2-7}\nopagebreak
-     & asset05 & \textcolor{red}{\num{82.95}} & \num{84.615} & \num{86.106} & \num{86.213} & \num{86.293}\\
+     & asset05 & \textcolor{red}{\num{85.555}} & \num{86.95} & \num{87.045} & \num{88.685} & \num{88.705}\\
     \cmidrule{2-7}\nopagebreak
-     & asset06 & \num{83.219} & \textcolor{red}{\num{82.135}} & \num{82.83} & \num{82.315} & \num{82.288}\\
+     & asset06 & \num{88.419} & \textcolor{red}{\num{87.18}} & \num{88.523} & \num{89.126} & \num{89.143}\\
     \cmidrule{2-7}\nopagebreak
-     & asset07 & \num{63.018} & \num{60.348} & \num{59.082} & \textcolor{red}{\num{58.819}} & \num{58.98}\\
+     & asset07 & \num{64.572} & \num{63.439} & \textcolor{red}{\num{62.489}} & \num{62.733} & \num{62.746}\\
     \cmidrule{2-7}\nopagebreak
-     & asset08 & \num{224.896} & \textcolor{red}{\num{209.041}} & \num{218.496} & \num{210.515} & \num{210.429}\\
+     & asset08 & \num{228.701} & \num{226.996} & \textcolor{red}{\num{217.313}} & \num{217.492} & \num{218.093}\\
     \cmidrule{2-7}\nopagebreak
-     & asset09 & \num{200.552} & \num{195.135} & \num{199.458} & \num{192.941} & \textcolor{red}{\num{192.941}}\\
+     & asset09 & \textcolor{red}{\num{193.064}} & \num{196.359} & \num{195.746} & \num{197.612} & \num{197.876}\\
     \cmidrule{2-7}\nopagebreak
-    \multirow{-10}{*}{\raggedright\arraybackslash MASE} & \cellcolor{gray}{Average} & \num{95.187} & \num{92.746} & \num{93.717} & \num{91.818} & \textcolor{red}{\num{91.788}}\\*
+    \multirow{-10}{*}{\raggedright\arraybackslash MASE} & \cellcolor{gray}{Average} & \num{97.542} & \num{97.753} & \textcolor{red}{\num{95.767}} & \num{96.257} & \num{96.33}\\*
     \end{longtable}
 
 5-step:
@@ -1169,85 +1184,85 @@ cv_medium_20 %>%
     \endfoot
     \bottomrule
     \endlastfoot
-     & asset01 & \num{0.000365} & \num{0.000384} & \num{0.000363} & \textcolor{red}{\num{0.000361}} & \num{0.000361}\\
+     & asset01 & \num{0.000358} & \num{0.000372} & \num{0.000358} & \textcolor{red}{\num{0.000358}} & \num{0.00036}\\
     \cmidrule{2-7}\nopagebreak
-     & asset02 & \num{0.000214} & \num{0.000222} & \num{0.000209} & \textcolor{red}{\num{0.000206}} & \num{0.000206}\\
+     & asset02 & \num{0.000213} & \num{0.000222} & \num{0.000209} & \textcolor{red}{\num{0.000208}} & \num{0.000209}\\
     \cmidrule{2-7}\nopagebreak
-     & asset03 & \num{0.000413} & \num{0.000419} & \num{4e-04} & \textcolor{red}{\num{0.000387}} & \num{0.000388}\\
+     & asset03 & \num{0.000338} & \num{0.000344} & \num{0.000336} & \textcolor{red}{\num{0.000336}} & \num{0.000337}\\
     \cmidrule{2-7}\nopagebreak
-     & asset04 & \textcolor{red}{\num{0.000483}} & \num{0.000488} & \num{0.000486} & \num{0.000484} & \num{0.000484}\\
+     & asset04 & \num{0.000489} & \num{0.000503} & \num{0.000485} & \num{0.000485} & \textcolor{red}{\num{0.000484}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset05 & \num{0.00114} & \textcolor{red}{\num{0.00111}} & \num{0.00115} & \num{0.00111} & \num{0.00111}\\
+     & asset05 & \textcolor{red}{\num{0.000949}} & \num{0.000958} & \num{0.000961} & \num{0.000959} & \num{0.000959}\\
     \cmidrule{2-7}\nopagebreak
-     & asset06 & \num{0.000957} & \textcolor{red}{\num{0.000936}} & \num{0.00095} & \num{0.000947} & \num{0.000946}\\
+     & asset06 & \num{0.000907} & \textcolor{red}{\num{0.000879}} & \num{0.000905} & \num{0.000904} & \num{0.000904}\\
     \cmidrule{2-7}\nopagebreak
-     & asset07 & \num{0.000563} & \num{0.000565} & \num{0.000556} & \num{0.00055} & \textcolor{red}{\num{0.00055}}\\
+     & asset07 & \textcolor{red}{\num{0.000525}} & \num{0.000535} & \num{0.000532} & \num{0.000532} & \num{0.000531}\\
     \cmidrule{2-7}\nopagebreak
-     & asset08 & \num{0.00672} & \num{0.00657} & \num{0.00659} & \num{0.0065} & \textcolor{red}{\num{0.00648}}\\
+     & asset08 & \num{0.00592} & \num{0.00595} & \num{0.00588} & \num{0.00588} & \textcolor{red}{\num{0.00587}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset09 & \num{0.0052} & \num{0.00528} & \textcolor{red}{\num{0.00504}} & \num{0.00507} & \num{0.00506}\\
+     & asset09 & \textcolor{red}{\num{0.00455}} & \num{0.00467} & \num{0.0046} & \num{0.0046} & \num{0.0046}\\
     \cmidrule{2-7}\nopagebreak
-    \multirow{-10}{*}{\raggedright\arraybackslash MSE} & \cellcolor{gray}{Average} & \num{0.00178} & \num{0.00177} & \num{0.00175} & \num{0.00174} & \textcolor{red}{\num{0.00173}}\\
+    \multirow{-10}{*}{\raggedright\arraybackslash MSE} & \cellcolor{gray}{Average} & \textcolor{red}{\num{0.00158}} & \num{0.0016} & \num{0.00159} & \num{0.00159} & \num{0.00158}\\
     \cmidrule{1-7}\pagebreak[0]
-     & asset01 & \num{0.0152} & \num{0.0154} & \num{0.015} & \textcolor{red}{\num{0.015}} & \num{0.015}\\
+     & asset01 & \num{0.0151} & \num{0.0153} & \num{0.015} & \textcolor{red}{\num{0.015}} & \num{0.015}\\
     \cmidrule{2-7}\nopagebreak
-     & asset02 & \num{0.0121} & \num{0.0121} & \num{0.0118} & \textcolor{red}{\num{0.0116}} & \num{0.0117}\\
+     & asset02 & \num{0.0119} & \num{0.0121} & \num{0.0118} & \textcolor{red}{\num{0.0118}} & \num{0.0118}\\
     \cmidrule{2-7}\nopagebreak
-     & asset03 & \num{0.0164} & \num{0.0169} & \textcolor{red}{\num{0.0161}} & \num{0.0161} & \num{0.0161}\\
+     & asset03 & \num{0.0152} & \num{0.0153} & \num{0.0152} & \textcolor{red}{\num{0.0152}} & \num{0.0152}\\
     \cmidrule{2-7}\nopagebreak
-     & asset04 & \num{0.0172} & \num{0.0174} & \num{0.0172} & \num{0.0172} & \textcolor{red}{\num{0.0172}}\\
+     & asset04 & \num{0.0173} & \num{0.0174} & \num{0.0172} & \num{0.0172} & \textcolor{red}{\num{0.0172}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset05 & \textcolor{red}{\num{0.0264}} & \num{0.0268} & \num{0.0265} & \num{0.0265} & \num{0.0265}\\
+     & asset05 & \num{0.0242} & \textcolor{red}{\num{0.0241}} & \num{0.0242} & \num{0.0242} & \num{0.0242}\\
     \cmidrule{2-7}\nopagebreak
-     & asset06 & \num{0.0254} & \num{0.0253} & \num{0.0252} & \num{0.025} & \textcolor{red}{\num{0.025}}\\
+     & asset06 & \num{0.025} & \num{0.0249} & \num{0.0248} & \num{0.0248} & \textcolor{red}{\num{0.0248}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset07 & \num{0.0179} & \num{0.0179} & \num{0.0176} & \num{0.0173} & \textcolor{red}{\num{0.0173}}\\
+     & asset07 & \num{0.0173} & \textcolor{red}{\num{0.0171}} & \num{0.0171} & \num{0.0171} & \num{0.0171}\\
     \cmidrule{2-7}\nopagebreak
-     & asset08 & \num{0.0675} & \num{0.0655} & \num{0.066} & \num{0.0648} & \textcolor{red}{\num{0.0646}}\\
+     & asset08 & \num{0.0636} & \num{0.0634} & \num{0.0624} & \textcolor{red}{\num{0.0624}} & \num{0.0624}\\
     \cmidrule{2-7}\nopagebreak
-     & asset09 & \num{0.0597} & \num{0.0597} & \num{0.059} & \num{0.0589} & \textcolor{red}{\num{0.0589}}\\
+     & asset09 & \textcolor{red}{\num{0.0555}} & \num{0.0559} & \num{0.0559} & \num{0.056} & \num{0.056}\\
     \cmidrule{2-7}\nopagebreak
-    \multirow{-10}{*}{\raggedright\arraybackslash MAE} & \cellcolor{gray}{Average} & \num{0.0287} & \num{0.0286} & \num{0.0283} & \num{0.028} & \textcolor{red}{\num{0.028}}\\
+    \multirow{-10}{*}{\raggedright\arraybackslash MAE} & \cellcolor{gray}{Average} & \num{0.0272} & \num{0.0273} & \num{0.0271} & \textcolor{red}{\num{0.0271}} & \num{0.0271}\\
     \cmidrule{1-7}\pagebreak[0]
-     & asset01 & \num{0.0122} & \num{0.0123} & \num{0.012} & \textcolor{red}{\num{0.012}} & \num{0.012}\\
+     & asset01 & \num{133.384} & \num{148.228} & \num{99.997} & \textcolor{red}{\num{99.794}} & \num{102.562}\\
     \cmidrule{2-7}\nopagebreak
-     & asset02 & \num{0.0107} & \num{0.0107} & \num{0.0104} & \textcolor{red}{\num{0.0103}} & \num{0.0103}\\
+     & asset02 & \num{134.261} & \num{122.341} & \textcolor{red}{\num{99.979}} & \num{99.985} & \num{103.025}\\
     \cmidrule{2-7}\nopagebreak
-     & asset03 & \num{0.00697} & \num{0.00721} & \textcolor{red}{\num{0.00684}} & \num{0.00685} & \num{0.00686}\\
+     & asset03 & \num{100.733} & \num{103.484} & \textcolor{red}{\num{99.741}} & \num{100.028} & \num{99.935}\\
     \cmidrule{2-7}\nopagebreak
-     & asset04 & \num{0.0125} & \num{0.0126} & \num{0.0125} & \num{0.0125} & \textcolor{red}{\num{0.0125}}\\
+     & asset04 & \num{171.122} & \num{142.09} & \textcolor{red}{\num{98.844}} & \num{99.187} & \num{99.708}\\
     \cmidrule{2-7}\nopagebreak
-     & asset05 & \textcolor{red}{\num{0.00741}} & \num{0.00751} & \num{0.00745} & \num{0.00744} & \num{0.00743}\\
+     & asset05 & \num{111.45} & \num{106.25} & \num{100.378} & \num{99.981} & \textcolor{red}{\num{99.954}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset06 & \num{0.0276} & \num{0.0275} & \num{0.0274} & \num{0.0272} & \textcolor{red}{\num{0.0272}}\\
+     & asset06 & \num{111.061} & \num{128.385} & \textcolor{red}{\num{99.572}} & \num{100.155} & \num{100}\\
     \cmidrule{2-7}\nopagebreak
-     & asset07 & \num{0.0111} & \num{0.0111} & \num{0.011} & \num{0.0108} & \textcolor{red}{\num{0.0108}}\\
+     & asset07 & \num{145.681} & \num{115.772} & \num{100.99} & \textcolor{red}{\num{98.812}} & \num{98.86}\\
     \cmidrule{2-7}\nopagebreak
-     & asset08 & \num{0.00728} & \num{0.00706} & \num{0.00712} & \num{0.00698} & \textcolor{red}{\num{0.00696}}\\
+     & asset08 & \num{136.362} & \num{187.569} & \textcolor{red}{\num{100.307}} & \num{100.413} & \num{103.929}\\
     \cmidrule{2-7}\nopagebreak
-     & asset09 & \num{0.00665} & \num{0.00664} & \num{0.00657} & \num{0.00655} & \textcolor{red}{\num{0.00655}}\\
+     & asset09 & \num{100.393} & \num{127.602} & \num{100.081} & \num{99.967} & \textcolor{red}{\num{99.423}}\\
     \cmidrule{2-7}\nopagebreak
-    \multirow{-10}{*}{\raggedright\arraybackslash MAPE} & \cellcolor{gray}{Average} & \num{0.0114} & \num{0.0114} & \num{0.0112} & \textcolor{red}{\num{0.0112}} & \num{0.0112}\\
+    \multirow{-10}{*}{\raggedright\arraybackslash MAPE} & \cellcolor{gray}{Average} & \num{127.161} & \num{131.302} & \num{99.987} & \textcolor{red}{\num{99.813}} & \num{100.822}\\
     \cmidrule{1-7}\pagebreak[0]
-     & asset01 & \num{49.679} & \num{50.305} & \textcolor{red}{\num{48.971}} & \num{49.357} & \num{49.658}\\
+     & asset01 & \num{54.544} & \num{54.841} & \num{54.108} & \textcolor{red}{\num{54.059}} & \num{54.301}\\
     \cmidrule{2-7}\nopagebreak
-     & asset02 & \num{40.758} & \num{40.465} & \num{39.73} & \textcolor{red}{\num{38.605}} & \num{38.702}\\
+     & asset02 & \num{42.581} & \num{43.62} & \num{42.016} & \textcolor{red}{\num{42.014}} & \num{42.133}\\
     \cmidrule{2-7}\nopagebreak
-     & asset03 & \num{53.463} & \num{56.083} & \textcolor{red}{\num{52.202}} & \num{53.25} & \num{53.275}\\
+     & asset03 & \num{54.104} & \num{54.613} & \num{54.019} & \textcolor{red}{\num{54.012}} & \num{54.07}\\
     \cmidrule{2-7}\nopagebreak
-     & asset04 & \num{57.131} & \num{57.363} & \num{57.054} & \num{56.724} & \textcolor{red}{\num{56.708}}\\
+     & asset04 & \num{61.994} & \num{61.738} & \num{61.307} & \num{61.271} & \textcolor{red}{\num{61.264}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset05 & \textcolor{red}{\num{86.815}} & \num{88.286} & \num{87.423} & \num{87.509} & \num{87.51}\\
+     & asset05 & \num{86.967} & \textcolor{red}{\num{86.607}} & \num{87.135} & \num{87.085} & \num{87.075}\\
     \cmidrule{2-7}\nopagebreak
-     & asset06 & \num{79.893} & \num{80.749} & \num{79.555} & \num{79.123} & \textcolor{red}{\num{79.101}}\\
+     & asset06 & \num{84.833} & \num{85.667} & \textcolor{red}{\num{84.44}} & \num{84.46} & \num{84.44}\\
     \cmidrule{2-7}\nopagebreak
-     & asset07 & \num{61.151} & \num{60.705} & \num{60.325} & \num{59.263} & \textcolor{red}{\num{59.216}}\\
+     & asset07 & \num{63.567} & \textcolor{red}{\num{62.396}} & \num{63.346} & \num{63.288} & \num{63.26}\\
     \cmidrule{2-7}\nopagebreak
-     & asset08 & \num{224.362} & \num{219.44} & \num{218.948} & \num{216.604} & \textcolor{red}{\num{215.915}}\\
+     & asset08 & \num{234.353} & \num{233.993} & \num{231.088} & \num{230.971} & \textcolor{red}{\num{230.876}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset09 & \num{198.025} & \num{204.528} & \textcolor{red}{\num{196.888}} & \num{199.061} & \num{198.938}\\
+     & asset09 & \textcolor{red}{\num{200.743}} & \num{205.801} & \num{202.709} & \num{202.791} & \num{202.931}\\
     \cmidrule{2-7}\nopagebreak
-    \multirow{-10}{*}{\raggedright\arraybackslash MASE} & \cellcolor{gray}{Average} & \num{94.586} & \num{95.325} & \num{93.455} & \num{93.277} & \textcolor{red}{\num{93.225}}\\*
+    \multirow{-10}{*}{\raggedright\arraybackslash MASE} & \cellcolor{gray}{Average} & \num{98.187} & \num{98.808} & \num{97.796} & \textcolor{red}{\num{97.772}} & \num{97.817}\\*
     \end{longtable}
 
 20-step:
@@ -1270,85 +1285,85 @@ cv_medium_20 %>%
     \endfoot
     \bottomrule
     \endlastfoot
-     & asset01 & \num{0.000407} & \textcolor{red}{\num{0.000392}} & \num{0.000408} & \num{0.000394} & \num{0.000393}\\
+     & asset01 & \num{0.000385} & \textcolor{red}{\num{0.000383}} & \num{0.000385} & \num{0.000385} & \num{0.000385}\\
     \cmidrule{2-7}\nopagebreak
-     & asset02 & \num{0.000239} & \textcolor{red}{\num{0.000224}} & \num{0.00024} & \num{0.000226} & \num{0.000225}\\
+     & asset02 & \num{0.000217} & \textcolor{red}{\num{0.000216}} & \num{0.000217} & \num{0.000217} & \num{0.000217}\\
     \cmidrule{2-7}\nopagebreak
-     & asset03 & \num{0.000399} & \textcolor{red}{\num{0.000384}} & \num{0.000398} & \num{0.000386} & \num{0.000385}\\
+     & asset03 & \num{0.000317} & \textcolor{red}{\num{0.000314}} & \num{0.000317} & \num{0.000317} & \num{0.000317}\\
     \cmidrule{2-7}\nopagebreak
-     & asset04 & \textcolor{red}{\num{0.00051}} & \num{0.000511} & \num{0.000513} & \num{0.000512} & \num{0.000513}\\
+     & asset04 & \num{0.00051} & \textcolor{red}{\num{0.000503}} & \num{0.00051} & \num{0.00051} & \num{0.00051}\\
     \cmidrule{2-7}\nopagebreak
-     & asset05 & \textcolor{red}{\num{0.000997}} & \num{0.001015} & \num{0.001019} & \num{0.001007} & \num{0.001007}\\
+     & asset05 & \num{0.000857} & \textcolor{red}{\num{0.000849}} & \num{0.000857} & \num{0.000857} & \num{0.000857}\\
     \cmidrule{2-7}\nopagebreak
-     & asset06 & \num{0.000858} & \textcolor{red}{\num{0.000855}} & \num{0.000866} & \num{0.000866} & \num{0.000865}\\
+     & asset06 & \num{0.000835} & \textcolor{red}{\num{0.00083}} & \num{0.000835} & \num{0.000835} & \num{0.000835}\\
     \cmidrule{2-7}\nopagebreak
-     & asset07 & \num{0.000507} & \textcolor{red}{\num{0.000496}} & \num{0.00051} & \num{0.000514} & \num{0.000513}\\
+     & asset07 & \num{0.000487} & \textcolor{red}{\num{0.000477}} & \num{0.000487} & \num{0.000487} & \num{0.000487}\\
     \cmidrule{2-7}\nopagebreak
-     & asset08 & \textcolor{red}{\num{0.00638}} & \num{0.00668} & \num{0.00649} & \num{0.0067} & \num{0.00669}\\
+     & asset08 & \num{0.00578} & \num{0.00579} & \num{0.00578} & \num{0.00578} & \textcolor{red}{\num{0.00578}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset09 & \num{0.00494} & \textcolor{red}{\num{0.00477}} & \num{0.00513} & \num{0.00494} & \num{0.00492}\\
+     & asset09 & \textcolor{red}{\num{0.00445}} & \num{0.00453} & \num{0.00445} & \num{0.00445} & \num{0.00446}\\
     \cmidrule{2-7}\nopagebreak
-    \multirow{-10}{*}{\raggedright\arraybackslash MSE} & \cellcolor{gray}{Average} & \textcolor{red}{\num{0.00169}} & \num{0.0017} & \num{0.00173} & \num{0.00173} & \num{0.00172}\\
+    \multirow{-10}{*}{\raggedright\arraybackslash MSE} & \cellcolor{gray}{Average} & \num{0.00154} & \num{0.00154} & \textcolor{red}{\num{0.00154}} & \num{0.00154} & \num{0.00154}\\
     \cmidrule{1-7}\pagebreak[0]
-     & asset01 & \num{0.0159} & \num{0.0156} & \num{0.016} & \num{0.0156} & \textcolor{red}{\num{0.0155}}\\
+     & asset01 & \num{0.0155} & \num{0.0157} & \num{0.0155} & \num{0.0155} & \textcolor{red}{\num{0.0155}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset02 & \num{0.0128} & \textcolor{red}{\num{0.0122}} & \num{0.0129} & \num{0.0124} & \num{0.0124}\\
+     & asset02 & \num{0.0122} & \textcolor{red}{\num{0.0122}} & \num{0.0122} & \num{0.0122} & \num{0.0122}\\
     \cmidrule{2-7}\nopagebreak
-     & asset03 & \num{0.0161} & \num{0.016} & \textcolor{red}{\num{0.0159}} & \num{0.0161} & \num{0.0161}\\
+     & asset03 & \num{0.0145} & \textcolor{red}{\num{0.0145}} & \num{0.0145} & \num{0.0145} & \num{0.0145}\\
     \cmidrule{2-7}\nopagebreak
-     & asset04 & \num{0.0179} & \num{0.0179} & \num{0.0179} & \textcolor{red}{\num{0.0178}} & \num{0.0178}\\
+     & asset04 & \num{0.0179} & \textcolor{red}{\num{0.0177}} & \num{0.0179} & \num{0.0179} & \num{0.0179}\\
     \cmidrule{2-7}\nopagebreak
-     & asset05 & \num{0.0257} & \num{0.0255} & \num{0.0258} & \textcolor{red}{\num{0.0253}} & \num{0.0254}\\
+     & asset05 & \num{0.0228} & \textcolor{red}{\num{0.0227}} & \num{0.0228} & \num{0.0228} & \num{0.0228}\\
     \cmidrule{2-7}\nopagebreak
-     & asset06 & \num{0.0238} & \textcolor{red}{\num{0.0236}} & \num{0.024} & \num{0.0238} & \num{0.0238}\\
+     & asset06 & \num{0.0238} & \textcolor{red}{\num{0.0237}} & \num{0.0238} & \num{0.0238} & \num{0.0238}\\
     \cmidrule{2-7}\nopagebreak
-     & asset07 & \num{0.0162} & \textcolor{red}{\num{0.0159}} & \num{0.0163} & \num{0.0163} & \num{0.0163}\\
+     & asset07 & \num{0.0159} & \textcolor{red}{\num{0.0159}} & \num{0.0159} & \num{0.0159} & \num{0.0159}\\
     \cmidrule{2-7}\nopagebreak
-     & asset08 & \textcolor{red}{\num{0.0633}} & \num{0.0648} & \num{0.0635} & \num{0.0643} & \num{0.0644}\\
+     & asset08 & \num{0.061} & \num{0.0611} & \num{0.061} & \num{0.061} & \textcolor{red}{\num{0.061}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset09 & \num{0.0581} & \textcolor{red}{\num{0.0571}} & \num{0.0595} & \num{0.0577} & \num{0.0576}\\
+     & asset09 & \textcolor{red}{\num{0.0549}} & \num{0.0551} & \num{0.0549} & \num{0.0549} & \num{0.055}\\
     \cmidrule{2-7}\nopagebreak
-    \multirow{-10}{*}{\raggedright\arraybackslash MAE} & \cellcolor{gray}{Average} & \num{0.0278} & \textcolor{red}{\num{0.0276}} & \num{0.028} & \num{0.0277} & \num{0.0277}\\
+    \multirow{-10}{*}{\raggedright\arraybackslash MAE} & \cellcolor{gray}{Average} & \num{0.0265} & \textcolor{red}{\num{0.0265}} & \num{0.0265} & \num{0.0265} & \num{0.0265}\\
     \cmidrule{1-7}\pagebreak[0]
-     & asset01 & \num{0.0128} & \num{0.0125} & \num{0.0128} & \num{0.0125} & \textcolor{red}{\num{0.0124}}\\
+     & asset01 & \num{99.945} & \num{125.942} & \num{100} & \num{99.937} & \textcolor{red}{\num{99.815}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset02 & \num{0.0113} & \textcolor{red}{\num{0.0108}} & \num{0.0114} & \num{0.011} & \num{0.0109}\\
+     & asset02 & \num{100.001} & \num{102.555} & \num{100} & \num{99.99} & \textcolor{red}{\num{99.988}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset03 & \num{0.00686} & \num{0.00681} & \textcolor{red}{\num{0.00676}} & \num{0.00687} & \num{0.00686}\\
+     & asset03 & \num{100.001} & \num{99.86} & \num{100} & \num{99.998} & \textcolor{red}{\num{99.759}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset04 & \num{0.013} & \num{0.013} & \num{0.013} & \textcolor{red}{\num{0.0129}} & \num{0.0129}\\
+     & asset04 & \num{99.995} & \num{100.804} & \num{100} & \textcolor{red}{\num{99.979}} & \num{100.057}\\
     \cmidrule{2-7}\nopagebreak
-     & asset05 & \num{0.0072} & \num{0.00716} & \num{0.00724} & \textcolor{red}{\num{0.00711}} & \num{0.00712}\\
+     & asset05 & \num{100.005} & \num{101.696} & \textcolor{red}{\num{100}} & \num{100.008} & \num{100.012}\\
     \cmidrule{2-7}\nopagebreak
-     & asset06 & \num{0.0258} & \textcolor{red}{\num{0.0256}} & \num{0.026} & \num{0.0258} & \num{0.0258}\\
+     & asset06 & \textcolor{red}{\num{99.984}} & \num{116.428} & \num{100} & \num{100.001} & \num{99.998}\\
     \cmidrule{2-7}\nopagebreak
-     & asset07 & \num{0.0101} & \textcolor{red}{\num{0.0099}} & \num{0.0101} & \num{0.0101} & \num{0.0101}\\
+     & asset07 & \textcolor{red}{\num{99.974}} & \num{104.761} & \num{100} & \num{99.981} & \num{100.051}\\
     \cmidrule{2-7}\nopagebreak
-     & asset08 & \textcolor{red}{\num{0.00682}} & \num{0.00698} & \num{0.00685} & \num{0.00693} & \num{0.00694}\\
+     & asset08 & \textcolor{red}{\num{99.964}} & \num{164.637} & \num{100} & \num{100.084} & \num{100.165}\\
     \cmidrule{2-7}\nopagebreak
-     & asset09 & \num{0.00647} & \textcolor{red}{\num{0.00636}} & \num{0.00662} & \num{0.00642} & \num{0.00641}\\
+     & asset09 & \textcolor{red}{\num{99.993}} & \num{100.887} & \num{100} & \num{99.993} & \num{100.553}\\
     \cmidrule{2-7}\nopagebreak
-    \multirow{-10}{*}{\raggedright\arraybackslash MAPE} & \cellcolor{gray}{Average} & \num{0.0111} & \textcolor{red}{\num{0.011}} & \num{0.0112} & \num{0.0111} & \num{0.0111}\\
+    \multirow{-10}{*}{\raggedright\arraybackslash MAPE} & \cellcolor{gray}{Average} & \textcolor{red}{\num{99.985}} & \num{113.063} & \num{100} & \num{99.997} & \num{100.044}\\
     \cmidrule{1-7}\pagebreak[0]
-     & asset01 & \num{54.305} & \textcolor{red}{\num{52.459}} & \num{54.377} & \num{52.857} & \num{52.75}\\
+     & asset01 & \num{57.096} & \num{57.2} & \num{57.096} & \num{57.097} & \textcolor{red}{\num{57.094}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset02 & \num{45.121} & \textcolor{red}{\num{43.068}} & \num{45.547} & \num{43.792} & \num{43.734}\\
+     & asset02 & \num{47.058} & \textcolor{red}{\num{46.686}} & \num{47.058} & \num{47.057} & \num{47.056}\\
     \cmidrule{2-7}\nopagebreak
-     & asset03 & \num{54.183} & \num{54.194} & \textcolor{red}{\num{53.321}} & \num{54.594} & \num{54.49}\\
+     & asset03 & \num{53.662} & \textcolor{red}{\num{53.386}} & \num{53.661} & \num{53.661} & \num{53.631}\\
     \cmidrule{2-7}\nopagebreak
-     & asset04 & \num{57.062} & \num{57.182} & \num{56.918} & \textcolor{red}{\num{56.499}} & \num{56.591}\\
+     & asset04 & \num{61.823} & \textcolor{red}{\num{60.919}} & \num{61.822} & \num{61.821} & \num{61.821}\\
     \cmidrule{2-7}\nopagebreak
-     & asset05 & \num{86.318} & \num{86.282} & \num{87.651} & \textcolor{red}{\num{85.717}} & \num{85.846}\\
+     & asset05 & \num{83.773} & \textcolor{red}{\num{82.989}} & \num{83.772} & \num{83.772} & \num{83.773}\\
     \cmidrule{2-7}\nopagebreak
-     & asset06 & \num{75.8} & \textcolor{red}{\num{74.93}} & \num{76.272} & \num{75.632} & \num{75.608}\\
+     & asset06 & \num{81.518} & \textcolor{red}{\num{81.041}} & \num{81.518} & \num{81.517} & \num{81.52}\\
     \cmidrule{2-7}\nopagebreak
-     & asset07 & \num{54.48} & \textcolor{red}{\num{53.192}} & \num{54.847} & \num{54.578} & \num{54.532}\\
+     & asset07 & \num{57.512} & \textcolor{red}{\num{56.927}} & \num{57.513} & \num{57.511} & \num{57.514}\\
     \cmidrule{2-7}\nopagebreak
-     & asset08 & \textcolor{red}{\num{198.839}} & \num{202.4} & \num{201.438} & \num{201.566} & \num{201.695}\\
+     & asset08 & \num{207.688} & \textcolor{red}{\num{206.661}} & \num{207.686} & \num{207.688} & \num{207.683}\\
     \cmidrule{2-7}\nopagebreak
-     & asset09 & \num{197.117} & \textcolor{red}{\num{193.481}} & \num{201.438} & \num{194.098} & \num{193.612}\\
+     & asset09 & \textcolor{red}{\num{197.198}} & \num{197.674} & \num{197.2} & \num{197.199} & \num{197.427}\\
     \cmidrule{2-7}\nopagebreak
-    \multirow{-10}{*}{\raggedright\arraybackslash MASE} & \cellcolor{gray}{Average} & \num{91.47} & \textcolor{red}{\num{90.799}} & \num{92.423} & \num{91.037} & \num{90.984}\\*
+    \multirow{-10}{*}{\raggedright\arraybackslash MASE} & \cellcolor{gray}{Average} & \num{94.147} & \textcolor{red}{\num{93.72}} & \num{94.147} & \num{94.147} & \num{94.169}\\*
     \end{longtable}
 
 ## LARGE
@@ -1474,109 +1489,109 @@ cv_large_20 %>%
     \endfoot
     \bottomrule
     \endlastfoot
-     & asset01 & \num{0.00029} & \num{0.000297} & \textcolor{red}{\num{0.000286}} & \num{0.000287} & \num{0.000287}\\
+     & asset01 & \num{0.000286} & \num{0.000291} & \num{0.000272} & \textcolor{red}{\num{0.000272}} & \num{0.000272}\\
     \cmidrule{2-7}\nopagebreak
-     & asset02 & \num{0.000421} & \num{0.000404} & \num{0.000389} & \textcolor{red}{\num{0.000382}} & \num{0.000382}\\
+     & asset02 & \num{0.000419} & \num{0.000404} & \num{0.000362} & \textcolor{red}{\num{0.000362}} & \num{0.000362}\\
     \cmidrule{2-7}\nopagebreak
-     & asset03 & \num{0.000241} & \num{0.000256} & \textcolor{red}{\num{0.000234}} & \num{0.000241} & \num{0.000241}\\
+     & asset03 & \num{0.000244} & \num{0.000258} & \num{0.000239} & \num{0.000239} & \textcolor{red}{\num{0.000239}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset04 & \num{0.000437} & \num{0.000442} & \textcolor{red}{\num{0.000437}} & \num{0.000442} & \num{0.000445}\\
+     & asset04 & \textcolor{red}{\num{0.000436}} & \num{0.000449} & \num{0.000466} & \num{0.000466} & \num{0.000464}\\
     \cmidrule{2-7}\nopagebreak
-     & asset05 & \num{0.000801} & \num{0.000776} & \num{0.000765} & \textcolor{red}{\num{0.000763}} & \num{0.000772}\\
+     & asset05 & \num{0.000819} & \num{0.00078} & \num{0.000761} & \num{0.000761} & \textcolor{red}{\num{0.000761}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset06 & \num{0.000525} & \num{0.000517} & \num{0.000508} & \num{0.000504} & \textcolor{red}{\num{0.000501}}\\
+     & asset06 & \num{0.000525} & \num{0.000521} & \num{0.000495} & \num{0.000495} & \textcolor{red}{\num{0.000495}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset07 & \num{0.000724} & \num{0.000748} & \num{0.000692} & \num{0.000686} & \textcolor{red}{\num{0.000682}}\\
+     & asset07 & \num{0.000715} & \num{0.00075} & \num{0.000669} & \num{0.000669} & \textcolor{red}{\num{0.000669}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset08 & \num{0.00238} & \num{0.00229} & \num{0.00223} & \num{0.00222} & \textcolor{red}{\num{0.00221}}\\
+     & asset08 & \num{0.00238} & \num{0.0023} & \num{0.00216} & \num{0.00215} & \textcolor{red}{\num{0.00215}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset09 & \num{0.00401} & \num{0.00386} & \num{0.00394} & \num{0.00381} & \textcolor{red}{\num{0.00378}}\\
+     & asset09 & \num{0.00377} & \num{0.00375} & \num{0.00369} & \num{0.00369} & \textcolor{red}{\num{0.00368}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset10 & \num{0.000896} & \num{0.000881} & \num{0.000879} & \textcolor{red}{\num{0.000863}} & \num{0.000869}\\
+     & asset10 & \num{0.000925} & \num{0.000936} & \num{0.000871} & \textcolor{red}{\num{0.00087}} & \num{0.000871}\\
     \cmidrule{2-7}\nopagebreak
-     & asset11 & \num{0.0042} & \textcolor{red}{\num{0.00384}} & \num{0.00396} & \num{0.0039} & \num{0.00389}\\
+     & asset11 & \num{0.0041} & \num{0.00381} & \num{0.00367} & \num{0.00367} & \textcolor{red}{\num{0.00363}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset12 & \num{0.00555} & \textcolor{red}{\num{0.00501}} & \num{0.00536} & \num{0.00521} & \num{0.00522}\\
+     & asset12 & \num{0.00515} & \textcolor{red}{\num{0.00482}} & \num{0.00489} & \num{0.00489} & \num{0.00489}\\
     \cmidrule{2-7}\nopagebreak
-    \multirow{-13}{*}{\raggedright\arraybackslash MSE} & \cellcolor{gray}{Average} & \num{0.00171} & \num{0.00161} & \num{0.00164} & \num{0.00161} & \textcolor{red}{\num{0.00161}}\\
+    \multirow{-13}{*}{\raggedright\arraybackslash MSE} & \cellcolor{gray}{Average} & \num{0.00165} & \num{0.00159} & \num{0.00154} & \num{0.00154} & \textcolor{red}{\num{0.00154}}\\
     \cmidrule{1-7}\pagebreak[0]
-     & asset01 & \num{0.0139} & \num{0.014} & \num{0.0137} & \num{0.0137} & \textcolor{red}{\num{0.0136}}\\
+     & asset01 & \num{0.0137} & \num{0.0138} & \num{0.0133} & \textcolor{red}{\num{0.0133}} & \num{0.0133}\\
     \cmidrule{2-7}\nopagebreak
-     & asset02 & \num{0.016} & \num{0.0157} & \num{0.0157} & \textcolor{red}{\num{0.0156}} & \num{0.0156}\\
+     & asset02 & \num{0.016} & \num{0.0157} & \num{0.0152} & \num{0.0152} & \textcolor{red}{\num{0.0152}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset03 & \num{0.0127} & \num{0.0127} & \textcolor{red}{\num{0.0124}} & \num{0.0125} & \num{0.0125}\\
+     & asset03 & \num{0.0124} & \num{0.0128} & \num{0.012} & \textcolor{red}{\num{0.012}} & \num{0.0121}\\
     \cmidrule{2-7}\nopagebreak
-     & asset04 & \num{0.0172} & \num{0.017} & \num{0.0168} & \textcolor{red}{\num{0.0168}} & \num{0.017}\\
+     & asset04 & \textcolor{red}{\num{0.0172}} & \num{0.0172} & \num{0.0175} & \num{0.0175} & \num{0.0174}\\
     \cmidrule{2-7}\nopagebreak
-     & asset05 & \num{0.0225} & \textcolor{red}{\num{0.0223}} & \num{0.0225} & \num{0.0225} & \num{0.0226}\\
+     & asset05 & \num{0.0223} & \num{0.0223} & \num{0.0221} & \num{0.0221} & \textcolor{red}{\num{0.022}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset06 & \num{0.0184} & \num{0.0183} & \num{0.0184} & \textcolor{red}{\num{0.0183}} & \num{0.0183}\\
+     & asset06 & \num{0.0184} & \num{0.0183} & \num{0.018} & \num{0.018} & \textcolor{red}{\num{0.018}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset07 & \num{0.0222} & \num{0.023} & \textcolor{red}{\num{0.0217}} & \num{0.0219} & \num{0.0217}\\
+     & asset07 & \num{0.0221} & \num{0.0229} & \textcolor{red}{\num{0.0215}} & \num{0.0215} & \num{0.0215}\\
     \cmidrule{2-7}\nopagebreak
-     & asset08 & \num{0.0394} & \num{0.0385} & \num{0.0379} & \num{0.0378} & \textcolor{red}{\num{0.0377}}\\
+     & asset08 & \num{0.0393} & \num{0.0386} & \num{0.037} & \num{0.037} & \textcolor{red}{\num{0.0369}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset09 & \num{0.0501} & \num{0.0499} & \num{0.0497} & \num{0.049} & \textcolor{red}{\num{0.0487}}\\
+     & asset09 & \num{0.0491} & \num{0.0493} & \num{0.0481} & \num{0.0481} & \textcolor{red}{\num{0.048}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset10 & \num{0.0236} & \num{0.0237} & \num{0.0237} & \num{0.0234} & \textcolor{red}{\num{0.0234}}\\
+     & asset10 & \num{0.0239} & \num{0.0244} & \num{0.0236} & \num{0.0236} & \textcolor{red}{\num{0.0236}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset11 & \num{0.0501} & \num{0.049} & \num{0.0493} & \num{0.0489} & \textcolor{red}{\num{0.0485}}\\
+     & asset11 & \num{0.0493} & \num{0.049} & \num{0.0482} & \num{0.0482} & \textcolor{red}{\num{0.0478}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset12 & \num{0.0604} & \textcolor{red}{\num{0.0572}} & \num{0.0589} & \num{0.0578} & \num{0.0578}\\
+     & asset12 & \num{0.0585} & \textcolor{red}{\num{0.0562}} & \num{0.0566} & \num{0.0566} & \num{0.0566}\\
     \cmidrule{2-7}\nopagebreak
-    \multirow{-13}{*}{\raggedright\arraybackslash MAE} & \cellcolor{gray}{Average} & \num{0.0289} & \num{0.0284} & \num{0.0284} & \num{0.0282} & \textcolor{red}{\num{0.0281}}\\
+    \multirow{-13}{*}{\raggedright\arraybackslash MAE} & \cellcolor{gray}{Average} & \num{0.0285} & \num{0.0284} & \num{0.0278} & \num{0.0278} & \textcolor{red}{\num{0.0277}}\\
     \cmidrule{1-7}\pagebreak[0]
-     & asset01 & \num{0.0199} & \num{0.02} & \num{0.0195} & \num{0.0195} & \textcolor{red}{\num{0.0194}}\\
+     & asset01 & \num{191.13} & \num{160.864} & \textcolor{red}{\num{129.391}} & \num{131.085} & \num{131.723}\\
     \cmidrule{2-7}\nopagebreak
-     & asset02 & \num{0.0213} & \num{0.0209} & \num{0.0209} & \textcolor{red}{\num{0.0208}} & \num{0.0208}\\
+     & asset02 & \num{164.612} & \num{161.164} & \num{109.285} & \num{109.209} & \textcolor{red}{\num{107.991}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset03 & \num{0.00792} & \num{0.00795} & \textcolor{red}{\num{0.00773}} & \num{0.00781} & \num{0.00782}\\
+     & asset03 & \num{387.577} & \num{357.399} & \num{150.338} & \num{151.499} & \textcolor{red}{\num{125.688}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset04 & \num{0.00911} & \num{0.00902} & \num{0.00893} & \textcolor{red}{\num{0.00893}} & \num{0.00901}\\
+     & asset04 & \num{508.691} & \num{364.154} & \textcolor{red}{\num{244.025}} & \num{244.462} & \num{245.518}\\
     \cmidrule{2-7}\nopagebreak
-     & asset05 & \num{0.0106} & \textcolor{red}{\num{0.0105}} & \num{0.0106} & \num{0.0106} & \num{0.0106}\\
+     & asset05 & \num{142.361} & \num{140.963} & \textcolor{red}{\num{105.625}} & \num{106.107} & \num{105.796}\\
     \cmidrule{2-7}\nopagebreak
-     & asset06 & \num{0.351} & \num{0.35} & \num{0.35} & \textcolor{red}{\num{0.348}} & \num{0.349}\\
+     & asset06 & \num{210.287} & \num{213.766} & \num{127.903} & \num{126.109} & \textcolor{red}{\num{125.974}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset07 & \num{0.0135} & \num{0.0139} & \textcolor{red}{\num{0.0132}} & \num{0.0132} & \num{0.0132}\\
+     & asset07 & \num{216.531} & \num{187.629} & \num{106.55} & \textcolor{red}{\num{106.255}} & \num{106.385}\\
     \cmidrule{2-7}\nopagebreak
-     & asset08 & \num{0.0176} & \num{0.0172} & \num{0.0169} & \num{0.0169} & \textcolor{red}{\num{0.0168}}\\
+     & asset08 & \num{164.36} & \num{139.679} & \textcolor{red}{\num{108.643}} & \num{109.468} & \num{111.627}\\
     \cmidrule{2-7}\nopagebreak
-     & asset09 & \num{0.0261} & \num{0.026} & \num{0.0259} & \num{0.0255} & \textcolor{red}{\num{0.0254}}\\
+     & asset09 & \textcolor{red}{\num{510.853}} & \num{1855.24} & \num{608.135} & \num{632.468} & \num{588.176}\\
     \cmidrule{2-7}\nopagebreak
-     & asset10 & \num{0.0335} & \num{0.0336} & \num{0.0336} & \num{0.0333} & \textcolor{red}{\num{0.0332}}\\
+     & asset10 & \num{136.385} & \num{127.286} & \num{99.679} & \textcolor{red}{\num{99.252}} & \num{102.347}\\
     \cmidrule{2-7}\nopagebreak
-     & asset11 & \num{0.00901} & \num{0.00881} & \num{0.00887} & \num{0.0088} & \textcolor{red}{\num{0.00872}}\\
+     & asset11 & \num{162.545} & \num{170.4} & \num{110.598} & \num{111.354} & \textcolor{red}{\num{110.133}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset12 & \num{0.00858} & \textcolor{red}{\num{0.00813}} & \num{0.00837} & \num{0.00822} & \num{0.00822}\\
+     & asset12 & \num{117.685} & \num{114.881} & \textcolor{red}{\num{96.459}} & \num{96.5} & \num{96.957}\\
     \cmidrule{2-7}\nopagebreak
-    \multirow{-13}{*}{\raggedright\arraybackslash MAPE} & \cellcolor{gray}{Average} & \num{0.044} & \num{0.0438} & \num{0.0437} & \textcolor{red}{\num{0.0435}} & \num{0.0435}\\
+    \multirow{-13}{*}{\raggedright\arraybackslash MAPE} & \cellcolor{gray}{Average} & \num{242.751} & \num{332.785} & \num{166.386} & \num{168.647} & \textcolor{red}{\num{163.193}}\\
     \cmidrule{1-7}\pagebreak[0]
-     & asset01 & \textcolor{red}{\num{50.504}} & \num{51.681} & \num{50.516} & \num{50.7} & \num{50.578}\\
+     & asset01 & \num{52.638} & \num{53.677} & \num{51.604} & \num{51.59} & \textcolor{red}{\num{51.588}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset02 & \num{56.46} & \num{55.184} & \num{55.195} & \textcolor{red}{\num{54.974}} & \num{55.071}\\
+     & asset02 & \num{59.243} & \num{58.243} & \textcolor{red}{\num{56.535}} & \num{56.538} & \num{56.54}\\
     \cmidrule{2-7}\nopagebreak
-     & asset03 & \num{42.272} & \num{41.65} & \textcolor{red}{\num{40.751}} & \num{41.104} & \num{41.213}\\
+     & asset03 & \num{43.1} & \num{43.924} & \num{41.046} & \textcolor{red}{\num{41.035}} & \num{41.4}\\
     \cmidrule{2-7}\nopagebreak
-     & asset04 & \num{56.169} & \num{55.396} & \textcolor{red}{\num{54.91}} & \num{55.007} & \num{55.232}\\
+     & asset04 & \num{59.395} & \num{59.35} & \num{59.389} & \num{59.388} & \textcolor{red}{\num{59.148}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset05 & \num{78.223} & \textcolor{red}{\num{75.269}} & \num{77.573} & \num{77.028} & \num{77.45}\\
+     & asset05 & \num{81.862} & \textcolor{red}{\num{79.36}} & \num{80.445} & \num{80.49} & \num{80.403}\\
     \cmidrule{2-7}\nopagebreak
-     & asset06 & \num{61.063} & \num{60.754} & \num{60.623} & \textcolor{red}{\num{60.016}} & \num{60.115}\\
+     & asset06 & \num{64.354} & \num{63.88} & \num{62.217} & \num{62.162} & \textcolor{red}{\num{62.151}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset07 & \num{77.178} & \num{79.704} & \num{73.953} & \num{73.936} & \textcolor{red}{\num{73.375}}\\
+     & asset07 & \num{80.612} & \num{83.571} & \num{77.189} & \num{77.192} & \textcolor{red}{\num{77.165}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset08 & \num{135.884} & \num{128.908} & \num{128.304} & \num{127.506} & \textcolor{red}{\num{127.053}}\\
+     & asset08 & \num{142.706} & \num{136.1} & \num{133.93} & \num{133.918} & \textcolor{red}{\num{133.493}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset09 & \num{167.453} & \num{164.778} & \num{165.999} & \num{163.371} & \textcolor{red}{\num{163.052}}\\
+     & asset09 & \num{176.106} & \num{173.854} & \num{171.222} & \num{171.178} & \textcolor{red}{\num{171.128}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset10 & \num{85.293} & \textcolor{red}{\num{83.03}} & \num{84.52} & \num{83.523} & \num{83.504}\\
+     & asset10 & \num{90.484} & \num{89.516} & \num{88.263} & \num{88.335} & \textcolor{red}{\num{88.178}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset11 & \num{173.473} & \num{167.267} & \num{170.073} & \num{167.73} & \textcolor{red}{\num{165.742}}\\
+     & asset11 & \num{181.782} & \num{177.14} & \num{177.545} & \num{177.5} & \textcolor{red}{\num{175.859}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset12 & \num{203.367} & \num{194.547} & \num{197.528} & \num{193.357} & \textcolor{red}{\num{192.783}}\\
+     & asset12 & \num{213.014} & \num{204.263} & \num{203.161} & \num{202.941} & \textcolor{red}{\num{202.928}}\\
     \cmidrule{2-7}\nopagebreak
-    \multirow{-13}{*}{\raggedright\arraybackslash MASE} & \cellcolor{gray}{Average} & \num{98.945} & \num{96.514} & \num{96.662} & \num{95.688} & \textcolor{red}{\num{95.431}}\\*
+    \multirow{-13}{*}{\raggedright\arraybackslash MASE} & \cellcolor{gray}{Average} & \num{103.775} & \num{101.907} & \num{100.212} & \num{100.189} & \textcolor{red}{\num{99.998}}\\*
     \end{longtable}
 
 5-step:
@@ -1599,109 +1614,109 @@ cv_large_20 %>%
     \endfoot
     \bottomrule
     \endlastfoot
-     & asset01 & \num{0.000282} & \num{0.000292} & \num{0.000281} & \textcolor{red}{\num{0.000277}} & \num{0.000277}\\
+     & asset01 & \num{0.000283} & \num{0.000298} & \num{0.000279} & \textcolor{red}{\num{0.000279}} & \num{0.000279}\\
     \cmidrule{2-7}\nopagebreak
-     & asset02 & \num{0.000383} & \num{0.00038} & \num{0.000379} & \textcolor{red}{\num{0.000369}} & \num{0.00037}\\
+     & asset02 & \num{0.000377} & \num{0.000387} & \num{0.000366} & \textcolor{red}{\num{0.000366}} & \num{0.000367}\\
     \cmidrule{2-7}\nopagebreak
-     & asset03 & \num{0.000237} & \num{0.000242} & \num{0.000245} & \textcolor{red}{\num{0.000232}} & \num{0.000232}\\
+     & asset03 & \textcolor{red}{\num{0.000232}} & \num{0.000248} & \num{0.000232} & \num{0.000232} & \num{0.000232}\\
     \cmidrule{2-7}\nopagebreak
-     & asset04 & \num{0.000477} & \num{0.000463} & \num{0.000462} & \num{0.000462} & \textcolor{red}{\num{0.000458}}\\
+     & asset04 & \num{0.000485} & \textcolor{red}{\num{0.000474}} & \num{0.000483} & \num{0.000483} & \num{0.000481}\\
     \cmidrule{2-7}\nopagebreak
-     & asset05 & \num{0.000755} & \num{0.000767} & \textcolor{red}{\num{0.000747}} & \num{0.00076} & \num{0.000764}\\
+     & asset05 & \num{0.000767} & \textcolor{red}{\num{0.00076}} & \num{0.000775} & \num{0.000775} & \num{0.000774}\\
     \cmidrule{2-7}\nopagebreak
-     & asset06 & \num{0.000491} & \num{0.000497} & \num{0.000487} & \num{0.000486} & \textcolor{red}{\num{0.000485}}\\
+     & asset06 & \num{0.000497} & \num{0.000508} & \num{0.000495} & \textcolor{red}{\num{0.000495}} & \num{0.000495}\\
     \cmidrule{2-7}\nopagebreak
-     & asset07 & \num{0.000732} & \num{0.000716} & \num{0.000725} & \num{0.000692} & \textcolor{red}{\num{0.000686}}\\
+     & asset07 & \num{0.00069} & \num{0.000701} & \num{0.000664} & \textcolor{red}{\num{0.000664}} & \num{0.000664}\\
     \cmidrule{2-7}\nopagebreak
-     & asset08 & \num{0.00219} & \num{0.0022} & \num{0.00218} & \num{0.00216} & \textcolor{red}{\num{0.00214}}\\
+     & asset08 & \num{0.00217} & \num{0.00218} & \num{0.00213} & \num{0.00213} & \textcolor{red}{\num{0.00213}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset09 & \num{0.0039} & \num{0.00378} & \num{0.00384} & \num{0.00376} & \textcolor{red}{\num{0.00373}}\\
+     & asset09 & \num{0.00389} & \textcolor{red}{\num{0.00386}} & \num{0.00389} & \num{0.00389} & \num{0.00388}\\
     \cmidrule{2-7}\nopagebreak
-     & asset10 & \textcolor{red}{\num{0.00081}} & \num{0.000846} & \num{0.000816} & \num{0.000824} & \num{0.00084}\\
+     & asset10 & \num{0.000869} & \num{0.000903} & \num{0.000856} & \textcolor{red}{\num{0.000856}} & \num{0.000862}\\
     \cmidrule{2-7}\nopagebreak
-     & asset11 & \num{0.00381} & \num{0.00356} & \num{0.0039} & \num{0.00357} & \textcolor{red}{\num{0.00354}}\\
+     & asset11 & \num{0.00357} & \num{0.00354} & \num{0.00349} & \num{0.00349} & \textcolor{red}{\num{0.00347}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset12 & \num{0.00522} & \textcolor{red}{\num{0.00467}} & \num{0.00525} & \num{0.00477} & \num{0.00477}\\
+     & asset12 & \num{0.00495} & \textcolor{red}{\num{0.00484}} & \num{0.00486} & \num{0.00486} & \num{0.00486}\\
     \cmidrule{2-7}\nopagebreak
-    \multirow{-13}{*}{\raggedright\arraybackslash MSE} & \cellcolor{gray}{Average} & \num{0.00161} & \num{0.00153} & \num{0.00161} & \num{0.00153} & \textcolor{red}{\num{0.00152}}\\
+    \multirow{-13}{*}{\raggedright\arraybackslash MSE} & \cellcolor{gray}{Average} & \num{0.00156} & \num{0.00156} & \num{0.00154} & \num{0.00154} & \textcolor{red}{\num{0.00154}}\\
     \cmidrule{1-7}\pagebreak[0]
-     & asset01 & \num{0.0137} & \num{0.0138} & \num{0.0136} & \textcolor{red}{\num{0.0135}} & \num{0.0135}\\
+     & asset01 & \num{0.0137} & \num{0.0139} & \textcolor{red}{\num{0.0135}} & \num{0.0135} & \num{0.0135}\\
     \cmidrule{2-7}\nopagebreak
-     & asset02 & \num{0.0156} & \num{0.0156} & \num{0.0156} & \textcolor{red}{\num{0.0154}} & \num{0.0154}\\
+     & asset02 & \num{0.0155} & \num{0.0159} & \num{0.0155} & \textcolor{red}{\num{0.0155}} & \num{0.0155}\\
     \cmidrule{2-7}\nopagebreak
-     & asset03 & \num{0.0123} & \num{0.0123} & \num{0.0126} & \textcolor{red}{\num{0.0122}} & \num{0.0123}\\
+     & asset03 & \num{0.0119} & \num{0.0123} & \num{0.0119} & \num{0.0119} & \textcolor{red}{\num{0.0119}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset04 & \num{0.0176} & \textcolor{red}{\num{0.0171}} & \num{0.0173} & \num{0.0172} & \num{0.0171}\\
+     & asset04 & \num{0.0179} & \textcolor{red}{\num{0.0175}} & \num{0.0178} & \num{0.0178} & \num{0.0177}\\
     \cmidrule{2-7}\nopagebreak
-     & asset05 & \num{0.0219} & \num{0.0224} & \textcolor{red}{\num{0.0218}} & \num{0.0222} & \num{0.0223}\\
+     & asset05 & \textcolor{red}{\num{0.0216}} & \num{0.0219} & \num{0.022} & \num{0.022} & \num{0.022}\\
     \cmidrule{2-7}\nopagebreak
-     & asset06 & \num{0.0177} & \num{0.0179} & \num{0.0177} & \num{0.0177} & \textcolor{red}{\num{0.0177}}\\
+     & asset06 & \textcolor{red}{\num{0.0176}} & \num{0.018} & \num{0.0177} & \num{0.0177} & \num{0.0177}\\
     \cmidrule{2-7}\nopagebreak
-     & asset07 & \num{0.0224} & \num{0.0225} & \num{0.0223} & \num{0.0218} & \textcolor{red}{\num{0.0217}}\\
+     & asset07 & \num{0.0217} & \num{0.0222} & \num{0.0214} & \textcolor{red}{\num{0.0214}} & \num{0.0214}\\
     \cmidrule{2-7}\nopagebreak
-     & asset08 & \num{0.0375} & \num{0.038} & \num{0.0377} & \num{0.0372} & \textcolor{red}{\num{0.0371}}\\
+     & asset08 & \num{0.0371} & \num{0.0378} & \num{0.0369} & \num{0.0369} & \textcolor{red}{\num{0.0368}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset09 & \num{0.0493} & \num{0.0486} & \num{0.0484} & \num{0.0483} & \textcolor{red}{\num{0.048}}\\
+     & asset09 & \num{0.0497} & \textcolor{red}{\num{0.0484}} & \num{0.0491} & \num{0.0491} & \num{0.049}\\
     \cmidrule{2-7}\nopagebreak
-     & asset10 & \num{0.0226} & \num{0.0232} & \textcolor{red}{\num{0.0226}} & \num{0.0227} & \num{0.0229}\\
+     & asset10 & \num{0.0237} & \num{0.0243} & \num{0.0237} & \num{0.0237} & \textcolor{red}{\num{0.0237}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset11 & \num{0.0488} & \num{0.0481} & \num{0.0503} & \num{0.0474} & \textcolor{red}{\num{0.0472}}\\
+     & asset11 & \num{0.0473} & \num{0.048} & \num{0.0472} & \num{0.0472} & \textcolor{red}{\num{0.0469}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset12 & \num{0.0578} & \textcolor{red}{\num{0.0543}} & \num{0.0585} & \num{0.055} & \num{0.0551}\\
+     & asset12 & \num{0.0572} & \textcolor{red}{\num{0.0568}} & \num{0.0569} & \num{0.0569} & \num{0.0569}\\
     \cmidrule{2-7}\nopagebreak
-    \multirow{-13}{*}{\raggedright\arraybackslash MAE} & \cellcolor{gray}{Average} & \num{0.0281} & \num{0.0278} & \num{0.0282} & \num{0.0276} & \textcolor{red}{\num{0.0275}}\\
+    \multirow{-13}{*}{\raggedright\arraybackslash MAE} & \cellcolor{gray}{Average} & \num{0.0279} & \num{0.0281} & \num{0.0278} & \num{0.0278} & \textcolor{red}{\num{0.0277}}\\
     \cmidrule{1-7}\pagebreak[0]
-     & asset01 & \num{0.0195} & \num{0.0197} & \num{0.0194} & \textcolor{red}{\num{0.0193}} & \num{0.0193}\\
+     & asset01 & \num{123.693} & \num{150.546} & \num{100} & \textcolor{red}{\num{100}} & \num{100.187}\\
     \cmidrule{2-7}\nopagebreak
-     & asset02 & \num{0.0207} & \num{0.0208} & \num{0.0208} & \textcolor{red}{\num{0.0205}} & \num{0.0206}\\
+     & asset02 & \num{123.677} & \num{128.848} & \num{100.001} & \textcolor{red}{\num{100.001}} & \num{100.29}\\
     \cmidrule{2-7}\nopagebreak
-     & asset03 & \num{0.00772} & \num{0.00768} & \num{0.00786} & \textcolor{red}{\num{0.00764}} & \num{0.00772}\\
+     & asset03 & \num{154.451} & \num{244.588} & \textcolor{red}{\num{100.001}} & \num{100.001} & \num{109.374}\\
     \cmidrule{2-7}\nopagebreak
-     & asset04 & \num{0.00936} & \textcolor{red}{\num{0.00905}} & \num{0.00916} & \num{0.00911} & \num{0.00907}\\
+     & asset04 & \num{323.994} & \num{190.728} & \num{100} & \textcolor{red}{\num{100}} & \num{107.47}\\
     \cmidrule{2-7}\nopagebreak
-     & asset05 & \num{0.0103} & \num{0.0105} & \textcolor{red}{\num{0.0103}} & \num{0.0105} & \num{0.0105}\\
+     & asset05 & \textcolor{red}{\num{98.245}} & \num{116.319} & \num{100} & \num{100} & \num{99.856}\\
     \cmidrule{2-7}\nopagebreak
-     & asset06 & \num{0.338} & \num{0.342} & \num{0.338} & \num{0.337} & \textcolor{red}{\num{0.337}}\\
+     & asset06 & \num{139.932} & \num{152.983} & \num{100.001} & \textcolor{red}{\num{100.001}} & \num{100.243}\\
     \cmidrule{2-7}\nopagebreak
-     & asset07 & \num{0.0135} & \num{0.0136} & \num{0.0135} & \num{0.0132} & \textcolor{red}{\num{0.0131}}\\
+     & asset07 & \num{108.823} & \num{143.027} & \num{100} & \textcolor{red}{\num{100}} & \num{100.22}\\
     \cmidrule{2-7}\nopagebreak
-     & asset08 & \num{0.0168} & \num{0.017} & \num{0.0168} & \num{0.0166} & \textcolor{red}{\num{0.0165}}\\
+     & asset08 & \num{116.387} & \num{128.354} & \textcolor{red}{\num{100.002}} & \num{100.003} & \num{101.4}\\
     \cmidrule{2-7}\nopagebreak
-     & asset09 & \num{0.0257} & \num{0.0253} & \num{0.0252} & \num{0.0252} & \textcolor{red}{\num{0.025}}\\
+     & asset09 & \num{296.2} & \num{383.098} & \num{99.989} & \textcolor{red}{\num{99.986}} & \num{148.57}\\
     \cmidrule{2-7}\nopagebreak
-     & asset10 & \num{0.0322} & \num{0.033} & \textcolor{red}{\num{0.0321}} & \num{0.0323} & \num{0.0326}\\
+     & asset10 & \num{113.495} & \num{107.022} & \num{100} & \num{100} & \textcolor{red}{\num{98.141}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset11 & \num{0.00878} & \num{0.00865} & \num{0.00904} & \num{0.00853} & \textcolor{red}{\num{0.00848}}\\
+     & asset11 & \num{112.792} & \num{124.638} & \textcolor{red}{\num{100}} & \num{100} & \num{101.867}\\
     \cmidrule{2-7}\nopagebreak
-     & asset12 & \num{0.00822} & \textcolor{red}{\num{0.00772}} & \num{0.00832} & \num{0.00783} & \num{0.00783}\\
+     & asset12 & \num{103.66} & \num{128.646} & \num{99.999} & \num{99.999} & \textcolor{red}{\num{99.731}}\\
     \cmidrule{2-7}\nopagebreak
-    \multirow{-13}{*}{\raggedright\arraybackslash MAPE} & \cellcolor{gray}{Average} & \num{0.0425} & \num{0.0429} & \num{0.0425} & \num{0.0423} & \textcolor{red}{\num{0.0423}}\\
+    \multirow{-13}{*}{\raggedright\arraybackslash MAPE} & \cellcolor{gray}{Average} & \num{151.279} & \num{166.566} & \num{99.999} & \textcolor{red}{\num{99.999}} & \num{105.612}\\
     \cmidrule{1-7}\pagebreak[0]
-     & asset01 & \num{43.669} & \num{44.035} & \num{43.337} & \textcolor{red}{\num{42.898}} & \num{43.051}\\
+     & asset01 & \num{46.138} & \num{47.155} & \num{45.793} & \num{45.793} & \textcolor{red}{\num{45.783}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset02 & \num{54.507} & \num{53.806} & \num{54.054} & \textcolor{red}{\num{53.32}} & \num{53.411}\\
+     & asset02 & \num{56.107} & \num{56.578} & \num{55.513} & \textcolor{red}{\num{55.513}} & \num{55.523}\\
     \cmidrule{2-7}\nopagebreak
-     & asset03 & \num{41.484} & \num{41.309} & \num{41.792} & \textcolor{red}{\num{40.795}} & \num{40.92}\\
+     & asset03 & \num{41.951} & \num{43.44} & \num{41.749} & \textcolor{red}{\num{41.749}} & \num{41.756}\\
     \cmidrule{2-7}\nopagebreak
-     & asset04 & \num{60.461} & \textcolor{red}{\num{57.97}} & \num{58.363} & \num{58.271} & \num{58.088}\\
+     & asset04 & \num{64.538} & \textcolor{red}{\num{62.566}} & \num{63.272} & \num{63.272} & \num{63.167}\\
     \cmidrule{2-7}\nopagebreak
-     & asset05 & \textcolor{red}{\num{75.073}} & \num{76.387} & \num{75.174} & \num{75.904} & \num{76.448}\\
+     & asset05 & \textcolor{red}{\num{77.86}} & \num{79.082} & \num{79.112} & \num{79.112} & \num{79.079}\\
     \cmidrule{2-7}\nopagebreak
-     & asset06 & \num{59.975} & \num{60.593} & \num{59.961} & \num{59.822} & \textcolor{red}{\num{59.677}}\\
+     & asset06 & \textcolor{red}{\num{62.216}} & \num{63.628} & \num{62.702} & \num{62.702} & \num{62.71}\\
     \cmidrule{2-7}\nopagebreak
-     & asset07 & \num{79.001} & \num{78.554} & \num{79.639} & \num{77.336} & \textcolor{red}{\num{77.027}}\\
+     & asset07 & \textcolor{red}{\num{79.307}} & \num{81.695} & \num{79.53} & \num{79.53} & \num{79.538}\\
     \cmidrule{2-7}\nopagebreak
-     & asset08 & \num{126.643} & \num{126.911} & \num{128.58} & \num{126.462} & \textcolor{red}{\num{126.166}}\\
+     & asset08 & \textcolor{red}{\num{130.991}} & \num{132.348} & \num{132.127} & \num{132.127} & \num{131.984}\\
     \cmidrule{2-7}\nopagebreak
-     & asset09 & \num{168.397} & \num{165.318} & \num{164.368} & \num{164.361} & \textcolor{red}{\num{163.209}}\\
+     & asset09 & \num{180.746} & \textcolor{red}{\num{174.058}} & \num{177.69} & \num{177.69} & \num{177.678}\\
     \cmidrule{2-7}\nopagebreak
-     & asset10 & \num{77.609} & \num{78.93} & \textcolor{red}{\num{77.198}} & \num{77.696} & \num{78.562}\\
+     & asset10 & \num{86.136} & \num{87.442} & \num{85.868} & \num{85.868} & \textcolor{red}{\num{85.825}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset11 & \num{165.367} & \num{160.307} & \num{171.221} & \num{159.085} & \textcolor{red}{\num{158.097}}\\
+     & asset11 & \num{168.792} & \num{171.515} & \num{168.953} & \num{168.953} & \textcolor{red}{\num{167.689}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset12 & \num{201.849} & \textcolor{red}{\num{188.612}} & \num{203.964} & \num{190.737} & \num{191.004}\\
+     & asset12 & \num{212.332} & \textcolor{red}{\num{210.461}} & \num{210.932} & \num{210.932} & \num{210.89}\\
     \cmidrule{2-7}\nopagebreak
-    \multirow{-13}{*}{\raggedright\arraybackslash MASE} & \cellcolor{gray}{Average} & \num{96.169} & \num{94.394} & \num{96.471} & \num{93.891} & \textcolor{red}{\num{93.805}}\\*
+    \multirow{-13}{*}{\raggedright\arraybackslash MASE} & \cellcolor{gray}{Average} & \num{100.593} & \num{100.831} & \num{100.27} & \num{100.27} & \textcolor{red}{\num{100.135}}\\*
     \end{longtable}
 
 20-step:
@@ -1724,109 +1739,109 @@ cv_large_20 %>%
     \endfoot
     \bottomrule
     \endlastfoot
-     & asset01 & \textcolor{red}{\num{0.000277}} & \num{0.000278} & \num{0.000278} & \num{0.000279} & \num{0.000278}\\
+     & asset01 & \num{0.000289} & \textcolor{red}{\num{0.000286}} & \num{0.000289} & \num{0.000289} & \num{0.000289}\\
     \cmidrule{2-7}\nopagebreak
-     & asset02 & \num{0.000377} & \num{0.000386} & \num{0.000379} & \num{0.00038} & \textcolor{red}{\num{0.000376}}\\
+     & asset02 & \num{0.000385} & \num{0.000393} & \num{0.000385} & \num{0.000385} & \textcolor{red}{\num{0.000385}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset03 & \textcolor{red}{\num{0.000251}} & \num{0.000264} & \num{0.000259} & \num{0.000261} & \num{0.000271}\\
+     & asset03 & \num{0.000242} & \num{0.00025} & \textcolor{red}{\num{0.000242}} & \num{0.000242} & \num{0.000242}\\
     \cmidrule{2-7}\nopagebreak
-     & asset04 & \textcolor{red}{\num{0.000453}} & \num{0.000457} & \num{0.000458} & \num{0.000467} & \num{0.000459}\\
+     & asset04 & \num{0.000474} & \textcolor{red}{\num{0.000467}} & \num{0.000474} & \num{0.000474} & \num{0.000473}\\
     \cmidrule{2-7}\nopagebreak
-     & asset05 & \textcolor{red}{\num{0.000744}} & \num{0.000758} & \num{0.000752} & \num{0.00076} & \num{0.000758}\\
+     & asset05 & \num{0.000742} & \textcolor{red}{\num{0.000741}} & \num{0.000742} & \num{0.000742} & \num{0.000742}\\
     \cmidrule{2-7}\nopagebreak
-     & asset06 & \num{0.000517} & \num{0.000525} & \num{0.000518} & \num{0.000517} & \textcolor{red}{\num{0.000514}}\\
+     & asset06 & \textcolor{red}{\num{0.000525}} & \num{0.000533} & \num{0.000525} & \num{0.000525} & \num{0.000525}\\
     \cmidrule{2-7}\nopagebreak
-     & asset07 & \num{0.00062} & \num{0.000655} & \textcolor{red}{\num{0.000619}} & \num{0.000636} & \num{0.00063}\\
+     & asset07 & \num{0.000656} & \num{0.000674} & \num{0.000656} & \num{0.000656} & \textcolor{red}{\num{0.000656}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset08 & \num{0.0019} & \num{0.00196} & \textcolor{red}{\num{0.00189}} & \num{0.00193} & \num{0.00192}\\
+     & asset08 & \num{0.00194} & \num{0.00198} & \num{0.00194} & \num{0.00194} & \textcolor{red}{\num{0.00194}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset09 & \num{0.00403} & \num{0.00398} & \num{0.00406} & \num{0.00399} & \textcolor{red}{\num{0.00397}}\\
+     & asset09 & \num{0.00407} & \num{0.0041} & \num{0.00407} & \num{0.00407} & \textcolor{red}{\num{0.00406}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset10 & \num{0.000836} & \num{0.000841} & \num{0.000841} & \textcolor{red}{\num{0.000835}} & \num{0.000837}\\
+     & asset10 & \num{0.000839} & \num{0.000858} & \num{0.000839} & \num{0.000839} & \textcolor{red}{\num{0.000838}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset11 & \textcolor{red}{\num{0.00297}} & \num{0.00304} & \num{0.00301} & \num{0.00305} & \num{0.00302}\\
+     & asset11 & \num{0.00319} & \num{0.00324} & \num{0.00319} & \num{0.00319} & \textcolor{red}{\num{0.00318}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset12 & \num{0.00413} & \num{0.00414} & \num{0.00424} & \num{0.00407} & \textcolor{red}{\num{0.00405}}\\
+     & asset12 & \textcolor{red}{\num{0.00449}} & \num{0.0046} & \num{0.00449} & \num{0.00449} & \num{0.00449}\\
     \cmidrule{2-7}\nopagebreak
-    \multirow{-13}{*}{\raggedright\arraybackslash MSE} & \cellcolor{gray}{Average} & \num{0.00143} & \num{0.00144} & \num{0.00144} & \num{0.00143} & \textcolor{red}{\num{0.00142}}\\
+    \multirow{-13}{*}{\raggedright\arraybackslash MSE} & \cellcolor{gray}{Average} & \num{0.00149} & \num{0.00151} & \num{0.00149} & \num{0.00149} & \textcolor{red}{\num{0.00148}}\\
     \cmidrule{1-7}\pagebreak[0]
-     & asset01 & \num{0.0136} & \textcolor{red}{\num{0.0136}} & \num{0.0137} & \num{0.0137} & \num{0.0136}\\
+     & asset01 & \num{0.0138} & \textcolor{red}{\num{0.0137}} & \num{0.0138} & \num{0.0138} & \num{0.0138}\\
     \cmidrule{2-7}\nopagebreak
-     & asset02 & \textcolor{red}{\num{0.0154}} & \num{0.0157} & \num{0.0154} & \num{0.0155} & \num{0.0154}\\
+     & asset02 & \num{0.0158} & \num{0.016} & \num{0.0158} & \num{0.0158} & \textcolor{red}{\num{0.0158}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset03 & \textcolor{red}{\num{0.0124}} & \num{0.0127} & \num{0.0125} & \num{0.0126} & \num{0.0128}\\
+     & asset03 & \num{0.0122} & \num{0.0124} & \textcolor{red}{\num{0.0122}} & \num{0.0122} & \num{0.0122}\\
     \cmidrule{2-7}\nopagebreak
-     & asset04 & \num{0.0171} & \textcolor{red}{\num{0.0171}} & \num{0.0173} & \num{0.0173} & \num{0.0172}\\
+     & asset04 & \num{0.0175} & \textcolor{red}{\num{0.0174}} & \num{0.0175} & \num{0.0175} & \num{0.0175}\\
     \cmidrule{2-7}\nopagebreak
-     & asset05 & \textcolor{red}{\num{0.022}} & \num{0.0223} & \num{0.0221} & \num{0.0222} & \num{0.0223}\\
+     & asset05 & \num{0.0215} & \num{0.0217} & \num{0.0215} & \num{0.0215} & \textcolor{red}{\num{0.0215}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset06 & \num{0.0187} & \num{0.0188} & \num{0.0187} & \num{0.0187} & \textcolor{red}{\num{0.0186}}\\
+     & asset06 & \num{0.0186} & \num{0.0188} & \num{0.0186} & \num{0.0186} & \textcolor{red}{\num{0.0186}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset07 & \textcolor{red}{\num{0.0208}} & \num{0.0214} & \num{0.0209} & \num{0.0212} & \num{0.0211}\\
+     & asset07 & \num{0.0215} & \num{0.0219} & \num{0.0215} & \num{0.0215} & \textcolor{red}{\num{0.0215}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset08 & \num{0.0339} & \num{0.0347} & \textcolor{red}{\num{0.0335}} & \num{0.0339} & \num{0.0338}\\
+     & asset08 & \num{0.0344} & \num{0.0352} & \num{0.0344} & \num{0.0344} & \textcolor{red}{\num{0.0344}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset09 & \num{0.05} & \textcolor{red}{\num{0.0495}} & \num{0.0503} & \num{0.0497} & \num{0.0496}\\
+     & asset09 & \num{0.0499} & \num{0.0501} & \num{0.0499} & \num{0.0499} & \textcolor{red}{\num{0.0499}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset10 & \textcolor{red}{\num{0.0226}} & \num{0.0229} & \num{0.0227} & \num{0.0226} & \num{0.0227}\\
+     & asset10 & \num{0.0234} & \num{0.0239} & \num{0.0234} & \num{0.0234} & \textcolor{red}{\num{0.0234}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset11 & \num{0.0432} & \num{0.0442} & \textcolor{red}{\num{0.043}} & \num{0.0437} & \num{0.0435}\\
+     & asset11 & \num{0.0453} & \num{0.0457} & \num{0.0453} & \num{0.0453} & \textcolor{red}{\num{0.0452}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset12 & \num{0.0501} & \num{0.0504} & \num{0.05} & \num{0.0489} & \textcolor{red}{\num{0.0485}}\\
+     & asset12 & \num{0.0548} & \num{0.0555} & \num{0.0548} & \num{0.0548} & \textcolor{red}{\num{0.0548}}\\
     \cmidrule{2-7}\nopagebreak
-    \multirow{-13}{*}{\raggedright\arraybackslash MAE} & \cellcolor{gray}{Average} & \num{0.0267} & \num{0.0269} & \num{0.0267} & \num{0.0267} & \textcolor{red}{\num{0.0266}}\\
+    \multirow{-13}{*}{\raggedright\arraybackslash MAE} & \cellcolor{gray}{Average} & \num{0.0274} & \num{0.0277} & \num{0.0274} & \num{0.0274} & \textcolor{red}{\num{0.0274}}\\
     \cmidrule{1-7}\pagebreak[0]
-     & asset01 & \num{0.0195} & \textcolor{red}{\num{0.0194}} & \num{0.0195} & \num{0.0195} & \num{0.0195}\\
+     & asset01 & \num{100.069} & \num{125.252} & \num{100} & \num{100} & \textcolor{red}{\num{99.837}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset02 & \textcolor{red}{\num{0.0205}} & \num{0.021} & \num{0.0205} & \num{0.0207} & \num{0.0206}\\
+     & asset02 & \num{100.038} & \num{115.499} & \num{100} & \num{100} & \textcolor{red}{\num{99.962}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset03 & \textcolor{red}{\num{0.00775}} & \num{0.00793} & \num{0.00781} & \num{0.00786} & \num{0.00803}\\
+     & asset03 & \num{100.416} & \num{201} & \num{100} & \num{100} & \textcolor{red}{\num{99.951}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset04 & \num{0.00908} & \textcolor{red}{\num{0.00907}} & \num{0.00917} & \num{0.0092} & \num{0.00913}\\
+     & asset04 & \num{100.941} & \num{185.291} & \num{100} & \textcolor{red}{\num{100}} & \num{116.044}\\
     \cmidrule{2-7}\nopagebreak
-     & asset05 & \textcolor{red}{\num{0.0104}} & \num{0.0105} & \num{0.0104} & \num{0.0105} & \num{0.0105}\\
+     & asset05 & \num{100.058} & \num{102.464} & \num{100} & \num{100} & \textcolor{red}{\num{99.999}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset06 & \num{0.356} & \num{0.359} & \num{0.356} & \num{0.356} & \textcolor{red}{\num{0.354}}\\
+     & asset06 & \num{99.989} & \num{111.004} & \num{100} & \num{100} & \textcolor{red}{\num{99.989}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset07 & \textcolor{red}{\num{0.0126}} & \num{0.013} & \num{0.0127} & \num{0.0128} & \num{0.0128}\\
+     & asset07 & \num{100.034} & \num{109.833} & \num{100} & \num{100} & \textcolor{red}{\num{99.944}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset08 & \num{0.0152} & \num{0.0155} & \textcolor{red}{\num{0.0149}} & \num{0.0151} & \num{0.0151}\\
+     & asset08 & \num{99.986} & \num{110.928} & \num{100} & \num{100} & \textcolor{red}{\num{99.455}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset09 & \num{0.026} & \textcolor{red}{\num{0.0258}} & \num{0.0262} & \num{0.0259} & \num{0.0258}\\
+     & asset09 & \num{100.077} & \num{213.129} & \num{100} & \textcolor{red}{\num{100}} & \num{106.16}\\
     \cmidrule{2-7}\nopagebreak
-     & asset10 & \textcolor{red}{\num{0.0321}} & \num{0.0325} & \num{0.0322} & \num{0.0322} & \num{0.0322}\\
+     & asset10 & \num{99.83} & \num{121.913} & \num{100} & \num{100} & \textcolor{red}{\num{99.771}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset11 & \num{0.00777} & \num{0.00795} & \textcolor{red}{\num{0.00773}} & \num{0.00785} & \num{0.00782}\\
+     & asset11 & \num{99.941} & \num{115.85} & \num{100} & \num{100} & \textcolor{red}{\num{99.365}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset12 & \num{0.00712} & \num{0.00716} & \num{0.00711} & \num{0.00695} & \textcolor{red}{\num{0.00689}}\\
+     & asset12 & \textcolor{red}{\num{99.923}} & \num{103.873} & \num{100} & \num{100} & \num{99.949}\\
     \cmidrule{2-7}\nopagebreak
-    \multirow{-13}{*}{\raggedright\arraybackslash MAPE} & \cellcolor{gray}{Average} & \num{0.0437} & \num{0.0441} & \num{0.0437} & \num{0.0437} & \textcolor{red}{\num{0.0436}}\\
+    \multirow{-13}{*}{\raggedright\arraybackslash MAPE} & \cellcolor{gray}{Average} & \num{100.109} & \num{134.67} & \num{100} & \textcolor{red}{\num{100}} & \num{101.702}\\
     \cmidrule{1-7}\pagebreak[0]
-     & asset01 & \textcolor{red}{\num{47.98}} & \num{48.021} & \num{48.412} & \num{48.32} & \num{48.217}\\
+     & asset01 & \num{50.539} & \textcolor{red}{\num{49.998}} & \num{50.539} & \num{50.539} & \num{50.561}\\
     \cmidrule{2-7}\nopagebreak
-     & asset02 & \num{49.331} & \num{51.109} & \textcolor{red}{\num{49.268}} & \num{49.902} & \num{49.756}\\
+     & asset02 & \num{53.722} & \num{54.428} & \num{53.723} & \num{53.723} & \textcolor{red}{\num{53.718}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset03 & \textcolor{red}{\num{43.448}} & \num{44.328} & \num{44.04} & \num{43.953} & \num{44.693}\\
+     & asset03 & \num{45.075} & \num{45.768} & \textcolor{red}{\num{45.072}} & \num{45.072} & \num{45.075}\\
     \cmidrule{2-7}\nopagebreak
-     & asset04 & \textcolor{red}{\num{57.469}} & \num{58.067} & \num{57.482} & \num{57.809} & \num{57.666}\\
+     & asset04 & \num{62.328} & \textcolor{red}{\num{61.965}} & \num{62.328} & \num{62.328} & \num{62.307}\\
     \cmidrule{2-7}\nopagebreak
-     & asset05 & \textcolor{red}{\num{81.971}} & \num{83.155} & \num{82.565} & \num{83.419} & \num{83.629}\\
+     & asset05 & \num{82.386} & \num{83.047} & \num{82.379} & \num{82.379} & \textcolor{red}{\num{82.378}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset06 & \num{64.646} & \num{64.944} & \num{64.729} & \num{64.662} & \textcolor{red}{\num{64.284}}\\
+     & asset06 & \num{68.198} & \num{68.466} & \num{68.203} & \num{68.203} & \textcolor{red}{\num{68.196}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset07 & \textcolor{red}{\num{69.927}} & \num{71.543} & \num{70.436} & \num{71.12} & \num{70.939}\\
+     & asset07 & \num{74.985} & \num{75.831} & \num{74.983} & \num{74.983} & \textcolor{red}{\num{74.976}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset08 & \num{110.085} & \num{112.098} & \textcolor{red}{\num{109.44}} & \num{110.273} & \num{109.87}\\
+     & asset08 & \num{117.522} & \num{120.048} & \num{117.524} & \num{117.524} & \textcolor{red}{\num{117.339}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset09 & \num{174.022} & \textcolor{red}{\num{172.735}} & \num{175.759} & \num{173.567} & \num{173.365}\\
+     & asset09 & \num{180.11} & \num{181.297} & \num{180.106} & \num{180.106} & \textcolor{red}{\num{179.908}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset10 & \textcolor{red}{\num{75.238}} & \num{76.164} & \num{75.422} & \num{75.486} & \num{75.687}\\
+     & asset10 & \num{82.186} & \num{84.017} & \num{82.201} & \num{82.201} & \textcolor{red}{\num{82.135}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset11 & \num{141.638} & \num{142.236} & \num{140.808} & \num{140.545} & \textcolor{red}{\num{139.657}}\\
+     & asset11 & \num{156.479} & \num{157.13} & \num{156.515} & \num{156.515} & \textcolor{red}{\num{155.967}}\\
     \cmidrule{2-7}\nopagebreak
-     & asset12 & \num{164.643} & \num{167.439} & \num{165.314} & \num{163.183} & \textcolor{red}{\num{161.508}}\\
+     & asset12 & \textcolor{red}{\num{195.851}} & \num{199.213} & \num{195.881} & \num{195.881} & \num{195.855}\\
     \cmidrule{2-7}\nopagebreak
-    \multirow{-13}{*}{\raggedright\arraybackslash MASE} & \cellcolor{gray}{Average} & \num{90.033} & \num{90.987} & \num{90.306} & \num{90.187} & \textcolor{red}{\num{89.939}}\\*
+    \multirow{-13}{*}{\raggedright\arraybackslash MASE} & \cellcolor{gray}{Average} & \num{97.448} & \num{98.434} & \num{97.455} & \num{97.455} & \textcolor{red}{\num{97.368}}\\*
     \end{longtable}
 
 ## Average
@@ -1843,10 +1858,10 @@ cv_large_20 %>%
     \toprule
       & VAR & VHAR & BVAR-Minnesota & BVHAR-MN-VAR & BVHAR-MN-VHAR\\
     \midrule
-    MSE & \num{0.0567} & \num{8.8273} & \num{0.0114} & \num{0.0149} & \textcolor{red}{\num{0.0099}}\\
-    MAE & \num{0.1444} & \num{1.9941} & \num{0.0689} & \num{0.0802} & \textcolor{red}{\num{0.0643}}\\
-    MAPE & \num{0.001755} & \num{0.023966} & \num{0.000827} & \num{0.000988} & \textcolor{red}{\num{0.000793}}\\
-    MASE & \num{329.562} & \num{4601.587} & \num{156.141} & \num{186.787} & \textcolor{red}{\num{145.386}}\\
+    MSE & \num{0.00556} & \num{0.00543} & \num{0.00542} & \textcolor{red}{\num{0.00539}} & \num{0.00539}\\
+    MAE & \num{0.05} & \num{0.049} & \num{0.0487} & \textcolor{red}{\num{0.0486}} & \num{0.0487}\\
+    MAPE & \num{169.723} & \textcolor{red}{\num{158.236}} & \num{159.718} & \num{160.812} & \num{160.435}\\
+    MASE & \num{112.869} & \num{110.465} & \num{109.757} & \textcolor{red}{\num{109.698}} & \num{109.828}\\
     \bottomrule
     \end{tabular}
     \end{table}
@@ -1861,10 +1876,10 @@ cv_large_20 %>%
     \toprule
       & VAR & VHAR & BVAR-Minnesota & BVHAR-MN-VAR & BVHAR-MN-VHAR\\
     \midrule
-    MSE & \num{1.044} & \num{185.217} & \num{0.122} & \num{0.198} & \textcolor{red}{\num{0.114}}\\
-    MAE & \num{0.638} & \num{9.195} & \num{0.226} & \num{0.294} & \textcolor{red}{\num{0.212}}\\
-    MAPE & \num{0.00771} & \num{0.11188} & \num{0.00274} & \num{0.00359} & \textcolor{red}{\num{0.00257}}\\
-    MASE & \num{1425.254} & \num{20516.721} & \num{535.142} & \num{709.581} & \textcolor{red}{\num{490.457}}\\
+    MSE & \num{0.00814} & \num{0.00809} & \num{0.00791} & \num{0.00792} & \textcolor{red}{\num{0.0079}}\\
+    MAE & \num{0.0594} & \num{0.0595} & \num{0.0589} & \num{0.0589} & \textcolor{red}{\num{0.0588}}\\
+    MAPE & \num{110.705} & \num{123.158} & \textcolor{red}{\num{100.969}} & \num{101.572} & \num{101.87}\\
+    MASE & \num{134.359} & \textcolor{red}{\num{132.268}} & \num{132.504} & \num{132.563} & \num{132.456}\\
     \bottomrule
     \end{tabular}
     \end{table}
@@ -1879,10 +1894,10 @@ cv_large_20 %>%
     \toprule
       & VAR & VHAR & BVAR-Minnesota & BVHAR-MN-VAR & BVHAR-MN-VHAR\\
     \midrule
-    MSE & \num{15.798} & \num{2066.521} & \num{1.487} & \num{2.011} & \textcolor{red}{\num{0.889}}\\
-    MAE & \num{2.486} & \num{30.535} & \num{0.754} & \num{0.941} & \textcolor{red}{\num{0.585}}\\
-    MAPE & \num{0.02997} & \num{0.36739} & \num{0.00913} & \num{0.01134} & \textcolor{red}{\num{0.00704}}\\
-    MASE & \num{5536.925} & \num{67150.978} & \num{1783.335} & \num{2199.036} & \textcolor{red}{\num{1297.187}}\\
+    MSE & \num{0.00764} & \num{0.00766} & \textcolor{red}{\num{0.00764}} & \num{0.00766} & \num{0.00766}\\
+    MAE & \num{0.0576} & \num{0.0577} & \textcolor{red}{\num{0.0576}} & \num{0.0577} & \num{0.0577}\\
+    MAPE & \num{100.014} & \num{107.513} & \textcolor{red}{\num{100}} & \num{100.809} & \num{100.743}\\
+    MASE & \num{129.196} & \num{129.274} & \textcolor{red}{\num{129.188}} & \num{129.447} & \num{129.413}\\
     \bottomrule
     \end{tabular}
     \end{table}
@@ -1899,10 +1914,10 @@ cv_large_20 %>%
     \toprule
       & VAR & VHAR & BVAR-Minnesota & BVHAR-MN-VAR & BVHAR-MN-VHAR\\
     \midrule
-    MSE & \num{0.00174} & \textcolor{red}{\num{0.00163}} & \num{0.00168} & \num{0.00163} & \num{0.00163}\\
-    MAE & \num{0.0284} & \num{0.0276} & \num{0.0279} & \num{0.0274} & \textcolor{red}{\num{0.0274}}\\
-    MAPE & \num{0.0113} & \num{0.0112} & \num{0.011} & \num{0.0109} & \textcolor{red}{\num{0.0109}}\\
-    MASE & \num{95.187} & \num{92.746} & \num{93.717} & \num{91.818} & \textcolor{red}{\num{91.788}}\\
+    MSE & \num{0.00155} & \num{0.00155} & \textcolor{red}{\num{0.00152}} & \num{0.00154} & \num{0.00154}\\
+    MAE & \num{0.027} & \num{0.0269} & \textcolor{red}{\num{0.0266}} & \num{0.0267} & \num{0.0267}\\
+    MAPE & \num{173.097} & \num{150.456} & \num{122.31} & \num{119.533} & \textcolor{red}{\num{116.638}}\\
+    MASE & \num{97.542} & \num{97.753} & \textcolor{red}{\num{95.767}} & \num{96.257} & \num{96.33}\\
     \bottomrule
     \end{tabular}
     \end{table}
@@ -1917,10 +1932,10 @@ cv_large_20 %>%
     \toprule
       & VAR & VHAR & BVAR-Minnesota & BVHAR-MN-VAR & BVHAR-MN-VHAR\\
     \midrule
-    MSE & \num{0.00178} & \num{0.00177} & \num{0.00175} & \num{0.00174} & \textcolor{red}{\num{0.00173}}\\
-    MAE & \num{0.0287} & \num{0.0286} & \num{0.0283} & \num{0.028} & \textcolor{red}{\num{0.028}}\\
-    MAPE & \num{0.0114} & \num{0.0114} & \num{0.0112} & \textcolor{red}{\num{0.0112}} & \num{0.0112}\\
-    MASE & \num{94.586} & \num{95.325} & \num{93.455} & \num{93.277} & \textcolor{red}{\num{93.225}}\\
+    MSE & \textcolor{red}{\num{0.00158}} & \num{0.0016} & \num{0.00159} & \num{0.00159} & \num{0.00158}\\
+    MAE & \num{0.0272} & \num{0.0273} & \num{0.0271} & \textcolor{red}{\num{0.0271}} & \num{0.0271}\\
+    MAPE & \num{127.161} & \num{131.302} & \num{99.987} & \textcolor{red}{\num{99.813}} & \num{100.822}\\
+    MASE & \num{98.187} & \num{98.808} & \num{97.796} & \textcolor{red}{\num{97.772}} & \num{97.817}\\
     \bottomrule
     \end{tabular}
     \end{table}
@@ -1935,10 +1950,10 @@ cv_large_20 %>%
     \toprule
       & VAR & VHAR & BVAR-Minnesota & BVHAR-MN-VAR & BVHAR-MN-VHAR\\
     \midrule
-    MSE & \textcolor{red}{\num{0.00169}} & \num{0.0017} & \num{0.00173} & \num{0.00173} & \num{0.00172}\\
-    MAE & \num{0.0278} & \textcolor{red}{\num{0.0276}} & \num{0.028} & \num{0.0277} & \num{0.0277}\\
-    MAPE & \num{0.0111} & \textcolor{red}{\num{0.011}} & \num{0.0112} & \num{0.0111} & \num{0.0111}\\
-    MASE & \num{91.47} & \textcolor{red}{\num{90.799}} & \num{92.423} & \num{91.037} & \num{90.984}\\
+    MSE & \num{0.00154} & \num{0.00154} & \textcolor{red}{\num{0.00154}} & \num{0.00154} & \num{0.00154}\\
+    MAE & \num{0.0265} & \textcolor{red}{\num{0.0265}} & \num{0.0265} & \num{0.0265} & \num{0.0265}\\
+    MAPE & \textcolor{red}{\num{99.985}} & \num{113.063} & \num{100} & \num{99.997} & \num{100.044}\\
+    MASE & \num{94.147} & \textcolor{red}{\num{93.72}} & \num{94.147} & \num{94.147} & \num{94.169}\\
     \bottomrule
     \end{tabular}
     \end{table}
@@ -1955,10 +1970,10 @@ cv_large_20 %>%
     \toprule
       & VAR & VHAR & BVAR-Minnesota & BVHAR-MN-VAR & BVHAR-MN-VHAR\\
     \midrule
-    MSE & \num{0.00171} & \num{0.00161} & \num{0.00164} & \num{0.00161} & \textcolor{red}{\num{0.00161}}\\
-    MAE & \num{0.0289} & \num{0.0284} & \num{0.0284} & \num{0.0282} & \textcolor{red}{\num{0.0281}}\\
-    MAPE & \num{0.044} & \num{0.0438} & \num{0.0437} & \textcolor{red}{\num{0.0435}} & \num{0.0435}\\
-    MASE & \num{98.945} & \num{96.514} & \num{96.662} & \num{95.688} & \textcolor{red}{\num{95.431}}\\
+    MSE & \num{0.00165} & \num{0.00159} & \num{0.00154} & \num{0.00154} & \textcolor{red}{\num{0.00154}}\\
+    MAE & \num{0.0285} & \num{0.0284} & \num{0.0278} & \num{0.0278} & \textcolor{red}{\num{0.0277}}\\
+    MAPE & \num{242.751} & \num{332.785} & \num{166.386} & \num{168.647} & \textcolor{red}{\num{163.193}}\\
+    MASE & \num{103.775} & \num{101.907} & \num{100.212} & \num{100.189} & \textcolor{red}{\num{99.998}}\\
     \bottomrule
     \end{tabular}
     \end{table}
@@ -1973,10 +1988,10 @@ cv_large_20 %>%
     \toprule
       & VAR & VHAR & BVAR-Minnesota & BVHAR-MN-VAR & BVHAR-MN-VHAR\\
     \midrule
-    MSE & \num{0.00161} & \num{0.00153} & \num{0.00161} & \num{0.00153} & \textcolor{red}{\num{0.00152}}\\
-    MAE & \num{0.0281} & \num{0.0278} & \num{0.0282} & \num{0.0276} & \textcolor{red}{\num{0.0275}}\\
-    MAPE & \num{0.0425} & \num{0.0429} & \num{0.0425} & \num{0.0423} & \textcolor{red}{\num{0.0423}}\\
-    MASE & \num{96.169} & \num{94.394} & \num{96.471} & \num{93.891} & \textcolor{red}{\num{93.805}}\\
+    MSE & \num{0.00156} & \num{0.00156} & \num{0.00154} & \num{0.00154} & \textcolor{red}{\num{0.00154}}\\
+    MAE & \num{0.0279} & \num{0.0281} & \num{0.0278} & \num{0.0278} & \textcolor{red}{\num{0.0277}}\\
+    MAPE & \num{151.279} & \num{166.566} & \num{99.999} & \textcolor{red}{\num{99.999}} & \num{105.612}\\
+    MASE & \num{100.593} & \num{100.831} & \num{100.27} & \num{100.27} & \textcolor{red}{\num{100.135}}\\
     \bottomrule
     \end{tabular}
     \end{table}
@@ -1991,10 +2006,10 @@ cv_large_20 %>%
     \toprule
       & VAR & VHAR & BVAR-Minnesota & BVHAR-MN-VAR & BVHAR-MN-VHAR\\
     \midrule
-    MSE & \num{0.00143} & \num{0.00144} & \num{0.00144} & \num{0.00143} & \textcolor{red}{\num{0.00142}}\\
-    MAE & \num{0.0267} & \num{0.0269} & \num{0.0267} & \num{0.0267} & \textcolor{red}{\num{0.0266}}\\
-    MAPE & \num{0.0437} & \num{0.0441} & \num{0.0437} & \num{0.0437} & \textcolor{red}{\num{0.0436}}\\
-    MASE & \num{90.033} & \num{90.987} & \num{90.306} & \num{90.187} & \textcolor{red}{\num{89.939}}\\
+    MSE & \num{0.00149} & \num{0.00151} & \num{0.00149} & \num{0.00149} & \textcolor{red}{\num{0.00148}}\\
+    MAE & \num{0.0274} & \num{0.0277} & \num{0.0274} & \num{0.0274} & \textcolor{red}{\num{0.0274}}\\
+    MAPE & \num{100.109} & \num{134.67} & \num{100} & \textcolor{red}{\num{100}} & \num{101.702}\\
+    MASE & \num{97.448} & \num{98.434} & \num{97.455} & \num{97.455} & \textcolor{red}{\num{97.368}}\\
     \bottomrule
     \end{tabular}
     \end{table}
@@ -2056,29 +2071,29 @@ cv_large_list <-
     \cmidrule(l{3pt}r{3pt}){3-5} \cmidrule(l{3pt}r{3pt}){6-8} \cmidrule(l{3pt}r{3pt}){9-11}
     \rotatebox{0}{} & \rotatebox{0}{} & \rotatebox{0}{$h = 1$} & \rotatebox{0}{$h = 5$} & \rotatebox{0}{$h = 20$} & \rotatebox{0}{$h = 1$} & \rotatebox{0}{$h = 5$} & \rotatebox{0}{$h = 20$} & \rotatebox{0}{$h = 1$} & \rotatebox{0}{$h = 5$} & \rotatebox{0}{$h = 20$}\\
     \midrule
-     & VHAR & \textcolor{black}{\num{13.806}} & \textcolor{black}{\num{14.418}} & \textcolor{black}{\num{12.284}} & \textcolor{black}{\num{1.56e+02}} & \textcolor{black}{\num{1.77e+02}} & \textcolor{black}{\num{1.31e+02}} & \textcolor{black}{\num{13.963}} & \textcolor{black}{\num{14.395}} & \textcolor{black}{\num{12.128}}\\
+     & VHAR & \textcolor{black}{\num{.981}} & \textcolor{black}{\num{1.002}} & \textcolor{black}{\num{1.002}} & \textcolor{black}{\num{.977}} & \textcolor{black}{\num{.994}} & \textcolor{black}{\num{1.002}} & \textcolor{black}{\num{.979}} & \textcolor{red}{\num{.984}} & \textcolor{black}{\num{1.001}}\\
 
-     & BVAR & \textcolor{black}{\num{ .477}} & \textcolor{black}{\num{ .354}} & \textcolor{black}{\num{ .303}} & \textcolor{black}{\num{2.00e-01}} & \textcolor{black}{\num{1.17e-01}} & \textcolor{black}{\num{9.41e-02}} & \textcolor{black}{\num{ .474}} & \textcolor{black}{\num{ .375}} & \textcolor{black}{\num{ .322}}\\
+     & BVAR & \textcolor{black}{\num{.975}} & \textcolor{black}{\num{.991}} & \textcolor{red}{\num{1.000}} & \textcolor{black}{\num{.975}} & \textcolor{black}{\num{.972}} & \textcolor{red}{\num{1.000}} & \textcolor{black}{\num{.972}} & \textcolor{black}{\num{.986}} & \textcolor{red}{\num{1.000}}\\
 
-     & BVHAR-S & \textcolor{black}{\num{ .555}} & \textcolor{black}{\num{ .462}} & \textcolor{black}{\num{ .378}} & \textcolor{black}{\num{2.62e-01}} & \textcolor{black}{\num{1.90e-01}} & \textcolor{black}{\num{1.27e-01}} & \textcolor{black}{\num{ .567}} & \textcolor{black}{\num{ .498}} & \textcolor{black}{\num{ .397}}\\
+     & BVHAR-S & \textcolor{red}{\num{.972}} & \textcolor{black}{\num{.992}} & \textcolor{black}{\num{1.002}} & \textcolor{red}{\num{.969}} & \textcolor{black}{\num{.973}} & \textcolor{black}{\num{1.002}} & \textcolor{red}{\num{.972}} & \textcolor{black}{\num{.987}} & \textcolor{black}{\num{1.002}}\\
 
-    \multirow{-4}{*}{\centering\arraybackslash SMALL} & BVHAR-L & \textcolor{red}{\num{ .445}} & \textcolor{red}{\num{ .332}} & \textcolor{red}{\num{ .235}} & \textcolor{red}{\num{1.75e-01}} & \textcolor{red}{\num{1.10e-01}} & \textcolor{red}{\num{5.62e-02}} & \textcolor{red}{\num{ .441}} & \textcolor{red}{\num{ .344}} & \textcolor{red}{\num{ .234}}\\
+    \multirow{-4}{*}{\centering\arraybackslash SMALL} & BVHAR-L & \textcolor{black}{\num{.973}} & \textcolor{red}{\num{.990}} & \textcolor{black}{\num{1.002}} & \textcolor{black}{\num{.971}} & \textcolor{red}{\num{.970}} & \textcolor{black}{\num{1.002}} & \textcolor{black}{\num{.973}} & \textcolor{black}{\num{.986}} & \textcolor{black}{\num{1.002}}\\
     \cmidrule{1-11}
-     & VHAR & \textcolor{black}{\num{.308}} & \textcolor{black}{\num{.3746}} & \textcolor{black}{\num{2.01e-02}} & \textcolor{black}{\num{.1894}} & \textcolor{black}{\num{1.40e-01}} & \textcolor{black}{\num{4.03e-04}} & \textcolor{black}{\num{.317}} & \textcolor{black}{\num{.3746}} & \textcolor{black}{\num{2.01e-02}}\\
+     & VHAR & \textcolor{black}{\num{1.001}} & \textcolor{black}{\num{1.077}} & \textcolor{black}{\num{1.013}} & \textcolor{black}{\num{.987}} & \textcolor{black}{\num{1.113}} & \textcolor{black}{\num{1.020}} & \textcolor{black}{\num{1.008}} & \textcolor{black}{\num{1.081}} & \textcolor{black}{\num{1.016}}\\
 
-     & BVAR & \textcolor{black}{\num{.750}} & \textcolor{black}{\num{1.2748}} & \textcolor{black}{\num{2.67e+00}} & \textcolor{black}{\num{.7330}} & \textcolor{black}{\num{1.63e+00}} & \textcolor{black}{\num{7.11e+00}} & \textcolor{black}{\num{.782}} & \textcolor{black}{\num{1.2749}} & \textcolor{black}{\num{2.67e+00}}\\
+     & BVAR & \textcolor{black}{\num{.969}} & \textcolor{black}{\num{.984}} & \textcolor{red}{\num{1.000}} & \textcolor{black}{\num{.960}} & \textcolor{black}{\num{.981}} & \textcolor{red}{\num{1.000}} & \textcolor{black}{\num{.972}} & \textcolor{black}{\num{.983}} & \textcolor{red}{\num{1.000}}\\
 
-     & BVHAR-S & \textcolor{black}{\num{.238}} & \textcolor{black}{\num{.0773}} & \textcolor{black}{\num{3.68e-05}} & \textcolor{black}{\num{.1080}} & \textcolor{black}{\num{5.97e-03}} & \textcolor{black}{\num{1.35e-09}} & \textcolor{black}{\num{.244}} & \textcolor{black}{\num{.0773}} & \textcolor{black}{\num{3.68e-05}}\\
+     & BVHAR-S & \textcolor{red}{\num{.969}} & \textcolor{black}{\num{.983}} & \textcolor{black}{\num{1.000}} & \textcolor{black}{\num{.959}} & \textcolor{black}{\num{.979}} & \textcolor{black}{\num{1.000}} & \textcolor{red}{\num{.971}} & \textcolor{red}{\num{.982}} & \textcolor{black}{\num{1.000}}\\
 
-    \multirow{-4}{*}{\centering\arraybackslash MEDIUM} & BVHAR-L & \textcolor{red}{\num{.226}} & \textcolor{red}{\num{.0580}} & \textcolor{red}{\num{1.16e-05}} & \textcolor{red}{\num{.0973}} & \textcolor{red}{\num{3.36e-03}} & \textcolor{red}{\num{1.36e-10}} & \textcolor{red}{\num{.233}} & \textcolor{red}{\num{.0580}} & \textcolor{red}{\num{1.16e-05}}\\
+    \multirow{-4}{*}{\centering\arraybackslash MEDIUM} & BVHAR-L & \textcolor{black}{\num{.969}} & \textcolor{red}{\num{.983}} & \textcolor{black}{\num{1.000}} & \textcolor{red}{\num{.959}} & \textcolor{red}{\num{.979}} & \textcolor{black}{\num{1.000}} & \textcolor{black}{\num{.971}} & \textcolor{black}{\num{.982}} & \textcolor{black}{\num{1.000}}\\
     \cmidrule{1-11}
-     & VHAR & \textcolor{black}{\num{.264}} & \textcolor{black}{\num{.3577}} & \textcolor{black}{\num{1.67e-02}} & \textcolor{black}{\num{.1728}} & \textcolor{black}{\num{1.28e-01}} & \textcolor{black}{\num{2.79e-04}} & \textcolor{black}{\num{.280}} & \textcolor{black}{\num{.3577}} & \textcolor{black}{\num{1.67e-02}}\\
+     & VHAR & \textcolor{black}{\num{.998}} & \textcolor{black}{\num{1.067}} & \textcolor{black}{\num{1.012}} & \textcolor{black}{\num{.995}} & \textcolor{black}{\num{1.114}} & \textcolor{black}{\num{1.017}} & \textcolor{black}{\num{.992}} & \textcolor{black}{\num{1.067}} & \textcolor{black}{\num{1.016}}\\
 
-     & BVAR & \textcolor{black}{\num{.715}} & \textcolor{black}{\num{1.3064}} & \textcolor{black}{\num{2.95e+00}} & \textcolor{black}{\num{.7425}} & \textcolor{black}{\num{1.71e+00}} & \textcolor{black}{\num{8.70e+00}} & \textcolor{black}{\num{.764}} & \textcolor{black}{\num{1.3065}} & \textcolor{black}{\num{2.95e+00}}\\
+     & BVAR & \textcolor{black}{\num{.970}} & \textcolor{red}{\num{.992}} & \textcolor{black}{\num{1.000}} & \textcolor{black}{\num{.956}} & \textcolor{red}{\num{.991}} & \textcolor{black}{\num{1.000}} & \textcolor{black}{\num{.968}} & \textcolor{black}{\num{.992}} & \textcolor{black}{\num{1.000}}\\
 
-     & BVHAR-S & \textcolor{black}{\num{.218}} & \textcolor{black}{\num{.0695}} & \textcolor{black}{\num{2.41e-05}} & \textcolor{black}{\num{.1059}} & \textcolor{black}{\num{4.83e-03}} & \textcolor{black}{\num{5.82e-10}} & \textcolor{black}{\num{.231}} & \textcolor{black}{\num{.0695}} & \textcolor{black}{\num{2.41e-05}}\\
+     & BVHAR-S & \textcolor{black}{\num{.969}} & \textcolor{black}{\num{.993}} & \textcolor{red}{\num{1.000}} & \textcolor{black}{\num{.953}} & \textcolor{black}{\num{.992}} & \textcolor{red}{\num{1.000}} & \textcolor{black}{\num{.965}} & \textcolor{red}{\num{.992}} & \textcolor{red}{\num{1.000}}\\
 
-    \multirow{-4}{*}{\centering\arraybackslash LARGE} & BVHAR-L & \textcolor{red}{\num{.209}} & \textcolor{red}{\num{.0538}} & \textcolor{red}{\num{8.69e-06}} & \textcolor{red}{\num{.0967}} & \textcolor{red}{\num{2.89e-03}} & \textcolor{red}{\num{7.54e-11}} & \textcolor{red}{\num{.221}} & \textcolor{red}{\num{.0538}} & \textcolor{red}{\num{8.69e-06}}\\
+    \multirow{-4}{*}{\centering\arraybackslash LARGE} & BVHAR-L & \textcolor{red}{\num{.969}} & \textcolor{black}{\num{.993}} & \textcolor{black}{\num{1.000}} & \textcolor{red}{\num{.952}} & \textcolor{black}{\num{.992}} & \textcolor{black}{\num{1.000}} & \textcolor{red}{\num{.965}} & \textcolor{black}{\num{.992}} & \textcolor{black}{\num{1.000}}\\
     \bottomrule
     \end{tabular}}
     \end{table}

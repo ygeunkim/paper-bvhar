@@ -18,10 +18,11 @@ num_test <- 100
 num_burin <- 300
 # SMALL-----------------------------------------------
 n_small <- 3
+# bvhar_small_sig <- runif(n_small, min = .01, max = .3)
 bvhar_small_spec <- set_bvhar(
   sigma = rep(.05, n_small),
-  lambda = .2,
-  delta = rep(0, n_small)
+  lambda = .1,
+  delta = rep(.1, n_small)
 )
 # generate SMALL coef--------------------
 set.seed(1)
@@ -31,7 +32,7 @@ set.seed(1)
 bvhar_small <- sim_vhar(
   num_train + num_test,
   num_burin,
-  bvhar_small_coef$coefficients,
+  bvhar_small_coef$coefficients[seq_len(n_small * 3),],
   bvhar_small_coef$covmat,
   matrix(0L, nrow = 22L, ncol = n_small)
 ) %>% 
@@ -41,10 +42,11 @@ colnames(bvhar_small) <- paste("asset", sprintf(1:n_small, fmt = "%02d"), sep = 
 bvhar_small_split <- divide_ts(bvhar_small, num_test)
 # MEDIUM----------------------------------------------
 n_medium <- 9
+# bvhar_medium_sig <- c(bvhar_small_sig, runif(n_medium - n_small, min = .01, max = .3))
 bvhar_medium_spec <- set_bvhar(
   sigma = rep(.05, n_medium),
-  lambda = .1,
-  delta = rep(0, n_medium)
+  lambda = .05,
+  delta = rep(.1, n_medium)
 )
 # generate MEDIUM coef----------------
 set.seed(1)
@@ -54,7 +56,7 @@ set.seed(1)
 bvhar_medium <- sim_vhar(
   num_train + num_test,
   num_burin,
-  bvhar_medium_coef$coefficients,
+  bvhar_medium_coef$coefficients[seq_len(n_medium * 3),],
   bvhar_medium_coef$covmat,
   matrix(0L, nrow = 22L, ncol = n_medium)
 ) %>% 
@@ -64,10 +66,11 @@ colnames(bvhar_medium) <- paste("asset", sprintf(1:n_medium, fmt = "%02d"), sep 
 bvhar_medium_split <- divide_ts(bvhar_medium, num_test)
 # LARGE----------------------------------------------
 n_large <- 12
+# bvhar_large_sig <- c(bvhar_medium_sig, runif(n_large - n_medium, min = .01, max = .3))
 bvhar_large_spec <- set_bvhar(
   sigma = rep(.05, n_large),
-  lambda = .03,
-  delta = rep(0, n_large)
+  lambda = .01,
+  delta = rep(.1, n_large)
 )
 # generate LARGE coef-----------------
 set.seed(1)
@@ -77,7 +80,7 @@ set.seed(1)
 bvhar_large <- sim_vhar(
   num_train + num_test,
   num_burin,
-  bvhar_large_coef$coefficients,
+  bvhar_large_coef$coefficients[seq_len(n_large * 3),],
   bvhar_large_coef$covmat,
   matrix(0L, nrow = 22L, ncol = n_large)
 ) %>% 
