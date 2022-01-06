@@ -15,6 +15,14 @@ knit:
   })
 ---
 
+```{r simdata}
+sim_data <- "../data/processed/bvarsim_dgp_wn.rds"
+```
+
+```{r cacheset, include=FALSE, cache=TRUE, cache.extra = tools::md5sum(sim_data)}
+knitr::opts_chunk$set(cache.rebuild = TRUE)
+```
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(
   comment = "#>",
@@ -57,7 +65,7 @@ source("report-fns.R")
 # hyperparameter setting table---------
 source("param-fns.R")
 # Simulation---------------------------
-dgp <- readRDS("../data/processed/bvarsim_dgp_wn.rds")
+dgp <- readRDS(sim_data)
 ```
 
 # BVAR Coefficient
@@ -229,7 +237,7 @@ fit_vhar_large <- vhar_lm(y_large_train, include_mean = FALSE)
 (bvar_lag <- 5)
 ```
 
-```{r smallbvaroptim, cache=TRUE}
+```{r smallbvaroptim, cache = 1}
 (bvar_small_optim <- choose_bvar(
   bvar_small_spec, 
   lower = c(
@@ -249,7 +257,7 @@ fit_vhar_large <- vhar_lm(y_large_train, include_mean = FALSE)
 ))
 ```
 
-```{r medbvaroptim, cache=TRUE}
+```{r medbvaroptim, cache = 1}
 (bvar_medium_optim <- choose_bvar(
   bvar_medium_spec, 
   lower = c(
@@ -269,7 +277,7 @@ fit_vhar_large <- vhar_lm(y_large_train, include_mean = FALSE)
 ))
 ```
 
-```{r largebvaroptim, cache=TRUE}
+```{r largebvaroptim, cache = 1}
 (bvar_large_optim <- choose_bvar(
   bvar_large_spec, 
   lower = c(
@@ -317,7 +325,7 @@ bvhar_var_large_spec <- set_bvhar(
 )
 ```
 
-```{r smallbvharoptim, cache=TRUE}
+```{r smallbvharoptim, cache = 1}
 (bvhar_var_small_optim <- choose_bvhar(
   bvhar_var_small_spec, 
   lower = c(
@@ -336,7 +344,7 @@ bvhar_var_large_spec <- set_bvhar(
 ))
 ```
 
-```{r medbvharoptim, cache=TRUE}
+```{r medbvharoptim, cache = 1}
 (bvhar_var_medium_optim <- choose_bvhar(
   bvhar_var_medium_spec, 
   lower = c(
@@ -355,7 +363,7 @@ bvhar_var_large_spec <- set_bvhar(
 ))
 ```
 
-```{r largebvharoptim, cache=TRUE}
+```{r largebvharoptim, cache = 1}
 (bvhar_var_large_optim <- choose_bvhar(
   bvhar_var_large_spec, 
   lower = c(
@@ -408,7 +416,7 @@ bvhar_vhar_large_spec <- set_weight_bvhar(
 )
 ```
 
-```{r smallbvharvharoptim, cache=TRUE}
+```{r smallbvharvharoptim, cache = 1}
 (bvhar_vhar_small_optim <- choose_bvhar(
   bvhar_vhar_small_spec, 
   lower = c(
@@ -431,7 +439,7 @@ bvhar_vhar_large_spec <- set_weight_bvhar(
 ))
 ```
 
-```{r medbvharvharoptim, cache=TRUE}
+```{r medbvharvharoptim, cache = 1}
 (bvhar_vhar_medium_optim <- choose_bvhar(
   bvhar_vhar_medium_spec, 
   lower = c(
@@ -454,7 +462,7 @@ bvhar_vhar_large_spec <- set_weight_bvhar(
 ))
 ```
 
-```{r largebvharvharoptim, cache=TRUE}
+```{r largebvharvharoptim, cache = 1}
 (bvhar_vhar_large_optim <- choose_bvhar(
   bvhar_vhar_large_spec, 
   lower = c(
@@ -487,9 +495,6 @@ fit_bvhar_large_vhar <- bvhar_vhar_large_optim$fit
 parallel::stopCluster(cl)
 ```
 
-
-# Errors
-
 ## Hyperparameters
 
 ```{r reportemp, comment=NULL, echo=FALSE}
@@ -515,10 +520,13 @@ report_hyperparam(spec_optim_list, report_true = FALSE, caption = "Empirical Bay
   writeLines()
 ```
 
+# Errors
 
-## SMALL
+## Rolling Windows
 
-```{r smallroll, cache=TRUE}
+### SMALL
+
+```{r smallroll, cache = 1}
 mod_small_list <- list(
   fit_var_small,
   fit_vhar_small,
@@ -552,7 +560,144 @@ cv_small_20 <-
   )
 ```
 
-### Plots
+### MEDIUM
+
+```{r medroll, cache = 1}
+mod_medium_list <- list(
+  fit_var_medium,
+  fit_vhar_medium,
+  fit_medium_bvar,
+  fit_bvhar_medium_var,
+  fit_bvhar_medium_vhar
+)
+# 1-step-----------
+cv_medium_1 <- 
+  mod_medium_list %>% 
+  lapply(
+    function(mod) {
+      forecast_roll(mod, 1, y_medium_test)
+    }
+  )
+# 5-step-----------
+cv_medium_5 <- 
+  mod_medium_list %>% 
+  lapply(
+    function(mod) {
+      forecast_roll(mod, 5, y_medium_test)
+    }
+  )
+# 20-step----------
+cv_medium_20 <- 
+  mod_medium_list %>% 
+  lapply(
+    function(mod) {
+      forecast_roll(mod, 20, y_medium_test)
+    }
+  )
+```
+
+### LARGE
+
+```{r largeroll, cache = 1}
+mod_large_list <- list(
+  fit_var_large,
+  fit_vhar_large,
+  fit_large_bvar,
+  fit_bvhar_large_var,
+  fit_bvhar_large_vhar
+)
+# 1-step-----------
+cv_large_1 <- 
+  mod_large_list %>% 
+  lapply(
+    function(mod) {
+      forecast_roll(mod, 1, y_large_test)
+    }
+  )
+# 5-step-----------
+cv_large_5 <- 
+  mod_large_list %>% 
+  lapply(
+    function(mod) {
+      forecast_roll(mod, 5, y_large_test)
+    }
+  )
+# 20-step----------
+cv_large_20 <- 
+  mod_large_list %>% 
+  lapply(
+    function(mod) {
+      forecast_roll(mod, 20, y_large_test)
+    }
+  )
+```
+
+### Lists
+
+```{r listroll, cache = 1}
+# SMALL-------------------------------
+cv_small_list <- 
+  lapply(
+    c(1, 5, 20),
+    function(h) {
+      mod_small_list %>% 
+        lapply(
+          function(mod) {
+            forecast_roll(mod, h, y_small_test)
+          }
+        )
+    }
+  )
+# MEDIUM------------------------------
+cv_medium_list <- 
+  lapply(
+    c(1, 5, 20),
+    function(h) {
+      mod_small_list %>% 
+        lapply(
+          function(mod) {
+            forecast_roll(mod, h, y_medium_test)
+          }
+        )
+    }
+  )
+# LARGE-------------------------------
+cv_large_list <- 
+  lapply(
+    c(1, 5, 20),
+    function(h) {
+      mod_small_list %>% 
+        lapply(
+          function(mod) {
+            forecast_roll(mod, h, y_large_test)
+          }
+        )
+    }
+  )
+```
+
+## Relative Errors
+
+Set VAR as the benchmark model.
+
+```{r simaveresult, comment=NULL, echo=FALSE}
+get_rmafetex_tr(
+  list(cv_small_list, cv_medium_list, cv_large_list), 
+  y_list = list(y_small_test, y_medium_test, y_large_test), 
+  ahead_list = c("$h = 1$", "$h = 5$", "$h = 20$"),
+  benchmark_id = 1,
+  caption = "Out-of-sample forecasting performance measures for DGP1.", 
+  label = "dgp1result",
+  header_angle = 0
+) %>% 
+  writeLines()
+```
+
+## Piceswise Errors
+
+### SMALL
+
+Plots
 
 ```{r smallcvonefig, echo=FALSE}
 cv_small_1 %>% 
@@ -637,43 +782,9 @@ cv_small_20 %>%
   writeLines()
 ```
 
-## MEDIUM
+### MEDIUM
 
-```{r medroll, cache=TRUE}
-mod_medium_list <- list(
-  fit_var_medium,
-  fit_vhar_medium,
-  fit_medium_bvar,
-  fit_bvhar_medium_var,
-  fit_bvhar_medium_vhar
-)
-# 1-step-----------
-cv_medium_1 <- 
-  mod_medium_list %>% 
-  lapply(
-    function(mod) {
-      forecast_roll(mod, 1, y_medium_test)
-    }
-  )
-# 5-step-----------
-cv_medium_5 <- 
-  mod_medium_list %>% 
-  lapply(
-    function(mod) {
-      forecast_roll(mod, 5, y_medium_test)
-    }
-  )
-# 20-step----------
-cv_medium_20 <- 
-  mod_medium_list %>% 
-  lapply(
-    function(mod) {
-      forecast_roll(mod, 20, y_medium_test)
-    }
-  )
-```
-
-### Plots
+Plots
 
 ```{r medcvonefig}
 cv_medium_1 %>% 
@@ -732,7 +843,7 @@ cv_medium_20 %>%
   )
 ```
 
-### Tables
+Tables
 
 1-step:
 
@@ -759,43 +870,9 @@ cv_medium_20 %>%
 ```
 
 
-## LARGE
+### LARGE
 
-```{r largeroll, cache=TRUE}
-mod_large_list <- list(
-  fit_var_large,
-  fit_vhar_large,
-  fit_large_bvar,
-  fit_bvhar_large_var,
-  fit_bvhar_large_vhar
-)
-# 1-step-----------
-cv_large_1 <- 
-  mod_large_list %>% 
-  lapply(
-    function(mod) {
-      forecast_roll(mod, 1, y_large_test)
-    }
-  )
-# 5-step-----------
-cv_large_5 <- 
-  mod_large_list %>% 
-  lapply(
-    function(mod) {
-      forecast_roll(mod, 5, y_large_test)
-    }
-  )
-# 20-step----------
-cv_large_20 <- 
-  mod_large_list %>% 
-  lapply(
-    function(mod) {
-      forecast_roll(mod, 20, y_large_test)
-    }
-  )
-```
-
-### Plots
+Plots
 
 ```{r largecvonefig}
 cv_large_1 %>% 
@@ -854,7 +931,7 @@ cv_large_20 %>%
   )
 ```
 
-### Tables
+Tables
 
 1-step:
 
@@ -880,9 +957,9 @@ cv_large_20 %>%
   writeLines()
 ```
 
-## Average
+### Average
 
-### SMALL
+SMALL
 
 1-step:
 
@@ -908,7 +985,7 @@ cv_small_20 %>%
   writeLines()
 ```
 
-### MEDIUM
+MEDIUM
 
 1-step:
 
@@ -934,7 +1011,7 @@ cv_medium_20 %>%
   writeLines()
 ```
 
-### LARGE
+LARGE
 
 1-step:
 
@@ -959,66 +1036,6 @@ cv_large_20 %>%
   kable_lossmean(y_large_test, kable = TRUE, caption = "LARGE Simulation - 20-step ahead Rolling Window Forecasting Average Loss", label = "largetwentyemean") %>% 
   writeLines()
 ```
-
-### RMSFE or RMAFE
-
-Set VAR as the benchmark model.
-
-```{r listroll, cache=TRUE}
-# SMALL-------------------------------
-cv_small_list <- 
-  lapply(
-    c(1, 5, 20),
-    function(h) {
-      mod_small_list %>% 
-        lapply(
-          function(mod) {
-            forecast_roll(mod, h, y_small_test)
-          }
-        )
-    }
-  )
-# MEDIUM------------------------------
-cv_medium_list <- 
-  lapply(
-    c(1, 5, 20),
-    function(h) {
-      mod_small_list %>% 
-        lapply(
-          function(mod) {
-            forecast_roll(mod, h, y_medium_test)
-          }
-        )
-    }
-  )
-# LARGE-------------------------------
-cv_large_list <- 
-  lapply(
-    c(1, 5, 20),
-    function(h) {
-      mod_small_list %>% 
-        lapply(
-          function(mod) {
-            forecast_roll(mod, h, y_large_test)
-          }
-        )
-    }
-  )
-```
-
-```{r simaveresult, comment=NULL, echo=FALSE}
-get_rmafetex_tr(
-  list(cv_small_list, cv_medium_list, cv_large_list), 
-  y_list = list(y_small_test, y_medium_test, y_large_test), 
-  ahead_list = c("$h = 1$", "$h = 5$", "$h = 20$"),
-  benchmark_id = 1,
-  caption = "Out-of-sample forecasting performance measures for DGP1.", 
-  label = "dgp1result",
-  header_angle = 0
-) %>% 
-  writeLines()
-```
-
 
 # Additional
 

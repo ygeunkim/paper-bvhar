@@ -21,9 +21,9 @@ num_burin <- 300
 # SMALL-----------------------------------------------
 n_small <- 3
 bvar_small_spec <- set_bvar(
-  sigma = runif(n_small, min = .01, max = .3),
-  lambda = 5e-3,
-  delta = runif(n_small, min = .01, max = .6)
+  sigma = rep(.05, n_small),
+  lambda = .1,
+  delta = rep(.1, n_small)
 )
 # generate SMALL coef--------------------
 set.seed(1)
@@ -45,9 +45,9 @@ y_small_split <- divide_ts(y_small, num_test)
 # MEDIUM----------------------------------------------
 n_medium <- 9
 bvar_medium_spec <- set_bvar(
-  sigma = runif(n_medium, min = .01, max = .3),
-  lambda = 1e-3,
-  delta = runif(n_medium, min = .01, max = .6),
+  sigma = rep(.05, n_medium),
+  lambda = .05,
+  delta = rep(.1, n_medium),
   eps = .1
 )
 # generate MEDIUM coef----------------
@@ -70,9 +70,9 @@ y_medium_split <- divide_ts(y_medium, num_test)
 # LARGE----------------------------------------------
 n_large <- 12
 bvar_large_spec <- set_bvar(
-  sigma = runif(n_large, min = .01, max = .3),
-  lambda = 5e-4,
-  delta = runif(n_large, min = .01, max = .6),
+  sigma = rep(.05, n_large),
+  lambda = .01,
+  delta = rep(.1, n_large),
   eps = .1
 )
 # generate LARGE coef-----------------

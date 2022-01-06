@@ -1,7 +1,7 @@
 Simulating VAR-type Minnesota BVHAR
 ================
 Young Geun Kim
-05 Jan, 2022
+06 Jan, 2022
 
 -   [BVHAR Coefficient](#bvhar-coefficient)
     -   [VAR-type Minnesota prior](#var-type-minnesota-prior)
@@ -15,23 +15,24 @@ Young Geun Kim
     -   [BVAR](#bvar)
     -   [BVHAR-VAR](#bvhar-var)
     -   [BVHAR-VHAR](#bvhar-vhar)
--   [Errors](#errors)
     -   [Hyperparameters](#hyperparameters)
-    -   [SMALL](#small-1)
-        -   [Plots](#plots)
-        -   [Tables](#tables)
-    -   [MEDIUM](#medium-1)
-        -   [Plots](#plots-1)
-        -   [Tables](#tables-1)
-    -   [LARGE](#large-1)
-        -   [Plots](#plots-2)
-        -   [Tables](#tables-2)
-    -   [Average](#average)
+-   [Errors](#errors)
+    -   [Rolling Windows](#rolling-windows)
+        -   [SMALL](#small-1)
+        -   [MEDIUM](#medium-1)
+        -   [LARGE](#large-1)
+        -   [Lists](#lists)
+    -   [Relative Error](#relative-error)
+    -   [Piecewise Errors](#piecewise-errors)
         -   [SMALL](#small-2)
         -   [MEDIUM](#medium-2)
         -   [LARGE](#large-2)
-        -   [RMSFE or RMAFE](#rmsfe-or-rmafe)
+        -   [Average](#average)
 -   [Coefficients](#coefficients)
+
+``` r
+sim_data <- "../data/processed/bvharsim_dgp_s.rds"
+```
 
 ``` r
 # tidyverse----------------------------
@@ -50,7 +51,7 @@ source("report-fns.R")
 # hyperparameter setting table---------
 source("param-fns.R")
 # Simulation---------------------------
-dgp <- readRDS("../data/processed/bvharsim_dgp_s.rds")
+dgp <- readRDS(sim_data)
 ```
 
 # BVHAR Coefficient
@@ -241,7 +242,7 @@ bvar_large_spec <- set_bvar(
   bvar_small_spec, 
   lower = c(
     rep(1e-2, n_small), # sigma
-    1e-4, # lambda
+    1e-2, # lambda
     rep(1e-2, n_small) # delta
   ), 
   upper = c(
@@ -279,7 +280,7 @@ bvar_large_spec <- set_bvar(
   bvar_medium_spec, 
   lower = c(
     rep(1e-2, n_medium), # sigma
-    1e-4, # lambda
+    1e-2, # lambda
     rep(1e-2, n_medium) # delta
   ), 
   upper = c(
@@ -306,7 +307,7 @@ bvar_large_spec <- set_bvar(
 #> [1]  0.0649
 #> 
 #> Setting for 'delta':
-#> [1]  0.1323  0.0492  0.0860  0.0647  0.0504  0.0598  0.1374  0.0636  0.1067
+#> [1]  0.1323  0.0491  0.0860  0.0647  0.0503  0.0598  0.1374  0.0636  0.1067
 #> 
 #> Setting for 'eps':
 #> [1]  1e-04
@@ -317,7 +318,7 @@ bvar_large_spec <- set_bvar(
   bvar_large_spec, 
   lower = c(
     rep(1e-2, n_large), # sigma
-    1e-4, # lambda
+    1e-2, # lambda
     rep(1e-2, n_large) # delta
   ), 
   upper = c(
@@ -338,15 +339,15 @@ bvar_large_spec <- set_bvar(
 #> ========================================================
 #> 
 #> Setting for 'sigma':
-#>  [1]  0.0378  0.0403  0.0438  0.0555  0.0666  0.0420  0.0651  0.0599  0.0887
-#> [10]  0.0788  0.0714  0.0990
+#>  [1]  0.0378  0.0403  0.0438  0.0556  0.0668  0.0422  0.0650  0.0604  0.0890
+#> [10]  0.0788  0.0725  0.0999
 #> 
 #> Setting for 'lambda':
-#> [1]  1e-04
+#> [1]  0.01
 #> 
 #> Setting for 'delta':
-#>  [1]  0.0800  0.0851  0.0695  0.0981  0.0664  0.0815  0.0525  0.1100  0.0897
-#> [10]  0.0871  0.0826  0.0896
+#>  [1]  0.0796  0.0852  0.0696  0.0979  0.0665  0.0830  0.0525  0.1088  0.0887
+#> [10]  0.0873  0.0821  0.0891
 #> 
 #> Setting for 'eps':
 #> [1]  1e-04
@@ -365,7 +366,7 @@ fit_large_bvar <- bvar_large_optim$fit
   bvhar_small_spec, 
   lower = c(
     rep(1e-2, n_small), # sigma
-    1e-4, # lambda
+    1e-2, # lambda
     rep(1e-2, n_small) # delta
   ), 
   upper = c(
@@ -402,7 +403,7 @@ fit_large_bvar <- bvar_large_optim$fit
   bvhar_medium_spec, 
   lower = c(
     rep(1e-2, n_medium), # sigma
-    1e-4, # lambda
+    1e-2, # lambda
     rep(1e-2, n_medium) # delta
   ), 
   upper = c(
@@ -439,7 +440,7 @@ fit_large_bvar <- bvar_large_optim$fit
   bvhar_large_spec, 
   lower = c(
     rep(1e-2, n_large), # sigma
-    1e-4, # lambda
+    1e-2, # lambda
     rep(1e-2, n_large) # delta
   ), 
   upper = c(
@@ -459,15 +460,15 @@ fit_large_bvar <- bvar_large_optim$fit
 #> ========================================================
 #> 
 #> Setting for 'sigma':
-#>  [1]  0.0379  0.0404  0.0438  0.0557  0.0664  0.0419  0.0648  0.0593  0.0885
-#> [10]  0.0783  0.0713  0.0994
+#>  [1]  0.0379  0.0404  0.0438  0.0557  0.0666  0.0421  0.0647  0.0600  0.0890
+#> [10]  0.0784  0.0723  0.1001
 #> 
 #> Setting for 'lambda':
-#> [1]  1e-04
+#> [1]  0.01
 #> 
 #> Setting for 'delta':
-#>  [1]  0.0836  0.0846  0.0710  0.0984  0.0721  0.0774  0.0511  0.1155  0.0940
-#> [10]  0.0805  0.0869  0.0926
+#>  [1]  0.0831  0.0847  0.0709  0.0980  0.0721  0.0789  0.0509  0.1141  0.0929
+#> [10]  0.0806  0.0862  0.0920
 #> 
 #> Setting for 'eps':
 #> [1]  1e-04
@@ -512,7 +513,7 @@ bvhar_vhar_large_spec <- set_weight_bvhar(
   bvhar_vhar_small_spec, 
   lower = c(
     rep(1e-2, n_small), # sigma
-    1e-4, # lambda
+    1e-2, # lambda
     rep(1e-2, n_small), # daily
     rep(1e-2, n_small), # weekly
     rep(1e-2, n_small) # monthly
@@ -548,10 +549,10 @@ bvhar_vhar_large_spec <- set_weight_bvhar(
 #> [1]  0.139  0.114  0.108
 #> 
 #> Setting for 'weekly':
-#> [1]  0.0946  0.0100  0.1222
+#> [1]  0.0944  0.0100  0.1222
 #> 
 #> Setting for 'monthly':
-#> [1]  0.0519  0.0224  0.0100
+#> [1]  0.0519  0.0227  0.0100
 ```
 
 ``` r
@@ -559,7 +560,7 @@ bvhar_vhar_large_spec <- set_weight_bvhar(
   bvhar_vhar_medium_spec, 
   lower = c(
     rep(1e-2, n_medium), # sigma
-    1e-4, # lambda
+    1e-2, # lambda
     rep(1e-2, n_medium), # daily
     rep(1e-2, n_medium), # weekly
     rep(1e-2, n_medium) # monthly
@@ -583,7 +584,7 @@ bvhar_vhar_large_spec <- set_weight_bvhar(
 #> ========================================================
 #> 
 #> Setting for 'sigma':
-#> [1]  0.0380  0.0391  0.0482  0.0514  0.0649  0.0568  0.0630  0.1344  0.1003
+#> [1]  0.0380  0.0391  0.0482  0.0515  0.0649  0.0568  0.0630  0.1344  0.1003
 #> 
 #> Setting for 'lambda':
 #> [1]  0.0443
@@ -592,13 +593,13 @@ bvhar_vhar_large_spec <- set_weight_bvhar(
 #> [1]  1e-04
 #> 
 #> Setting for 'daily':
-#> [1]  0.0995  0.0482  0.0802  0.0653  0.0448  0.0569  0.1366  0.0409  0.0993
+#> [1]  0.0993  0.0482  0.0802  0.0653  0.0447  0.0569  0.1365  0.0407  0.0992
 #> 
 #> Setting for 'weekly':
-#> [1]  0.1814  0.0847  0.0292  0.0100  0.0100  0.0100  0.0100  0.1422  0.0100
+#> [1]  0.1817  0.0847  0.0291  0.0100  0.0100  0.0100  0.0100  0.1436  0.0100
 #> 
 #> Setting for 'monthly':
-#> [1]  0.0100  0.0100  0.0914  0.0100  0.0100  0.0100  0.0100  0.0100  0.1473
+#> [1]  0.0100  0.0100  0.0912  0.0100  0.0100  0.0100  0.0100  0.0100  0.1505
 ```
 
 ``` r
@@ -606,7 +607,7 @@ bvhar_vhar_large_spec <- set_weight_bvhar(
   bvhar_vhar_large_spec, 
   lower = c(
     rep(1e-2, n_large), # sigma
-    1e-4, # lambda
+    1e-2, # lambda
     rep(1e-2, n_large), # daily
     rep(1e-2, n_large), # weekly
     rep(1e-2, n_large) # monthly
@@ -630,26 +631,26 @@ bvhar_vhar_large_spec <- set_weight_bvhar(
 #> ========================================================
 #> 
 #> Setting for 'sigma':
-#>  [1]  0.0380  0.0402  0.0437  0.0557  0.0665  0.0419  0.0647  0.0592  0.0883
-#> [10]  0.0781  0.0711  0.0991
+#>  [1]  0.0379  0.0404  0.0438  0.0558  0.0667  0.0421  0.0646  0.0600  0.0888
+#> [10]  0.0782  0.0722  0.0998
 #> 
 #> Setting for 'lambda':
-#> [1]  1e-04
+#> [1]  0.01
 #> 
 #> Setting for 'eps':
 #> [1]  1e-04
 #> 
 #> Setting for 'daily':
-#>  [1]  0.0813  0.0826  0.0522  0.0905  0.0708  0.0753  0.0486  0.1111  0.0894
-#> [10]  0.0579  0.0776  0.0913
+#>  [1]  0.0807  0.0826  0.0525  0.0900  0.0706  0.0766  0.0483  0.1097  0.0882
+#> [10]  0.0583  0.0769  0.0905
 #> 
 #> Setting for 'weekly':
-#>  [1]  0.0100  0.0100  0.1579  0.0524  0.0140  0.0100  0.0100  0.0100  0.0100
-#> [10]  0.1606  0.0449  0.0100
+#>  [1]  0.0100  0.0100  0.1581  0.0514  0.0149  0.0100  0.0100  0.0100  0.0100
+#> [10]  0.1607  0.0441  0.0100
 #> 
 #> Setting for 'monthly':
-#>  [1]  0.0989  0.0100  0.0100  0.1417  0.0100  0.0100  0.0100  0.1688  0.1708
-#> [10]  0.1520  0.2342  0.0100
+#>  [1]  0.0991  0.0100  0.0100  0.1431  0.0100  0.0100  0.0100  0.1686  0.1728
+#> [10]  0.1523  0.2344  0.0100
 ```
 
 ``` r
@@ -661,8 +662,6 @@ fit_bvhar_large_vhar <- bvhar_vhar_large_optim$fit
 ``` r
 parallel::stopCluster(cl)
 ```
-
-# Errors
 
 ## Hyperparameters
 
@@ -702,9 +701,9 @@ parallel::stopCluster(cl)
 
     \hspace{1em} &  & $d_i$ & 0.139 & 0.114 & 0.108 &  &  &  &  &  &  &  &  & \\
 
-    \hspace{1em} &  & $w_i$ & 0.095 & 0.010 & 0.122 &  &  &  &  &  &  &  &  & \\
+    \hspace{1em} &  & $w_i$ & 0.094 & 0.010 & 0.122 &  &  &  &  &  &  &  &  & \\
 
-    \hspace{1em} &  & $m_i$ & 0.052 & 0.022 & 0.010 &  &  &  &  &  &  &  &  & \\
+    \hspace{1em} &  & $m_i$ & 0.052 & 0.023 & 0.010 &  &  &  &  &  &  &  &  & \\
     \cmidrule{1-15}
     \addlinespace[0.3em]
     \multicolumn{15}{l}{\textbf{MEDIUM}}\\
@@ -726,36 +725,40 @@ parallel::stopCluster(cl)
 
     \hspace{1em} &  & $d_i$ & 0.099 & 0.048 & 0.080 & 0.065 & 0.045 & 0.057 & 0.137 & 0.041 & 0.099 &  &  & \\
 
-    \hspace{1em} &  & $w_i$ & 0.181 & 0.085 & 0.029 & 0.010 & 0.010 & 0.010 & 0.010 & 0.142 & 0.010 &  &  & \\
+    \hspace{1em} &  & $w_i$ & 0.182 & 0.085 & 0.029 & 0.010 & 0.010 & 0.010 & 0.010 & 0.144 & 0.010 &  &  & \\
 
-    \hspace{1em} &  & $m_i$ & 0.010 & 0.010 & 0.091 & 0.010 & 0.010 & 0.010 & 0.010 & 0.010 & 0.147 &  &  & \\
+    \hspace{1em} &  & $m_i$ & 0.010 & 0.010 & 0.091 & 0.010 & 0.010 & 0.010 & 0.010 & 0.010 & 0.151 &  &  & \\
     \cmidrule{1-15}
     \addlinespace[0.3em]
     \multicolumn{15}{l}{\textbf{LARGE}}\\
-    \hspace{1em} & BVAR & $\sigma$ & 0.038 & 0.040 & 0.044 & 0.056 & 0.067 & 0.042 & 0.065 & 0.060 & 0.089 & 0.079 & 0.071 & 0.099\\
+    \hspace{1em} & BVAR & $\sigma$ & 0.038 & 0.040 & 0.044 & 0.056 & 0.067 & 0.042 & 0.065 & 0.060 & 0.089 & 0.079 & 0.073 & 0.100\\
 
-    \hspace{1em}\hspace{1em}\hspace{1em} &  & $\lambda$ & 0.000 &  &  &  &  &  &  &  &  &  &  & \\
+    \hspace{1em}\hspace{1em}\hspace{1em} &  & $\lambda$ & 0.010 &  &  &  &  &  &  &  &  &  &  & \\
 
-    \hspace{1em} &  & $\delta$ & 0.080 & 0.085 & 0.070 & 0.098 & 0.066 & 0.081 & 0.053 & 0.110 & 0.090 & 0.087 & 0.083 & 0.090\\
+    \hspace{1em} &  & $\delta$ & 0.080 & 0.085 & 0.070 & 0.098 & 0.066 & 0.083 & 0.052 & 0.109 & 0.089 & 0.087 & 0.082 & 0.089\\
     \cmidrule{2-15}
-    \hspace{1em} & BVHAR-S & $\sigma$ & 0.038 & 0.040 & 0.044 & 0.056 & 0.066 & 0.042 & 0.065 & 0.059 & 0.088 & 0.078 & 0.071 & 0.099\\
+    \hspace{1em} & BVHAR-S & $\sigma$ & 0.038 & 0.040 & 0.044 & 0.056 & 0.067 & 0.042 & 0.065 & 0.060 & 0.089 & 0.078 & 0.072 & 0.100\\
 
-     &  & $\lambda$ & 0.000 &  &  &  &  &  &  &  &  &  &  & \\
+     &  & $\lambda$ & 0.010 &  &  &  &  &  &  &  &  &  &  & \\
 
-    \hspace{1em} &  & $\delta$ & 0.084 & 0.085 & 0.071 & 0.098 & 0.072 & 0.077 & 0.051 & 0.115 & 0.094 & 0.081 & 0.087 & 0.093\\
+    \hspace{1em} &  & $\delta$ & 0.083 & 0.085 & 0.071 & 0.098 & 0.072 & 0.079 & 0.051 & 0.114 & 0.093 & 0.081 & 0.086 & 0.092\\
     \cmidrule{2-15}
-    \hspace{1em} & BVHAR-L & $\sigma$ & 0.038 & 0.040 & 0.044 & 0.056 & 0.066 & 0.042 & 0.065 & 0.059 & 0.088 & 0.078 & 0.071 & 0.099\\
+    \hspace{1em} & BVHAR-L & $\sigma$ & 0.038 & 0.040 & 0.044 & 0.056 & 0.067 & 0.042 & 0.065 & 0.060 & 0.089 & 0.078 & 0.072 & 0.100\\
 
-     &  & $\lambda$ & 0.000 &  &  &  &  &  &  &  &  &  &  & \\
+     &  & $\lambda$ & 0.010 &  &  &  &  &  &  &  &  &  &  & \\
 
-    \hspace{1em} &  & $d_i$ & 0.081 & 0.083 & 0.052 & 0.091 & 0.071 & 0.075 & 0.049 & 0.111 & 0.089 & 0.058 & 0.078 & 0.091\\
+    \hspace{1em} &  & $d_i$ & 0.081 & 0.083 & 0.053 & 0.090 & 0.071 & 0.077 & 0.048 & 0.110 & 0.088 & 0.058 & 0.077 & 0.091\\
 
-    \hspace{1em} &  & $w_i$ & 0.010 & 0.010 & 0.158 & 0.052 & 0.014 & 0.010 & 0.010 & 0.010 & 0.010 & 0.161 & 0.045 & 0.010\\
+    \hspace{1em} &  & $w_i$ & 0.010 & 0.010 & 0.158 & 0.051 & 0.015 & 0.010 & 0.010 & 0.010 & 0.010 & 0.161 & 0.044 & 0.010\\
 
-    \hspace{1em} &  & $m_i$ & 0.099 & 0.010 & 0.010 & 0.142 & 0.010 & 0.010 & 0.010 & 0.169 & 0.171 & 0.152 & 0.234 & 0.010\\*
+    \hspace{1em} &  & $m_i$ & 0.099 & 0.010 & 0.010 & 0.143 & 0.010 & 0.010 & 0.010 & 0.169 & 0.173 & 0.152 & 0.234 & 0.010\\*
     \end{longtable}
 
-## SMALL
+# Errors
+
+## Rolling Windows
+
+### SMALL
 
 ``` r
 mod_small_list <- list(
@@ -791,7 +794,169 @@ cv_small_20 <-
   )
 ```
 
-### Plots
+### MEDIUM
+
+``` r
+mod_medium_list <- list(
+  fit_var_medium,
+  fit_vhar_medium,
+  fit_medium_bvar,
+  fit_bvhar_medium_var,
+  fit_bvhar_medium_vhar
+)
+# 1-step-----------
+cv_medium_1 <- 
+  mod_medium_list %>% 
+  lapply(
+    function(mod) {
+      forecast_roll(mod, 1, y_medium_test)
+    }
+  )
+# 5-step-----------
+cv_medium_5 <- 
+  mod_medium_list %>% 
+  lapply(
+    function(mod) {
+      forecast_roll(mod, 5, y_medium_test)
+    }
+  )
+# 20-step----------
+cv_medium_20 <- 
+  mod_medium_list %>% 
+  lapply(
+    function(mod) {
+      forecast_roll(mod, 20, y_medium_test)
+    }
+  )
+```
+
+### LARGE
+
+``` r
+mod_large_list <- list(
+  fit_var_large,
+  fit_vhar_large,
+  fit_large_bvar,
+  fit_bvhar_large_var,
+  fit_bvhar_large_vhar
+)
+# 1-step-----------
+cv_large_1 <- 
+  mod_large_list %>% 
+  lapply(
+    function(mod) {
+      forecast_roll(mod, 1, y_large_test)
+    }
+  )
+# 5-step-----------
+cv_large_5 <- 
+  mod_large_list %>% 
+  lapply(
+    function(mod) {
+      forecast_roll(mod, 5, y_large_test)
+    }
+  )
+# 20-step----------
+cv_large_20 <- 
+  mod_large_list %>% 
+  lapply(
+    function(mod) {
+      forecast_roll(mod, 20, y_large_test)
+    }
+  )
+```
+
+### Lists
+
+``` r
+# SMALL-------------------------------
+cv_small_list <- 
+  lapply(
+    c(1, 5, 20),
+    function(h) {
+      mod_small_list %>% 
+        lapply(
+          function(mod) {
+            forecast_roll(mod, h, y_small_test)
+          }
+        )
+    }
+  )
+# MEDIUM------------------------------
+cv_medium_list <- 
+  lapply(
+    c(1, 5, 20),
+    function(h) {
+      mod_small_list %>% 
+        lapply(
+          function(mod) {
+            forecast_roll(mod, h, y_medium_test)
+          }
+        )
+    }
+  )
+# LARGE-------------------------------
+cv_large_list <- 
+  lapply(
+    c(1, 5, 20),
+    function(h) {
+      mod_small_list %>% 
+        lapply(
+          function(mod) {
+            forecast_roll(mod, h, y_large_test)
+          }
+        )
+    }
+  )
+```
+
+## Relative Error
+
+Set VAR as the benchmark model.
+
+    \begin{table}[H]
+
+    \caption{\label{tab:dgp3result}Out-of-sample forecasting performance measures for DGP3.}
+    \centering
+    \resizebox{\linewidth}{!}{
+    \begin{tabular}[t]{cc|ccc|ccc|ccc|}
+    \toprule
+    \multicolumn{2}{c}{ } & \multicolumn{3}{c}{RMAFE} & \multicolumn{3}{c}{RMSFE} & \multicolumn{3}{c}{RMASE} \\
+    \cmidrule(l{3pt}r{3pt}){3-5} \cmidrule(l{3pt}r{3pt}){6-8} \cmidrule(l{3pt}r{3pt}){9-11}
+    \rotatebox{0}{} & \rotatebox{0}{} & \rotatebox{0}{$h = 1$} & \rotatebox{0}{$h = 5$} & \rotatebox{0}{$h = 20$} & \rotatebox{0}{$h = 1$} & \rotatebox{0}{$h = 5$} & \rotatebox{0}{$h = 20$} & \rotatebox{0}{$h = 1$} & \rotatebox{0}{$h = 5$} & \rotatebox{0}{$h = 20$}\\
+    \midrule
+     & VHAR & \textcolor{black}{\num{.981}} & \textcolor{black}{\num{1.002}} & \textcolor{black}{\num{1.002}} & \textcolor{black}{\num{.977}} & \textcolor{black}{\num{.994}} & \textcolor{black}{\num{1.002}} & \textcolor{black}{\num{.979}} & \textcolor{red}{\num{.984}} & \textcolor{black}{\num{1.001}}\\
+
+     & BVAR & \textcolor{black}{\num{.975}} & \textcolor{black}{\num{.991}} & \textcolor{red}{\num{1.000}} & \textcolor{black}{\num{.975}} & \textcolor{black}{\num{.972}} & \textcolor{red}{\num{1.000}} & \textcolor{black}{\num{.972}} & \textcolor{black}{\num{.986}} & \textcolor{red}{\num{1.000}}\\
+
+     & BVHAR-S & \textcolor{red}{\num{.972}} & \textcolor{black}{\num{.992}} & \textcolor{black}{\num{1.002}} & \textcolor{red}{\num{.969}} & \textcolor{black}{\num{.973}} & \textcolor{black}{\num{1.002}} & \textcolor{red}{\num{.972}} & \textcolor{black}{\num{.987}} & \textcolor{black}{\num{1.002}}\\
+
+    \multirow{-4}{*}{\centering\arraybackslash SMALL} & BVHAR-L & \textcolor{black}{\num{.973}} & \textcolor{red}{\num{.990}} & \textcolor{black}{\num{1.002}} & \textcolor{black}{\num{.971}} & \textcolor{red}{\num{.970}} & \textcolor{black}{\num{1.002}} & \textcolor{black}{\num{.973}} & \textcolor{black}{\num{.986}} & \textcolor{black}{\num{1.002}}\\
+    \cmidrule{1-11}
+     & VHAR & \textcolor{black}{\num{1.001}} & \textcolor{black}{\num{1.077}} & \textcolor{black}{\num{1.013}} & \textcolor{black}{\num{.987}} & \textcolor{black}{\num{1.113}} & \textcolor{black}{\num{1.020}} & \textcolor{black}{\num{1.008}} & \textcolor{black}{\num{1.081}} & \textcolor{black}{\num{1.016}}\\
+
+     & BVAR & \textcolor{black}{\num{.969}} & \textcolor{black}{\num{.984}} & \textcolor{red}{\num{1.000}} & \textcolor{black}{\num{.960}} & \textcolor{black}{\num{.981}} & \textcolor{red}{\num{1.000}} & \textcolor{black}{\num{.972}} & \textcolor{black}{\num{.983}} & \textcolor{red}{\num{1.000}}\\
+
+     & BVHAR-S & \textcolor{red}{\num{.969}} & \textcolor{black}{\num{.983}} & \textcolor{black}{\num{1.000}} & \textcolor{black}{\num{.959}} & \textcolor{black}{\num{.979}} & \textcolor{black}{\num{1.000}} & \textcolor{red}{\num{.971}} & \textcolor{red}{\num{.982}} & \textcolor{black}{\num{1.000}}\\
+
+    \multirow{-4}{*}{\centering\arraybackslash MEDIUM} & BVHAR-L & \textcolor{black}{\num{.969}} & \textcolor{red}{\num{.983}} & \textcolor{black}{\num{1.000}} & \textcolor{red}{\num{.959}} & \textcolor{red}{\num{.979}} & \textcolor{black}{\num{1.000}} & \textcolor{black}{\num{.971}} & \textcolor{black}{\num{.982}} & \textcolor{black}{\num{1.000}}\\
+    \cmidrule{1-11}
+     & VHAR & \textcolor{black}{\num{.998}} & \textcolor{black}{\num{1.067}} & \textcolor{black}{\num{1.012}} & \textcolor{black}{\num{.995}} & \textcolor{black}{\num{1.114}} & \textcolor{black}{\num{1.017}} & \textcolor{black}{\num{.992}} & \textcolor{black}{\num{1.067}} & \textcolor{black}{\num{1.016}}\\
+
+     & BVAR & \textcolor{black}{\num{.970}} & \textcolor{red}{\num{.992}} & \textcolor{black}{\num{1.000}} & \textcolor{black}{\num{.956}} & \textcolor{red}{\num{.991}} & \textcolor{black}{\num{1.000}} & \textcolor{black}{\num{.968}} & \textcolor{black}{\num{.992}} & \textcolor{black}{\num{1.000}}\\
+
+     & BVHAR-S & \textcolor{black}{\num{.969}} & \textcolor{black}{\num{.993}} & \textcolor{red}{\num{1.000}} & \textcolor{black}{\num{.953}} & \textcolor{black}{\num{.992}} & \textcolor{red}{\num{1.000}} & \textcolor{black}{\num{.965}} & \textcolor{red}{\num{.992}} & \textcolor{red}{\num{1.000}}\\
+
+    \multirow{-4}{*}{\centering\arraybackslash LARGE} & BVHAR-L & \textcolor{red}{\num{.969}} & \textcolor{black}{\num{.993}} & \textcolor{black}{\num{1.000}} & \textcolor{red}{\num{.952}} & \textcolor{black}{\num{.992}} & \textcolor{black}{\num{1.000}} & \textcolor{red}{\num{.965}} & \textcolor{black}{\num{.992}} & \textcolor{black}{\num{1.000}}\\
+    \bottomrule
+    \end{tabular}}
+    \end{table}
+
+## Piecewise Errors
+
+### SMALL
+
+Plots
 
 <img src="../output/figs/DGP-3-smallcvonefig-1.png" width="70%" style="display: block; margin: auto;" />
 
@@ -799,7 +964,7 @@ cv_small_20 <-
 
 <img src="../output/figs/DGP-3-smallcvtwentyfig-1.png" width="70%" style="display: block; margin: auto;" />
 
-### Tables
+Tables
 
 1-step:
 
@@ -960,43 +1125,9 @@ cv_small_20 <-
     \multirow{-4}{*}{\raggedright\arraybackslash MASE} & \cellcolor{gray}{Average} & \num{129.196} & \num{129.274} & \textcolor{red}{\num{129.188}} & \num{129.447} & \num{129.413}\\*
     \end{longtable}
 
-## MEDIUM
+### MEDIUM
 
-``` r
-mod_medium_list <- list(
-  fit_var_medium,
-  fit_vhar_medium,
-  fit_medium_bvar,
-  fit_bvhar_medium_var,
-  fit_bvhar_medium_vhar
-)
-# 1-step-----------
-cv_medium_1 <- 
-  mod_medium_list %>% 
-  lapply(
-    function(mod) {
-      forecast_roll(mod, 1, y_medium_test)
-    }
-  )
-# 5-step-----------
-cv_medium_5 <- 
-  mod_medium_list %>% 
-  lapply(
-    function(mod) {
-      forecast_roll(mod, 5, y_medium_test)
-    }
-  )
-# 20-step----------
-cv_medium_20 <- 
-  mod_medium_list %>% 
-  lapply(
-    function(mod) {
-      forecast_roll(mod, 20, y_medium_test)
-    }
-  )
-```
-
-### Plots
+Plots
 
 ``` r
 cv_medium_1 %>% 
@@ -1061,7 +1192,7 @@ cv_medium_20 %>%
 
 <img src="../output/figs/DGP-3-medcvtwentyfig-1.png" width="70%" style="display: block; margin: auto;" />
 
-### Tables
+Tables
 
 1-step:
 
@@ -1366,43 +1497,9 @@ cv_medium_20 %>%
     \multirow{-10}{*}{\raggedright\arraybackslash MASE} & \cellcolor{gray}{Average} & \num{94.147} & \textcolor{red}{\num{93.72}} & \num{94.147} & \num{94.147} & \num{94.169}\\*
     \end{longtable}
 
-## LARGE
+### LARGE
 
-``` r
-mod_large_list <- list(
-  fit_var_large,
-  fit_vhar_large,
-  fit_large_bvar,
-  fit_bvhar_large_var,
-  fit_bvhar_large_vhar
-)
-# 1-step-----------
-cv_large_1 <- 
-  mod_large_list %>% 
-  lapply(
-    function(mod) {
-      forecast_roll(mod, 1, y_large_test)
-    }
-  )
-# 5-step-----------
-cv_large_5 <- 
-  mod_large_list %>% 
-  lapply(
-    function(mod) {
-      forecast_roll(mod, 5, y_large_test)
-    }
-  )
-# 20-step----------
-cv_large_20 <- 
-  mod_large_list %>% 
-  lapply(
-    function(mod) {
-      forecast_roll(mod, 20, y_large_test)
-    }
-  )
-```
-
-### Plots
+Plots
 
 ``` r
 cv_large_1 %>% 
@@ -1467,7 +1564,7 @@ cv_large_20 %>%
 
 <img src="../output/figs/DGP-3-largecvtwentyfig-1.png" width="70%" style="display: block; margin: auto;" />
 
-### Tables
+Tables
 
 1-step:
 
@@ -1844,9 +1941,9 @@ cv_large_20 %>%
     \multirow{-13}{*}{\raggedright\arraybackslash MASE} & \cellcolor{gray}{Average} & \num{97.448} & \num{98.434} & \num{97.455} & \num{97.455} & \textcolor{red}{\num{97.368}}\\*
     \end{longtable}
 
-## Average
+### Average
 
-### SMALL
+SMALL
 
 1-step:
 
@@ -1902,7 +1999,7 @@ cv_large_20 %>%
     \end{tabular}
     \end{table}
 
-### MEDIUM
+MEDIUM
 
 1-step:
 
@@ -1958,7 +2055,7 @@ cv_large_20 %>%
     \end{tabular}
     \end{table}
 
-### LARGE
+LARGE
 
 1-step:
 
@@ -2012,90 +2109,6 @@ cv_large_20 %>%
     MASE & \num{97.448} & \num{98.434} & \num{97.455} & \num{97.455} & \textcolor{red}{\num{97.368}}\\
     \bottomrule
     \end{tabular}
-    \end{table}
-
-### RMSFE or RMAFE
-
-Set VAR as the benchmark model.
-
-``` r
-# SMALL-------------------------------
-cv_small_list <- 
-  lapply(
-    c(1, 5, 20),
-    function(h) {
-      mod_small_list %>% 
-        lapply(
-          function(mod) {
-            forecast_roll(mod, h, y_small_test)
-          }
-        )
-    }
-  )
-# MEDIUM------------------------------
-cv_medium_list <- 
-  lapply(
-    c(1, 5, 20),
-    function(h) {
-      mod_small_list %>% 
-        lapply(
-          function(mod) {
-            forecast_roll(mod, h, y_medium_test)
-          }
-        )
-    }
-  )
-# LARGE-------------------------------
-cv_large_list <- 
-  lapply(
-    c(1, 5, 20),
-    function(h) {
-      mod_small_list %>% 
-        lapply(
-          function(mod) {
-            forecast_roll(mod, h, y_large_test)
-          }
-        )
-    }
-  )
-```
-
-    \begin{table}[H]
-
-    \caption{\label{tab:dgp3result}Out-of-sample forecasting performance measures for DGP3.}
-    \centering
-    \resizebox{\linewidth}{!}{
-    \begin{tabular}[t]{cc|ccc|ccc|ccc|}
-    \toprule
-    \multicolumn{2}{c}{ } & \multicolumn{3}{c}{RMAFE} & \multicolumn{3}{c}{RMSFE} & \multicolumn{3}{c}{RMASE} \\
-    \cmidrule(l{3pt}r{3pt}){3-5} \cmidrule(l{3pt}r{3pt}){6-8} \cmidrule(l{3pt}r{3pt}){9-11}
-    \rotatebox{0}{} & \rotatebox{0}{} & \rotatebox{0}{$h = 1$} & \rotatebox{0}{$h = 5$} & \rotatebox{0}{$h = 20$} & \rotatebox{0}{$h = 1$} & \rotatebox{0}{$h = 5$} & \rotatebox{0}{$h = 20$} & \rotatebox{0}{$h = 1$} & \rotatebox{0}{$h = 5$} & \rotatebox{0}{$h = 20$}\\
-    \midrule
-     & VHAR & \textcolor{black}{\num{.981}} & \textcolor{black}{\num{1.002}} & \textcolor{black}{\num{1.002}} & \textcolor{black}{\num{.977}} & \textcolor{black}{\num{.994}} & \textcolor{black}{\num{1.002}} & \textcolor{black}{\num{.979}} & \textcolor{red}{\num{.984}} & \textcolor{black}{\num{1.001}}\\
-
-     & BVAR & \textcolor{black}{\num{.975}} & \textcolor{black}{\num{.991}} & \textcolor{red}{\num{1.000}} & \textcolor{black}{\num{.975}} & \textcolor{black}{\num{.972}} & \textcolor{red}{\num{1.000}} & \textcolor{black}{\num{.972}} & \textcolor{black}{\num{.986}} & \textcolor{red}{\num{1.000}}\\
-
-     & BVHAR-S & \textcolor{red}{\num{.972}} & \textcolor{black}{\num{.992}} & \textcolor{black}{\num{1.002}} & \textcolor{red}{\num{.969}} & \textcolor{black}{\num{.973}} & \textcolor{black}{\num{1.002}} & \textcolor{red}{\num{.972}} & \textcolor{black}{\num{.987}} & \textcolor{black}{\num{1.002}}\\
-
-    \multirow{-4}{*}{\centering\arraybackslash SMALL} & BVHAR-L & \textcolor{black}{\num{.973}} & \textcolor{red}{\num{.990}} & \textcolor{black}{\num{1.002}} & \textcolor{black}{\num{.971}} & \textcolor{red}{\num{.970}} & \textcolor{black}{\num{1.002}} & \textcolor{black}{\num{.973}} & \textcolor{black}{\num{.986}} & \textcolor{black}{\num{1.002}}\\
-    \cmidrule{1-11}
-     & VHAR & \textcolor{black}{\num{1.001}} & \textcolor{black}{\num{1.077}} & \textcolor{black}{\num{1.013}} & \textcolor{black}{\num{.987}} & \textcolor{black}{\num{1.113}} & \textcolor{black}{\num{1.020}} & \textcolor{black}{\num{1.008}} & \textcolor{black}{\num{1.081}} & \textcolor{black}{\num{1.016}}\\
-
-     & BVAR & \textcolor{black}{\num{.969}} & \textcolor{black}{\num{.984}} & \textcolor{red}{\num{1.000}} & \textcolor{black}{\num{.960}} & \textcolor{black}{\num{.981}} & \textcolor{red}{\num{1.000}} & \textcolor{black}{\num{.972}} & \textcolor{black}{\num{.983}} & \textcolor{red}{\num{1.000}}\\
-
-     & BVHAR-S & \textcolor{red}{\num{.969}} & \textcolor{black}{\num{.983}} & \textcolor{black}{\num{1.000}} & \textcolor{black}{\num{.959}} & \textcolor{black}{\num{.979}} & \textcolor{black}{\num{1.000}} & \textcolor{red}{\num{.971}} & \textcolor{red}{\num{.982}} & \textcolor{black}{\num{1.000}}\\
-
-    \multirow{-4}{*}{\centering\arraybackslash MEDIUM} & BVHAR-L & \textcolor{black}{\num{.969}} & \textcolor{red}{\num{.983}} & \textcolor{black}{\num{1.000}} & \textcolor{red}{\num{.959}} & \textcolor{red}{\num{.979}} & \textcolor{black}{\num{1.000}} & \textcolor{black}{\num{.971}} & \textcolor{black}{\num{.982}} & \textcolor{black}{\num{1.000}}\\
-    \cmidrule{1-11}
-     & VHAR & \textcolor{black}{\num{.998}} & \textcolor{black}{\num{1.067}} & \textcolor{black}{\num{1.012}} & \textcolor{black}{\num{.995}} & \textcolor{black}{\num{1.114}} & \textcolor{black}{\num{1.017}} & \textcolor{black}{\num{.992}} & \textcolor{black}{\num{1.067}} & \textcolor{black}{\num{1.016}}\\
-
-     & BVAR & \textcolor{black}{\num{.970}} & \textcolor{red}{\num{.992}} & \textcolor{black}{\num{1.000}} & \textcolor{black}{\num{.956}} & \textcolor{red}{\num{.991}} & \textcolor{black}{\num{1.000}} & \textcolor{black}{\num{.968}} & \textcolor{black}{\num{.992}} & \textcolor{black}{\num{1.000}}\\
-
-     & BVHAR-S & \textcolor{black}{\num{.969}} & \textcolor{black}{\num{.993}} & \textcolor{red}{\num{1.000}} & \textcolor{black}{\num{.953}} & \textcolor{black}{\num{.992}} & \textcolor{red}{\num{1.000}} & \textcolor{black}{\num{.965}} & \textcolor{red}{\num{.992}} & \textcolor{red}{\num{1.000}}\\
-
-    \multirow{-4}{*}{\centering\arraybackslash LARGE} & BVHAR-L & \textcolor{red}{\num{.969}} & \textcolor{black}{\num{.993}} & \textcolor{black}{\num{1.000}} & \textcolor{red}{\num{.952}} & \textcolor{black}{\num{.992}} & \textcolor{black}{\num{1.000}} & \textcolor{red}{\num{.965}} & \textcolor{black}{\num{.992}} & \textcolor{black}{\num{1.000}}\\
-    \bottomrule
-    \end{tabular}}
     \end{table}
 
 # Coefficients

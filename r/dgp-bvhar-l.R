@@ -20,11 +20,11 @@ num_burin <- 300
 n_small <- 3
 # bvhar_small_sig <- runif(n_small, min = .01, max = .3)
 bvhar_small_spec <- set_weight_bvhar(
-  sigma = rep(.05, n_small),
-  lambda = 5e-3,
-  daily = rep(.7, n_small),
+  sigma = rep(1, n_small),
+  lambda = .05,
+  daily = rep(.1, n_small),
   weekly = rep(.2, n_small),
-  monthly = rep(.1, n_small)
+  monthly = rep(.3, n_small)
 )
 # generate SMALL coef--------------------
 set.seed(1)
@@ -46,11 +46,11 @@ bvhar_small_split <- divide_ts(bvhar_small, num_test)
 n_medium <- 9
 # bvhar_medium_sig <- c(bvhar_small_sig, runif(n_medium - n_small, min = .01, max = .3))
 bvhar_medium_spec <- set_weight_bvhar(
-  sigma = rep(.05, n_medium),
-  lambda = 1e-3,
-  daily = rep(.7, n_medium),
+  sigma = rep(1, n_medium),
+  lambda = .01,
+  daily = rep(.1, n_medium),
   weekly = rep(.2, n_medium),
-  monthly = rep(.1, n_medium)
+  monthly = rep(.3, n_medium)
 )
 # generate MEDIUM coef----------------
 set.seed(1)
@@ -72,11 +72,11 @@ bvhar_medium_split <- divide_ts(bvhar_medium, num_test)
 n_large <- 12
 # bvhar_large_sig <- c(bvhar_medium_sig, runif(n_large - n_medium, min = .01, max = .3))
 bvhar_large_spec <- set_weight_bvhar(
-  sigma = rep(.05, n_large),
-  lambda = 5e-4,
-  daily = rep(.7, n_large),
+  sigma = rep(1, n_large),
+  lambda = .005,
+  daily = rep(.1, n_large),
   weekly = rep(.2, n_large),
-  monthly = rep(.1, n_large)
+  monthly = rep(.3, n_large)
 )
 # generate LARGE coef-----------------
 set.seed(1)
