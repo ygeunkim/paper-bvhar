@@ -425,10 +425,10 @@ get_rmafetex_tr <- function(mod_list,
                             label = "",
                             header_angle = NULL) {
   if (length(mod_list) != 3) {
-    stop("Wrong 'mod_list'.")
+    stop("Wrong 'mod_list'.") # small, medium, large
   }
   if (length(y_list) != 3) {
-    stop("Wrong 'y_list'.")
+    stop("Wrong 'y_list'.") # small, medium, large
   }
   ahead_length <- length(mod_list[[1]])
   error_list <- 
@@ -436,7 +436,7 @@ get_rmafetex_tr <- function(mod_list,
     lapply(
       function(er) {
         lapply(
-          1:3,
+          1:3, # small-medium-large
           function(id) {
             get_rmfe_tr(
               mod_list[[id]], 
@@ -487,7 +487,7 @@ get_rmafetex_tr <- function(mod_list,
           rep("c", ahead_length - 1),
           "c|"
         ),
-        3
+        3 # small, medium, large
       )
     )
   error_list %>% 

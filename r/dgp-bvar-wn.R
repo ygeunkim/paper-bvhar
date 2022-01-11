@@ -10,9 +10,9 @@ set.seed(1)
 # SMALL: 3
 # MEDIUM: 9
 # LARGE: 12
-# Random walk: delta = 1
-# sigma = 1
-# lambda = 3
+# White noise: delta = 0
+# sigma
+# lambda
 #-----------------------------------------------------
 bvar_lag <- 5
 num_train <- 1000
@@ -21,19 +21,19 @@ num_burin <- 300
 # SMALL-----------------------------------------------
 n_small <- 3
 bvar_small_spec <- set_bvar(
-  sigma = rep(.05, n_small),
-  lambda = .2,
+  sigma = runif(n_small, min = .5, max = 2),
+  lambda = .1,
   delta = rep(0, n_small)
 )
 # generate SMALL coef--------------------
 set.seed(1)
-bvar_small_coef <- sim_mncoef(bvar_lag, bvar_small_spec)
+bvar_small_coef <- sim_mncoef(bvar_lag, bvar_small_spec, full = FALSE)
 # SMALL dataset--------------------------
 set.seed(1)
 y_small <- sim_var(
   num_train + num_test,
   num_burin,
-  bvar_small_coef$coefficients[seq_len(n_small * bvar_lag),],
+  bvar_small_coef$coefficients,
   bvar_lag,
   bvar_small_coef$covmat,
   matrix(0L, nrow = bvar_lag, ncol = n_small)
@@ -45,19 +45,19 @@ y_small_split <- divide_ts(y_small, num_test)
 # MEDIUM----------------------------------------------
 n_medium <- 9
 bvar_medium_spec <- set_bvar(
-  sigma = rep(.05, n_medium),
-  lambda = .1,
+  sigma = runif(n_medium, min = .5, max = 2),
+  lambda = 5e-2,
   delta = rep(0, n_medium)
 )
 # generate MEDIUM coef----------------
 set.seed(1)
-bvar_medium_coef <- sim_mncoef(bvar_lag, bvar_medium_spec)
+bvar_medium_coef <- sim_mncoef(bvar_lag, bvar_medium_spec, full = FALSE)
 # MEDIUM dataset----------------------
 set.seed(1)
 y_medium <- sim_var(
   num_train + num_test,
   num_burin,
-  bvar_medium_coef$coefficients[seq_len(n_medium * bvar_lag),],
+  bvar_medium_coef$coefficients,
   bvar_lag,
   bvar_medium_coef$covmat,
   matrix(0L, nrow = bvar_lag, ncol = n_medium)
@@ -69,19 +69,19 @@ y_medium_split <- divide_ts(y_medium, num_test)
 # LARGE----------------------------------------------
 n_large <- 12
 bvar_large_spec <- set_bvar(
-  sigma = rep(.05, n_large),
-  lambda = .03,
+  sigma = runif(n_large, min = .5, max = 2),
+  lambda = 1e-2,
   delta = rep(0, n_large)
 )
 # generate LARGE coef-----------------
 set.seed(1)
-bvar_large_coef <- sim_mncoef(bvar_lag, bvar_large_spec)
+bvar_large_coef <- sim_mncoef(bvar_lag, bvar_large_spec, full = FALSE)
 # LARGE dataset------------------------
 set.seed(1)
 y_large <- sim_var(
   num_train + num_test,
   num_burin,
-  bvar_large_coef$coefficients[seq_len(n_large * bvar_lag),],
+  bvar_large_coef$coefficients,
   bvar_lag,
   bvar_large_coef$covmat,
   matrix(0L, nrow = bvar_lag, ncol = n_large)
@@ -92,9 +92,8 @@ colnames(y_large) <- paste("asset", sprintf(1:n_large, fmt = "%02d"), sep = "_")
 y_large_split <- divide_ts(y_large, num_test)
 # Save----------------------------------------------
 # in data/processed/
-# File name: bvarsim_a_b.csv
-# a: small, medium, large
-# b: train, test
+# File name: bvarsim_dgp_wn.rds
+# saved objects: bvharspec and data
 #---------------------------------------------------
 dgp1 <- list(
   small_spec = bvar_small_spec,

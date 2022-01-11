@@ -261,7 +261,7 @@ bvar_large_spec <- set_bvar(
   bvar_small_spec, 
   lower = c(
     rep(1e-2, n_small), # sigma
-    1e-3, # lambda
+    1e-2, # lambda
     rep(1e-2, n_small) # delta
   ), 
   upper = c(
@@ -281,7 +281,7 @@ bvar_large_spec <- set_bvar(
   bvar_medium_spec, 
   lower = c(
     rep(1e-2, n_medium), # sigma
-    1e-3, # lambda
+    1e-2, # lambda
     rep(1e-2, n_medium) # delta
   ), 
   upper = c(
@@ -301,7 +301,7 @@ bvar_large_spec <- set_bvar(
   bvar_large_spec, 
   lower = c(
     rep(1e-2, n_large), # sigma
-    1e-3, # lambda
+    1e-2, # lambda
     rep(1e-2, n_large) # delta
   ), 
   upper = c(
@@ -349,7 +349,7 @@ bvhar_var_large_spec <- set_bvhar(
   bvhar_var_small_spec, 
   lower = c(
     rep(1e-2, n_small), # sigma
-    1e-3, # lambda
+    1e-2, # lambda
     rep(1e-2, n_small) # delta
   ), 
   upper = c(
@@ -368,7 +368,7 @@ bvhar_var_large_spec <- set_bvhar(
   bvhar_var_medium_spec, 
   lower = c(
     rep(1e-2, n_medium), # sigma
-    1e-3, # lambda
+    1e-2, # lambda
     rep(1e-2, n_medium) # delta
   ), 
   upper = c(
@@ -387,7 +387,7 @@ bvhar_var_large_spec <- set_bvhar(
   bvhar_var_large_spec, 
   lower = c(
     rep(1e-2, n_large), # sigma
-    1e-3, # lambda
+    1e-2, # lambda
     rep(1e-2, n_large) # delta
   ), 
   upper = c(
@@ -414,7 +414,7 @@ fit_bvhar_large_var <- bvhar_var_large_optim$fit
   bvhar_small_spec, 
   lower = c(
     rep(1e-2, n_small), # sigma
-    1e-3, # lambda
+    1e-2, # lambda
     rep(1e-2, n_small), # daily
     rep(1e-2, n_small), # weekly
     rep(1e-2, n_small) # monthly
@@ -437,7 +437,7 @@ fit_bvhar_large_var <- bvhar_var_large_optim$fit
   bvhar_medium_spec, 
   lower = c(
     rep(1e-2, n_medium), # sigma
-    1e-3, # lambda
+    1e-2, # lambda
     rep(1e-2, n_medium), # daily
     rep(1e-2, n_medium), # weekly
     rep(1e-2, n_medium) # monthly
@@ -460,7 +460,7 @@ fit_bvhar_large_var <- bvhar_var_large_optim$fit
   bvhar_large_spec, 
   lower = c(
     rep(1e-2, n_large), # sigma
-    1e-3, # lambda
+    1e-2, # lambda
     rep(1e-2, n_large), # daily
     rep(1e-2, n_large), # weekly
     rep(1e-2, n_large) # monthly
@@ -647,7 +647,7 @@ cv_medium_list <-
   lapply(
     c(1, 5, 20),
     function(h) {
-      mod_small_list %>% 
+      mod_medium_list %>% 
         lapply(
           function(mod) {
             forecast_roll(mod, h, y_medium_test)
@@ -660,7 +660,7 @@ cv_large_list <-
   lapply(
     c(1, 5, 20),
     function(h) {
-      mod_small_list %>% 
+      mod_large_list %>% 
         lapply(
           function(mod) {
             forecast_roll(mod, h, y_large_test)

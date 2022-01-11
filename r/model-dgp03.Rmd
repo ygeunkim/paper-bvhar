@@ -653,7 +653,7 @@ cv_medium_list <-
   lapply(
     c(1, 5, 20),
     function(h) {
-      mod_small_list %>% 
+      mod_medium_list %>% 
         lapply(
           function(mod) {
             forecast_roll(mod, h, y_medium_test)
@@ -666,7 +666,7 @@ cv_large_list <-
   lapply(
     c(1, 5, 20),
     function(h) {
-      mod_small_list %>% 
+      mod_large_list %>% 
         lapply(
           function(mod) {
             forecast_roll(mod, h, y_large_test)

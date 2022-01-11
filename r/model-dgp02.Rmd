@@ -242,7 +242,7 @@ fit_vhar_large <- vhar_lm(y_large_train, include_mean = FALSE)
   bvar_small_spec, 
   lower = c(
     rep(1e-2, n_small), # sigma
-    1e-4, # lambda
+    1e-2, # lambda
     rep(1e-2, n_small) # delta
   ), 
   upper = c(
@@ -262,7 +262,7 @@ fit_vhar_large <- vhar_lm(y_large_train, include_mean = FALSE)
   bvar_medium_spec, 
   lower = c(
     rep(1e-2, n_medium), # sigma
-    1e-4, # lambda
+    1e-2, # lambda
     rep(1e-2, n_medium) # delta
   ), 
   upper = c(
@@ -282,7 +282,7 @@ fit_vhar_large <- vhar_lm(y_large_train, include_mean = FALSE)
   bvar_large_spec, 
   lower = c(
     rep(1e-2, n_large), # sigma
-    1e-4, # lambda
+    1e-2, # lambda
     rep(1e-2, n_large) # delta
   ), 
   upper = c(
@@ -330,7 +330,7 @@ bvhar_var_large_spec <- set_bvhar(
   bvhar_var_small_spec, 
   lower = c(
     rep(1e-2, n_small), # sigma
-    1e-4, # lambda
+    1e-2, # lambda
     rep(1e-2, n_small) # delta
   ), 
   upper = c(
@@ -349,7 +349,7 @@ bvhar_var_large_spec <- set_bvhar(
   bvhar_var_medium_spec, 
   lower = c(
     rep(1e-2, n_medium), # sigma
-    1e-4, # lambda
+    1e-2, # lambda
     rep(1e-2, n_medium) # delta
   ), 
   upper = c(
@@ -368,7 +368,7 @@ bvhar_var_large_spec <- set_bvhar(
   bvhar_var_large_spec, 
   lower = c(
     rep(1e-2, n_large), # sigma
-    1e-4, # lambda
+    1e-2, # lambda
     rep(1e-2, n_large) # delta
   ), 
   upper = c(
@@ -421,7 +421,7 @@ bvhar_vhar_large_spec <- set_weight_bvhar(
   bvhar_vhar_small_spec, 
   lower = c(
     rep(1e-2, n_small), # sigma
-    1e-4, # lambda
+    1e-2, # lambda
     rep(1e-2, n_small), # daily
     rep(1e-2, n_small), # weekly
     rep(1e-2, n_small) # monthly
@@ -444,7 +444,7 @@ bvhar_vhar_large_spec <- set_weight_bvhar(
   bvhar_vhar_medium_spec, 
   lower = c(
     rep(1e-2, n_medium), # sigma
-    1e-4, # lambda
+    1e-2, # lambda
     rep(1e-2, n_medium), # daily
     rep(1e-2, n_medium), # weekly
     rep(1e-2, n_medium) # monthly
@@ -467,7 +467,7 @@ bvhar_vhar_large_spec <- set_weight_bvhar(
   bvhar_vhar_large_spec, 
   lower = c(
     rep(1e-2, n_large), # sigma
-    1e-4, # lambda
+    1e-2, # lambda
     rep(1e-2, n_large), # daily
     rep(1e-2, n_large), # weekly
     rep(1e-2, n_large) # monthly
@@ -654,7 +654,7 @@ cv_medium_list <-
   lapply(
     c(1, 5, 20),
     function(h) {
-      mod_small_list %>% 
+      mod_medium_list %>% 
         lapply(
           function(mod) {
             forecast_roll(mod, h, y_medium_test)
@@ -667,7 +667,7 @@ cv_large_list <-
   lapply(
     c(1, 5, 20),
     function(h) {
-      mod_small_list %>% 
+      mod_large_list %>% 
         lapply(
           function(mod) {
             forecast_roll(mod, h, y_large_test)
@@ -688,7 +688,7 @@ get_rmafetex_tr(
   y_list = list(y_small_test, y_medium_test, y_large_test), 
   ahead_list = c("$h = 1$", "$h = 5$", "$h = 20$"),
   benchmark_id = 1,
-  caption = "Out-of-sample forecasting performance measures for DGP2.", 
+  caption = "Out-of-sample forecasting performance measures for DGP2 with VAR(5) model as benchmark.", 
   label = "dgp2result",
   header_angle = 0
 ) %>% 
