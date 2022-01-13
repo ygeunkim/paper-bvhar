@@ -21,7 +21,7 @@ num_burin <- 300
 # SMALL-----------------------------------------------
 n_small <- 3
 bvar_small_spec <- set_bvar(
-  sigma = runif(n_small, min = .5, max = 2),
+  sigma = runif(n_small, min = .9, max = 1.2),
   lambda = .1,
   delta = rep(0, n_small)
 )
@@ -45,7 +45,7 @@ y_small_split <- divide_ts(y_small, num_test)
 # MEDIUM----------------------------------------------
 n_medium <- 9
 bvar_medium_spec <- set_bvar(
-  sigma = runif(n_medium, min = .5, max = 2),
+  sigma = runif(n_medium, min = .9, max = 1.2),
   lambda = 5e-2,
   delta = rep(0, n_medium)
 )
@@ -69,7 +69,7 @@ y_medium_split <- divide_ts(y_medium, num_test)
 # LARGE----------------------------------------------
 n_large <- 12
 bvar_large_spec <- set_bvar(
-  sigma = runif(n_large, min = .5, max = 2),
+  sigma = runif(n_large, min = .9, max = 1.2),
   lambda = 1e-2,
   delta = rep(0, n_large)
 )

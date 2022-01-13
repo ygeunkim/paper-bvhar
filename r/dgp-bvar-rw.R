@@ -11,8 +11,8 @@ set.seed(1)
 # MEDIUM: 9
 # LARGE: 12
 # Random walk: delta = 1
-# sigma = 1
-# lambda = 3
+# sigma
+# lambda
 #-----------------------------------------------------
 bvar_lag <- 5
 num_train <- 1000
@@ -21,9 +21,9 @@ num_burin <- 300
 # SMALL-----------------------------------------------
 n_small <- 3
 bvar_small_spec <- set_bvar(
-  sigma = rep(.05, n_small),
+  sigma = runif(n_small, min = .9, max = 1.2),
   lambda = .1,
-  delta = rep(.3, n_small)
+  delta = runif(n_small, min = 0, max = 1)
 )
 # generate SMALL coef--------------------
 set.seed(1)
@@ -45,10 +45,9 @@ y_small_split <- divide_ts(y_small, num_test)
 # MEDIUM----------------------------------------------
 n_medium <- 9
 bvar_medium_spec <- set_bvar(
-  sigma = rep(.05, n_medium),
+  sigma = runif(n_medium, min = .9, max = 1.2),
   lambda = 5e-2,
-  delta = rep(.3, n_medium),
-  eps = .1
+  delta = runif(n_medium, min = 0, max = 1)
 )
 # generate MEDIUM coef----------------
 set.seed(1)
@@ -70,10 +69,9 @@ y_medium_split <- divide_ts(y_medium, num_test)
 # LARGE----------------------------------------------
 n_large <- 12
 bvar_large_spec <- set_bvar(
-  sigma = rep(.05, n_large),
+  sigma = runif(n_large, min = .9, max = 1.2),
   lambda = 1e-2,
-  delta = rep(.3, n_large),
-  eps = .1
+  delta = runif(n_large, min = 0, max = 1)
 )
 # generate LARGE coef-----------------
 set.seed(1)
@@ -94,9 +92,8 @@ colnames(y_large) <- paste("asset", sprintf(1:n_large, fmt = "%02d"), sep = "_")
 y_large_split <- divide_ts(y_large, num_test)
 # Save----------------------------------------------
 # in data/processed/
-# File name: bvarsim_a_b.csv
-# a: small, medium, large
-# b: train, test
+# File name: bvarsim_dgp_rw.rds
+# saved objects: bvharspec and data
 #---------------------------------------------------
 dgp2 <- list(
   small_spec = bvar_small_spec,

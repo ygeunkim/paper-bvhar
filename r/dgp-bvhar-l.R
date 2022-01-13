@@ -9,9 +9,9 @@ set.seed(1)
 # SMALL: 3
 # MEDIUM: 9
 # LARGE: 12
-# Random walk: delta = 1
-# sigma = 1
-# lambda = 3
+# daily, weekly, monthly
+# sigma
+# lambda
 #-----------------------------------------------------
 num_train <- 1000
 num_test <- 100
@@ -19,11 +19,11 @@ num_burin <- 300
 # SMALL-----------------------------------------------
 n_small <- 3
 bvhar_small_spec <- set_weight_bvhar(
-  sigma = rep(.05, n_small),
-  lambda = 5e-2,
-  daily = rep(.5, n_small),
-  weekly = rep(.1, n_small),
-  monthly = rep(.5, n_small)
+  sigma = runif(n_small, min = .9, max = 1.2),
+  lambda = .1,
+  daily = runif(n_small, min = 0, max = .5),
+  weekly = runif(n_small, min = .5 / 5, max = 1 / 5),
+  monthly = runif(n_small, min = 1 / 22, max = 1.5 / 22)
 )
 # generate SMALL coef--------------------
 set.seed(1)
@@ -44,11 +44,11 @@ bvhar_small_split <- divide_ts(bvhar_small, num_test)
 # MEDIUM----------------------------------------------
 n_medium <- 9
 bvhar_medium_spec <- set_weight_bvhar(
-  sigma = rep(.05, n_medium),
-  lambda = 3e-2,
-  daily = rep(.5, n_medium),
-  weekly = rep(.1, n_medium),
-  monthly = rep(.5, n_medium)
+  sigma = runif(n_medium, min = .9, max = 1.2),
+  lambda = 5e-2,
+  daily = runif(n_medium, min = 0, max = .5),
+  weekly = runif(n_medium, min = .5 / 5, max = 1 / 5),
+  monthly = runif(n_medium, min = 1 / 22, max = 1.5 / 22)
 )
 # generate MEDIUM coef----------------
 set.seed(1)
@@ -69,11 +69,11 @@ bvhar_medium_split <- divide_ts(bvhar_medium, num_test)
 # LARGE----------------------------------------------
 n_large <- 12
 bvhar_large_spec <- set_weight_bvhar(
-  sigma = rep(.05, n_large),
+  sigma = runif(n_large, min = .9, max = 1.2),
   lambda = 1e-2,
-  daily = rep(.5, n_large),
-  weekly = rep(.1, n_large),
-  monthly = rep(.5, n_large)
+  daily = runif(n_large, min = 0, max = .5),
+  weekly = runif(n_large, min = .5 / 5, max = 1 / 5),
+  monthly = runif(n_large, min = 1 / 22, max = 1.5 / 22)
 )
 # generate LARGE coef-----------------
 set.seed(1)
@@ -93,9 +93,8 @@ colnames(bvhar_large) <- paste("asset", sprintf(1:n_large, fmt = "%02d"), sep = 
 bvhar_large_split <- divide_ts(bvhar_large, num_test)
 # Save----------------------------------------------
 # in data/processed/
-# File name: bvharsim_a_b.csv
-# a: small, medium, large
-# b: train, test
+# File name: bvharsim_dgp_l.rds
+# saved objects: bvharspec and data
 #---------------------------------------------------
 dgp4 <- list(
   small_spec = bvhar_small_spec,

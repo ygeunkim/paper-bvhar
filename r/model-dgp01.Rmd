@@ -246,7 +246,7 @@ fit_vhar_large <- vhar_lm(y_large_train, include_mean = FALSE)
     rep(0, n_small) # delta
   ), 
   upper = c(
-    rep(2, n_small), # sigma
+    rep(5, n_small), # sigma
     Inf, # lambda
     rep(1, n_small) # delta
   ), 
@@ -266,7 +266,7 @@ fit_vhar_large <- vhar_lm(y_large_train, include_mean = FALSE)
     rep(0, n_medium) # delta
   ), 
   upper = c(
-    rep(2, n_medium), # sigma
+    rep(5, n_medium), # sigma
     Inf, # lambda
     rep(1, n_medium) # delta
   ), 
@@ -286,7 +286,7 @@ fit_vhar_large <- vhar_lm(y_large_train, include_mean = FALSE)
     rep(0, n_large) # delta
   ), 
   upper = c(
-    rep(2, n_large), # sigma
+    rep(5, n_large), # sigma
     Inf, # lambda
     rep(1, n_large) # delta
   ), 
@@ -334,7 +334,7 @@ bvhar_var_large_spec <- set_bvhar(
     rep(0, n_small) # delta
   ), 
   upper = c(
-    rep(2, n_small), # sigma
+    rep(5, n_small), # sigma
     Inf, # lambda
     rep(1, n_small) # delta
   ), 
@@ -353,7 +353,7 @@ bvhar_var_large_spec <- set_bvhar(
     rep(0, n_medium) # delta
   ), 
   upper = c(
-    rep(2, n_medium), # sigma
+    rep(5, n_medium), # sigma
     Inf, # lambda
     rep(1, n_medium) # delta
   ), 
@@ -372,7 +372,7 @@ bvhar_var_large_spec <- set_bvhar(
     rep(0, n_large) # delta
   ), 
   upper = c(
-    rep(2, n_large), # sigma
+    rep(5, n_large), # sigma
     Inf, # lambda
     rep(1, n_large) # delta
   ), 
@@ -427,7 +427,7 @@ bvhar_vhar_large_spec <- set_weight_bvhar(
     rep(0, n_small) # monthly
   ), 
   upper = c(
-    rep(2, n_small), # sigma
+    rep(5, n_small), # sigma
     Inf, # lambda
     rep(1, n_small), # daily
     rep(1, n_small), # weekly
@@ -450,7 +450,7 @@ bvhar_vhar_large_spec <- set_weight_bvhar(
     rep(0, n_medium) # monthly
   ), 
   upper = c(
-    rep(2, n_medium), # sigma
+    rep(5, n_medium), # sigma
     Inf, # lambda
     rep(1, n_medium), # daily
     rep(1, n_medium), # weekly
@@ -473,7 +473,7 @@ bvhar_vhar_large_spec <- set_weight_bvhar(
     rep(0, n_large) # monthly
   ), 
   upper = c(
-    rep(2, n_large), # sigma
+    rep(5, n_large), # sigma
     Inf, # lambda
     rep(1, n_large), # daily
     rep(1, n_large), # weekly
@@ -549,7 +549,7 @@ mod_large_list <- list(
 )
 # SMALL-------------------------------
 cv_small_list <- 
-  lapply(
+  parallel::mclapply(
     c(1, 5, 10, 20),
     function(h) {
       mod_small_list %>% 
@@ -558,11 +558,12 @@ cv_small_list <-
             forecast_roll(mod, h, y_small_test)
           }
         )
-    }
+    },
+    mc.cores = 8
   )
 # MEDIUM------------------------------
 cv_medium_list <- 
-  lapply(
+  parallel::mclapply(
     c(1, 5, 10, 20),
     function(h) {
       mod_medium_list %>% 
@@ -571,11 +572,12 @@ cv_medium_list <-
             forecast_roll(mod, h, y_medium_test)
           }
         )
-    }
+    },
+    mc.cores = 8
   )
 # LARGE-------------------------------
 cv_large_list <- 
-  lapply(
+  parallel::mclapply(
     c(1, 5, 10, 20),
     function(h) {
       mod_large_list %>% 
@@ -584,7 +586,8 @@ cv_large_list <-
             forecast_roll(mod, h, y_large_test)
           }
         )
-    }
+    },
+    mc.cores = 8
   )
 ```
 

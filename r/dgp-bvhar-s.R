@@ -9,9 +9,9 @@ set.seed(1)
 # SMALL: 3
 # MEDIUM: 9
 # LARGE: 12
-# Random walk: delta = 1
-# sigma = 1
-# lambda = 3
+# delta
+# sigma
+# lambda
 #-----------------------------------------------------
 num_train <- 1000
 num_test <- 100
@@ -19,9 +19,9 @@ num_burin <- 300
 # SMALL-----------------------------------------------
 n_small <- 3
 bvhar_small_spec <- set_bvhar(
-  sigma = rep(.05, n_small),
+  sigma = runif(n_small, min = .9, max = 1.2),
   lambda = .1,
-  delta = rep(.1, n_small)
+  delta = runif(n_small, min = 0, max = 1)
 )
 # generate SMALL coef--------------------
 set.seed(1)
@@ -42,9 +42,9 @@ bvhar_small_split <- divide_ts(bvhar_small, num_test)
 # MEDIUM----------------------------------------------
 n_medium <- 9
 bvhar_medium_spec <- set_bvhar(
-  sigma = rep(.05, n_medium),
-  lambda = .05,
-  delta = rep(.1, n_medium)
+  sigma = runif(n_medium, min = .9, max = 1.2),
+  lambda = 5e-2,
+  delta = runif(n_medium, min = 0, max = 1)
 )
 # generate MEDIUM coef----------------
 set.seed(1)
@@ -65,9 +65,9 @@ bvhar_medium_split <- divide_ts(bvhar_medium, num_test)
 # LARGE----------------------------------------------
 n_large <- 12
 bvhar_large_spec <- set_bvhar(
-  sigma = rep(.05, n_large),
-  lambda = .01,
-  delta = rep(.1, n_large)
+  sigma = runif(n_large, min = .9, max = 1.2),
+  lambda = 1e-2,
+  delta = runif(n_large, min = 0, max = 1)
 )
 # generate LARGE coef-----------------
 set.seed(1)
@@ -87,9 +87,8 @@ colnames(bvhar_large) <- paste("asset", sprintf(1:n_large, fmt = "%02d"), sep = 
 bvhar_large_split <- divide_ts(bvhar_large, num_test)
 # Save----------------------------------------------
 # in data/processed/
-# File name: bvharsim_a_b.csv
-# a: small, medium, large
-# b: train, test
+# File name: bvharsim_dgp_s.rds
+# saved objects: bvharspec and data
 #---------------------------------------------------
 dgp3 <- list(
   small_spec = bvhar_small_spec,
