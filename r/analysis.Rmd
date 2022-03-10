@@ -15,6 +15,14 @@ knit:
   })
 ---
 
+```{r etfdata}
+etf_data <- "../data/processed/cboe_etf.rds"
+```
+
+```{r cacheset, include=FALSE, cache=TRUE, cache.extra = tools::md5sum(etf_data)}
+knitr::opts_chunk$set(cache.rebuild = TRUE)
+```
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(
   comment = "#>",
@@ -45,6 +53,8 @@ kable_format <- ifelse(length(kable_format) == 0, "html", kable_format) # for ex
 library(tidyverse)
 # BVHAR custom package-----------------
 library(bvhar)
+# Set the number of processor cores----
+cl <- parallel::makeCluster(8, type = "FORK")
 # set seed for reproducible result-----
 set.seed(1)
 ```
@@ -54,6 +64,8 @@ set.seed(1)
 source("report-fns.R")
 # hyperparameter setting table---------
 source("param-fns.R")
+# CBOE ETF raw data--------------------
+etf_raw <- readRDS(etf_data)
 ```
 
 # Data
@@ -61,45 +73,58 @@ source("param-fns.R")
 ## Split
 
 ```{r testsize}
-(h <- 42)
+(h <- 30)
 ```
 
-```{r splittest}
-etf_split <- divide_ts(etf_vix, h)
-etf_train <- etf_split$train
-etf_test <- etf_split$test
-```
+- 2000: Dot-com bubble
+- 2001: September 11 terror and Enron scandal
+- 2002: Stock market downturn after 2001
+- 2003: Iraq war (until 2011)
+- 2007 to 2008: Financial crisis
+    - 2007: Subprime mortgage crisis
+    - 2008: Bankruptcy of Lehman Brothers
+- 2010 to 2016: European sovereign dept crisis
+    - 2010: Greek debt crisis
+    - 2011: *Italian default*
+    - 2015: *Greek default*
+    - 2016: Brexit
+- 2018: US-China trade war
+- 2019: Brexit
+- 2020: COVID-19
 
 ```{r dataplot}
-bvhar:::etf_vix_raw %>% 
+te_date <- tail(etf_raw$data_wide$date, h)[1]
+etf_raw$data_long %>% 
   mutate(
-    train = c(
-      rep(TRUE, nrow(etf_train)),
-      rep(FALSE, nrow(etf_test))
-    )
+    train = date < te_date,
+    xmin = min(date[train == FALSE]),
+    xmax = max(date)
   ) %>% 
-  pivot_longer(-c(DATE, train), names_to = "asset", values_to = "value") %>% 
-  mutate(
-    xmin = min(DATE[train == FALSE]),
-    xmax = max(DATE)
-  ) %>% 
-  ggplot(aes(x = DATE, y = value)) +
+  ggplot(aes(x = date, y = value)) +
   geom_rect(
     aes(xmin = xmin, xmax = xmax, ymin = -Inf, ymax = Inf),
     alpha = .7,
     fill = "grey" # test set
   ) +
   geom_path() +
-  facet_grid(asset ~ ., scales = "free_y") +
-  # scale_x_date(
-  #   breaks = c(nrow(etf_train), nrow(etf_train) + nrow(etf_test))
-  # ) +
+  facet_grid(series_id ~ ., scales = "free_y") +
   theme_minimal() +
-  theme(panel.border = element_rect(fill = NA)) +
+  theme(
+    panel.border = element_rect(fill = NA),
+    strip.text = element_text(size = 3),
+    axis.text.y = element_text(size = 5)
+  ) +
   labs(
     x = element_blank(),
-    y = element_blank()
+    y = "Volatility index"
   )
+```
+
+
+```{r splittest}
+etf_split <- divide_ts(etf_vix, h)
+etf_train <- etf_split$train
+etf_test <- etf_split$test
 ```
 
 
@@ -112,11 +137,11 @@ choose_var(etf_train, lag_max = 10)
 ```
 
 ```{r varlag}
-(var_lag <- 2)
+(var_lag <- 3)
 ```
 
 ```{r fitvar}
-fit_var <- var_lm(etf_train, 2)
+fit_var <- var_lm(etf_train, var_lag)
 ```
 
 ## VHAR
@@ -128,7 +153,7 @@ fit_vhar <- vhar_lm(etf_train)
 ## BVAR
 
 ```{r bvarlag}
-(bvar_lag <- 2)
+(bvar_lag <- var_lag)
 ```
 
 ```{r bvarinit}
@@ -155,7 +180,8 @@ bvar_init <- set_bvar(
   ), 
   y = etf_train, 
   p = bvar_lag, 
-  include_mean = TRUE
+  include_mean = TRUE,
+  parallel = list(cl = cl, forward = FALSE, loginfo = FALSE)
 ))
 ```
 
@@ -187,7 +213,9 @@ bvhar_init <- set_bvhar(
     rep(1, n_asset) # delta
   ), 
   y = etf_train, 
-  include_mean = TRUE
+  har = c(5, 22),
+  include_mean = TRUE,
+  parallel = list(cl = cl, forward = FALSE, loginfo = FALSE)
 ))
 ```
 
@@ -225,7 +253,9 @@ bvhar_vhar_init <- set_weight_bvhar(
     rep(1, n_asset) # monthly
   ), 
   y = etf_train, 
-  include_mean = TRUE
+  har = c(5, 22),
+  include_mean = TRUE,
+  parallel = list(cl = cl, forward = FALSE, loginfo = FALSE)
 ))
 ```
 
@@ -233,6 +263,9 @@ bvhar_vhar_init <- set_weight_bvhar(
 fit_bvhar_vhar <- bvhar_vhar_optim$fit
 ```
 
+```{r stopcl}
+parallel::stopCluster(cl)
+```
 
 ## Hyperparamers
 
@@ -250,32 +283,35 @@ mod_list <- list(
 # 1-step-----------
 roll1 <- 
   mod_list %>% 
-  lapply(
+  parallel::mclapply(
     function(mod) {
       forecast_roll(mod, 1, etf_test)
-    }
+    },
+    mc.cores = 4
   )
 # 5-step-----------
 roll2 <- 
   mod_list %>% 
-  lapply(
+  parallel::mclapply(
     function(mod) {
       forecast_roll(mod, 5, etf_test)
-    }
+    },
+    mc.cores = 4
   )
 # 20-step----------
 roll3 <- 
   mod_list %>% 
-  lapply(
+  parallel::mclapply(
     function(mod) {
       forecast_roll(mod, 20, etf_test)
-    }
+    },
+    mc.cores = 4
   )
 ```
 
 ```{r listroll}
 roll_list <- 
-  lapply(
+  parallel::mclapply(
     c(1, 5, 20),
     function(h) {
       mod_list %>% 
@@ -284,12 +320,27 @@ roll_list <-
             forecast_roll(mod, h, etf_test)
           }
         )
-    }
+    },
+    mc.cores = 8
   )
 ```
 
 
 ## Relative Errors
+
+```{r relerror}
+get_rmafetex_tr_2(
+  roll_list, 
+  etf_test, 
+  ahead_list = c("$h = 1$", "$h = 5$", "$h = 20$"), 
+  benchmark_id = 1,
+  caption = "Out-of-sample forecasting performance measures with VAR(3) as benchmark", 
+  label = "losscboe"
+) %>% 
+  writeLines()
+```
+
+
 
 ```{r rmafetab}
 get_rmfe_tr(
@@ -332,7 +383,22 @@ get_rmfe_tr(
 
 ## Piecewise Errors
 
-
+```{r piecewise-error}
+roll_list[[1]] %>% 
+  gg_loss(
+    etf_test, 
+    mean_line = TRUE, 
+    line_param = list(size = .3), 
+    mean_param = list(alpha = .5, size = .3)
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = -45, vjust = -1, size = 6),
+    panel.border = element_rect(fill = NA),
+    legend.position = "top"
+  ) +
+  scale_colour_viridis_d(labels = c("BVAR", "BVHAR-S", "BVHAR-L", "VAR", "VHAR"))
+```
 
 
 # Intervals
@@ -345,27 +411,37 @@ pred_bvhar <- predict(fit_bvhar, h)
 pred_bvhar_vhar <- predict(fit_bvhar_vhar, h)
 ```
 
+<!-- ```{r credplot} -->
+<!-- autoplot(pred_var, x_cut = 850, ci_alpha = .8, type = "wrap") + -->
+<!--   autolayer(pred_vhar, ci_alpha = .7) + -->
+<!--   autolayer(pred_bvar, ci_alpha = .6) + -->
+<!--   autolayer(pred_bvhar, ci_alpha = .5) + -->
+<!--   autolayer(pred_bvhar_vhar, ci_alpha = .4) + -->
+<!--   geom_eval(etf_test, num_train = nrow(etf_train), alpha = .5) + -->
+<!--   theme_minimal() + -->
+<!--   theme( -->
+<!--     panel.border = element_rect(fill = NA), -->
+<!--     axis.text.x = element_blank(), -->
+<!--     legend.position = "top" -->
+<!--   ) + -->
+<!--   scale_fill_discrete(labels = c("BVAR", "BVHAR-S", "BVHAR-L", "VAR", "VHAR")) -->
+<!-- ``` -->
+
 ```{r credplot}
-autoplot(pred_var, x_cut = 950, ci_alpha = .8, type = "wrap") +
+autoplot(pred_var, x_cut = 860, ci_alpha = .8, type = "wrap") +
   autolayer(pred_vhar, ci_alpha = .7) +
   autolayer(pred_bvar, ci_alpha = .6) +
   autolayer(pred_bvhar, ci_alpha = .5) +
   autolayer(pred_bvhar_vhar, ci_alpha = .4) +
-  geom_eval(etf_test, num_train = nrow(etf_train), alpha = .3) +
+  geom_eval(etf_test, num_train = nrow(etf_train), alpha = .5) +
   theme_minimal() +
   theme(
     panel.border = element_rect(fill = NA),
     axis.text.x = element_blank(),
     legend.position = "top"
   ) +
-  scale_fill_discrete(labels = c("BVAR", "BVHAR-S", "BVHAR-L", "VAR", "VHAR"))
+  scale_fill_viridis_d(labels = c("BVAR", "BVHAR-S", "BVHAR-L", "VAR", "VHAR"))
 ```
-
-
-
-
-
-
 
 
 

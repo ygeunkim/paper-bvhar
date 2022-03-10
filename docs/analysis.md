@@ -1,7 +1,7 @@
 Empirical Analysis
 ================
 Young Geun Kim
-03 Jan, 2022
+10 Mar, 2022
 
 -   [Data](#data)
     -   [Split](#split)
@@ -18,10 +18,16 @@ Young Geun Kim
 -   [Intervals](#intervals)
 
 ``` r
+etf_data <- "../data/processed/cboe_etf.rds"
+```
+
+``` r
 # tidyverse----------------------------
 library(tidyverse)
 # BVHAR custom package-----------------
 library(bvhar)
+# Set the number of processor cores----
+cl <- parallel::makeCluster(8, type = "FORK")
 # set seed for reproducible result-----
 set.seed(1)
 ```
@@ -31,6 +37,8 @@ set.seed(1)
 source("report-fns.R")
 # hyperparameter setting table---------
 source("param-fns.R")
+# CBOE ETF raw data--------------------
+etf_raw <- readRDS(etf_data)
 ```
 
 # Data
@@ -38,49 +46,61 @@ source("param-fns.R")
 ## Split
 
 ``` r
-(h <- 42)
-#> [1] 42
+(h <- 30)
+#> [1] 30
 ```
 
-``` r
-etf_split <- divide_ts(etf_vix, h)
-etf_train <- etf_split$train
-etf_test <- etf_split$test
-```
+-   2000: Dot-com bubble
+-   2001: September 11 terror and Enron scandal
+-   2002: Stock market downturn after 2001
+-   2003: Iraq war (until 2011)
+-   2007 to 2008: Financial crisis
+    -   2007: Subprime mortgage crisis
+    -   2008: Bankruptcy of Lehman Brothers
+-   2010 to 2016: European sovereign dept crisis
+    -   2010: Greek debt crisis
+    -   2011: *Italian default*
+    -   2015: *Greek default*
+    -   2016: Brexit
+-   2018: US-China trade war
+-   2019: Brexit
+-   2020: COVID-19
 
 ``` r
-bvhar:::etf_vix_raw %>% 
+te_date <- tail(etf_raw$data_wide$date, h)[1]
+etf_raw$data_long %>% 
   mutate(
-    train = c(
-      rep(TRUE, nrow(etf_train)),
-      rep(FALSE, nrow(etf_test))
-    )
+    train = date < te_date,
+    xmin = min(date[train == FALSE]),
+    xmax = max(date)
   ) %>% 
-  pivot_longer(-c(DATE, train), names_to = "asset", values_to = "value") %>% 
-  mutate(
-    xmin = min(DATE[train == FALSE]),
-    xmax = max(DATE)
-  ) %>% 
-  ggplot(aes(x = DATE, y = value)) +
+  ggplot(aes(x = date, y = value)) +
   geom_rect(
     aes(xmin = xmin, xmax = xmax, ymin = -Inf, ymax = Inf),
     alpha = .7,
     fill = "grey" # test set
   ) +
   geom_path() +
-  facet_grid(asset ~ ., scales = "free_y") +
-  # scale_x_date(
-  #   breaks = c(nrow(etf_train), nrow(etf_train) + nrow(etf_test))
-  # ) +
+  facet_grid(series_id ~ ., scales = "free_y") +
   theme_minimal() +
-  theme(panel.border = element_rect(fill = NA)) +
+  theme(
+    panel.border = element_rect(fill = NA),
+    strip.text = element_text(size = 3),
+    axis.text.y = element_text(size = 5)
+  ) +
   labs(
     x = element_blank(),
-    y = element_blank()
+    y = "Volatility index"
   )
 ```
 
 <img src="../output/figs/analysis-dataplot-1.png" width="70%" style="display: block; margin: auto;" />
+
+``` r
+etf_split <- divide_ts(etf_vix, h)
+etf_train <- etf_split$train
+etf_test <- etf_split$test
+```
 
 # Model
 
@@ -89,30 +109,30 @@ bvhar:::etf_vix_raw %>%
 ``` r
 choose_var(etf_train, lag_max = 10)
 #> $ic
-#>       AIC   BIC    HQ   FPE
-#> 1  0.1421 0.585 0.310 0.310
-#> 2  0.0474 0.889 0.367 0.367
-#> 3  0.0716 1.313 0.544 0.544
-#> 4  0.1026 1.745 0.727 0.727
-#> 5  0.1364 2.180 0.913 0.913
-#> 6  0.2052 2.650 1.135 1.135
-#> 7  0.2627 3.110 1.345 1.345
-#> 8  0.3184 3.569 1.554 1.554
-#> 9  0.2871 3.941 1.677 1.677
-#> 10 0.3209 4.379 1.864 1.864
+#>      AIC     BIC      HQ     FPE
+#> 1  -1.39 -0.9015 -1.2050 -1.2050
+#> 2  -1.40 -0.4632 -1.0403 -1.0403
+#> 3  -1.43 -0.0467 -0.8979 -0.8979
+#> 4  -1.37  0.4529 -0.6729 -0.6729
+#> 5  -1.35  0.9208 -0.4801 -0.4801
+#> 6  -1.32  1.3935 -0.2829 -0.2829
+#> 7  -1.30  1.8662 -0.0864 -0.0864
+#> 8  -1.28  2.3290  0.0999  0.0999
+#> 9  -1.20  2.8602  0.3542  0.3542
+#> 10 -1.17  3.3427  0.5592  0.5592
 #> 
 #> $min_lag
 #> AIC BIC  HQ FPE 
-#>   2   1   1   1
+#>   3   1   1   1
 ```
 
 ``` r
-(var_lag <- 2)
-#> [1] 2
+(var_lag <- 3)
+#> [1] 3
 ```
 
 ``` r
-fit_var <- var_lm(etf_train, 2)
+fit_var <- var_lm(etf_train, var_lag)
 ```
 
 ## VHAR
@@ -124,8 +144,8 @@ fit_vhar <- vhar_lm(etf_train)
 ## BVAR
 
 ``` r
-(bvar_lag <- 2)
-#> [1] 2
+(bvar_lag <- var_lag)
+#> [1] 3
 ```
 
 ``` r
@@ -152,7 +172,8 @@ bvar_init <- set_bvar(
   ), 
   y = etf_train, 
   p = bvar_lag, 
-  include_mean = TRUE
+  include_mean = TRUE,
+  parallel = list(cl = cl, forward = FALSE, loginfo = FALSE)
 ))
 #> Model Specification for BVAR
 #> 
@@ -162,18 +183,18 @@ bvar_init <- set_bvar(
 #> ========================================================
 #> 
 #> Setting for 'sigma':
-#>   EVZCLS    GVZCLS    OVXCLS  VXEEMCLS  VXEWZCLS  VXFXICLS  VXGDXCLS  VXSLVCLS  
-#>     1.42      1.88      6.92      2.32      6.09      3.07      8.67      2.08  
-#> VXXLECLS  
-#>     2.64  
+#>   GVZCLS    OVXCLS  VXFXICLS  VXEEMCLS  VXSLVCLS    EVZCLS  VXXLECLS  VXGDXCLS  
+#>     1.89      6.11      2.49      1.80      4.23      1.30      1.94      5.47  
+#> VXEWZCLS  
+#>     5.74  
 #> 
 #> Setting for 'lambda':
 #>         
-#> 0.0261  
+#> 0.0279  
 #> 
 #> Setting for 'delta':
 #>                                                                
-#> 0.952  0.896  0.954  0.905  0.960  0.944  0.930  0.931  0.925  
+#> 0.895  0.976  0.931  0.947  0.881  0.966  0.965  0.943  0.970  
 #> 
 #> Setting for 'eps':
 #> [1]  1e-04
@@ -207,7 +228,9 @@ bvhar_init <- set_bvhar(
     rep(1, n_asset) # delta
   ), 
   y = etf_train, 
-  include_mean = TRUE
+  har = c(5, 22),
+  include_mean = TRUE,
+  parallel = list(cl = cl, forward = FALSE, loginfo = FALSE)
 ))
 #> Model Specification for BVHAR
 #> 
@@ -217,18 +240,18 @@ bvhar_init <- set_bvhar(
 #> ========================================================
 #> 
 #> Setting for 'sigma':
-#>   EVZCLS    GVZCLS    OVXCLS  VXEEMCLS  VXEWZCLS  VXFXICLS  VXGDXCLS  VXSLVCLS  
-#>     1.60      1.37      5.05      2.50      5.52      2.76      7.57      2.42  
-#> VXXLECLS  
-#>     2.45  
+#>   GVZCLS    OVXCLS  VXFXICLS  VXEEMCLS  VXSLVCLS    EVZCLS  VXXLECLS  VXGDXCLS  
+#>     2.36      4.34      2.64      2.38      3.65      1.22      2.47      4.71  
+#> VXEWZCLS  
+#>     5.30  
 #> 
 #> Setting for 'lambda':
 #>         
-#> 0.0295  
+#> 0.0332  
 #> 
 #> Setting for 'delta':
 #>                                                                
-#> 0.956  0.885  0.951  0.895  0.957  0.942  0.922  0.917  0.917  
+#> 0.878  0.973  0.936  0.945  0.861  0.956  0.956  0.938  0.973  
 #> 
 #> Setting for 'eps':
 #> [1]  1e-04
@@ -268,7 +291,9 @@ bvhar_vhar_init <- set_weight_bvhar(
     rep(1, n_asset) # monthly
   ), 
   y = etf_train, 
-  include_mean = TRUE
+  har = c(5, 22),
+  include_mean = TRUE,
+  parallel = list(cl = cl, forward = FALSE, loginfo = FALSE)
 ))
 #> Model Specification for BVHAR
 #> 
@@ -278,33 +303,37 @@ bvhar_vhar_init <- set_weight_bvhar(
 #> ========================================================
 #> 
 #> Setting for 'sigma':
-#>   EVZCLS    GVZCLS    OVXCLS  VXEEMCLS  VXEWZCLS  VXFXICLS  VXGDXCLS  VXSLVCLS  
-#>     1.74      1.61      9.33      2.87      7.09      4.67     10.12      3.06  
-#> VXXLECLS  
-#>     4.10  
+#>   GVZCLS    OVXCLS  VXFXICLS  VXEEMCLS  VXSLVCLS    EVZCLS  VXXLECLS  VXGDXCLS  
+#>     3.07      9.51      3.25      3.48      5.54      1.00      3.82      7.01  
+#> VXEWZCLS  
+#>     6.70  
 #> 
 #> Setting for 'lambda':
-#>         
-#> 0.0266  
+#>        
+#> 1e-04  
 #> 
 #> Setting for 'eps':
 #> [1]  1e-04
 #> 
 #> Setting for 'daily':
 #>                                                                
-#> 0.886  0.750  0.910  0.749  0.871  0.830  0.634  0.813  0.825  
+#> 0.811  0.913  0.936  0.864  0.766  0.930  0.908  0.846  0.959  
 #> 
 #> Setting for 'weekly':
-#>                                                                
-#> 0.153  0.331  0.104  0.368  0.165  0.235  0.627  0.210  0.215  
+#>                                                                         
+#> 0.1634  0.1569  0.0171  0.0987  0.2383  0.0100  0.0100  0.2000  0.0100  
 #> 
 #> Setting for 'monthly':
 #>                                                                         
-#> 0.0100  0.0332  0.0108  0.0363  0.0433  0.0365  0.0111  0.0870  0.0437
+#> 0.2121  0.0100  0.0737  0.2057  0.2335  0.1662  0.1886  0.1019  0.0376
 ```
 
 ``` r
 fit_bvhar_vhar <- bvhar_vhar_optim$fit
+```
+
+``` r
+parallel::stopCluster(cl)
 ```
 
 ## Hyperparamers
@@ -322,32 +351,35 @@ mod_list <- list(
 # 1-step-----------
 roll1 <- 
   mod_list %>% 
-  lapply(
+  parallel::mclapply(
     function(mod) {
       forecast_roll(mod, 1, etf_test)
-    }
+    },
+    mc.cores = 4
   )
 # 5-step-----------
 roll2 <- 
   mod_list %>% 
-  lapply(
+  parallel::mclapply(
     function(mod) {
       forecast_roll(mod, 5, etf_test)
-    }
+    },
+    mc.cores = 4
   )
 # 20-step----------
 roll3 <- 
   mod_list %>% 
-  lapply(
+  parallel::mclapply(
     function(mod) {
       forecast_roll(mod, 20, etf_test)
-    }
+    },
+    mc.cores = 4
   )
 ```
 
 ``` r
 roll_list <- 
-  lapply(
+  parallel::mclapply(
     c(1, 5, 20),
     function(h) {
       mod_list %>% 
@@ -356,11 +388,45 @@ roll_list <-
             forecast_roll(mod, h, etf_test)
           }
         )
-    }
+    },
+    mc.cores = 8
   )
 ```
 
 ## Relative Errors
+
+``` r
+get_rmafetex_tr_2(
+  roll_list, 
+  etf_test, 
+  ahead_list = c("$h = 1$", "$h = 5$", "$h = 20$"), 
+  benchmark_id = 1,
+  caption = "Out-of-sample forecasting performance measures with VAR(3) as benchmark", 
+  label = "losscboe"
+) %>% 
+  writeLines()
+#> \begin{table}[H]
+#> 
+#> \caption{\label{tab:losscboe}Out-of-sample forecasting performance measures with VAR(3) as benchmark}
+#> \centering
+#> \resizebox{\linewidth}{!}{
+#> \begin{tabular}[t]{c|ccc|ccc|ccc|ccc|}
+#> \toprule
+#> \multicolumn{1}{c}{ } & \multicolumn{3}{c}{RMAFE} & \multicolumn{3}{c}{RMSFE} & \multicolumn{3}{c}{RMAPE} & \multicolumn{3}{c}{RMASE} \\
+#> \cmidrule(l{3pt}r{3pt}){2-4} \cmidrule(l{3pt}r{3pt}){5-7} \cmidrule(l{3pt}r{3pt}){8-10} \cmidrule(l{3pt}r{3pt}){11-13}
+#>  & $h = 1$ & $h = 5$ & $h = 20$ & $h = 1$ & $h = 5$ & $h = 20$ & $h = 1$ & $h = 5$ & $h = 20$ & $h = 1$ & $h = 5$ & $h = 20$\\
+#> \midrule
+#> VHAR & \textcolor{black}{\num{.964}} & \textcolor{black}{\num{.895}} & \textcolor{black}{\num{.734}} & \textcolor{black}{\num{.943}} & \textcolor{black}{\num{.799}} & \textcolor{black}{\num{.552}} & \textcolor{black}{\num{.970}} & \textcolor{black}{\num{.891}} & \textcolor{black}{\num{.744}} & \textcolor{black}{\num{.958}} & \textcolor{black}{\num{.875}} & \textcolor{black}{\num{.737}}\\
+#> \cmidrule{1-13}
+#> BVAR & \textcolor{black}{\num{.943}} & \textcolor{black}{\num{.830}} & \textcolor{black}{\num{.703}} & \textcolor{black}{\num{.916}} & \textcolor{black}{\num{.737}} & \textcolor{black}{\num{.494}} & \textcolor{black}{\num{.945}} & \textcolor{black}{\num{.811}} & \textcolor{black}{\num{.718}} & \textcolor{black}{\num{.932}} & \textcolor{black}{\num{.806}} & \textcolor{black}{\num{.710}}\\
+#> \cmidrule{1-13}
+#> BVHAR-S & \textcolor{black}{\num{.945}} & \textcolor{black}{\num{.828}} & \textcolor{black}{\num{.681}} & \textcolor{black}{\num{.915}} & \textcolor{black}{\num{.731}} & \textcolor{black}{\num{.457}} & \textcolor{black}{\num{.947}} & \textcolor{black}{\num{.812}} & \textcolor{black}{\num{.701}} & \textcolor{black}{\num{.934}} & \textcolor{black}{\num{.806}} & \textcolor{black}{\num{.688}}\\
+#> \cmidrule{1-13}
+#> BVHAR-L & \textcolor{red}{\num{.937}} & \textcolor{red}{\num{.798}} & \textcolor{red}{\num{.538}} & \textcolor{red}{\num{.880}} & \textcolor{red}{\num{.679}} & \textcolor{red}{\num{.300}} & \textcolor{red}{\num{.935}} & \textcolor{red}{\num{.773}} & \textcolor{red}{\num{.531}} & \textcolor{red}{\num{.918}} & \textcolor{red}{\num{.787}} & \textcolor{red}{\num{.540}}\\
+#> \bottomrule
+#> \end{tabular}}
+#> \end{table}
+```
 
 ``` r
 get_rmfe_tr(
@@ -370,9 +436,9 @@ get_rmfe_tr(
   benchmark_id = 1
 )
 #>           VHAR  BVAR BVHAR-S BVHAR-L
-#> $h = 1$  1.002 0.989   0.988   0.966
-#> $h = 5$  1.069 1.048   1.046   1.015
-#> $h = 20$ 0.957 1.067   1.054   0.931
+#> $h = 1$  0.964 0.943   0.945   0.937
+#> $h = 5$  0.895 0.830   0.828   0.798
+#> $h = 20$ 0.734 0.703   0.681   0.538
 ```
 
 ``` r
@@ -383,10 +449,10 @@ get_rmfe_tr(
   benchmark_id = 1,
   error = "rmsfe"
 )
-#>          VHAR  BVAR BVHAR-S BVHAR-L
-#> $h = 1$  1.00 0.981   0.978   0.966
-#> $h = 5$  1.10 1.059   1.039   1.011
-#> $h = 20$ 1.04 1.089   1.031   0.898
+#>           VHAR  BVAR BVHAR-S BVHAR-L
+#> $h = 1$  0.943 0.916   0.915   0.880
+#> $h = 5$  0.799 0.737   0.731   0.679
+#> $h = 20$ 0.552 0.494   0.457   0.300
 ```
 
 ``` r
@@ -398,9 +464,9 @@ get_rmfe_tr(
   error = "mape"
 )
 #>           VHAR  BVAR BVHAR-S BVHAR-L
-#> $h = 1$  1.010 0.993   0.995   0.969
-#> $h = 5$  1.076 1.057   1.066   1.006
-#> $h = 20$ 0.951 1.095   1.095   0.941
+#> $h = 1$  0.970 0.945   0.947   0.935
+#> $h = 5$  0.891 0.811   0.812   0.773
+#> $h = 20$ 0.744 0.718   0.701   0.531
 ```
 
 ``` r
@@ -412,12 +478,31 @@ get_rmfe_tr(
   error = "mase"
 )
 #>           VHAR  BVAR BVHAR-S BVHAR-L
-#> $h = 1$  1.010 0.997   0.995   0.977
-#> $h = 5$  1.072 1.041   1.040   1.015
-#> $h = 20$ 0.975 1.069   1.062   0.940
+#> $h = 1$  0.958 0.932   0.934   0.918
+#> $h = 5$  0.875 0.806   0.806   0.787
+#> $h = 20$ 0.737 0.710   0.688   0.540
 ```
 
 ## Piecewise Errors
+
+``` r
+roll_list[[1]] %>% 
+  gg_loss(
+    etf_test, 
+    mean_line = TRUE, 
+    line_param = list(size = .3), 
+    mean_param = list(alpha = .5, size = .3)
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = -45, vjust = -1, size = 6),
+    panel.border = element_rect(fill = NA),
+    legend.position = "top"
+  ) +
+  scale_colour_viridis_d(labels = c("BVAR", "BVHAR-S", "BVHAR-L", "VAR", "VHAR"))
+```
+
+<img src="../output/figs/analysis-piecewise-error-1.png" width="70%" style="display: block; margin: auto;" />
 
 # Intervals
 
@@ -429,20 +514,36 @@ pred_bvhar <- predict(fit_bvhar, h)
 pred_bvhar_vhar <- predict(fit_bvhar_vhar, h)
 ```
 
+<!-- ```{r credplot} -->
+<!-- autoplot(pred_var, x_cut = 850, ci_alpha = .8, type = "wrap") + -->
+<!--   autolayer(pred_vhar, ci_alpha = .7) + -->
+<!--   autolayer(pred_bvar, ci_alpha = .6) + -->
+<!--   autolayer(pred_bvhar, ci_alpha = .5) + -->
+<!--   autolayer(pred_bvhar_vhar, ci_alpha = .4) + -->
+<!--   geom_eval(etf_test, num_train = nrow(etf_train), alpha = .5) + -->
+<!--   theme_minimal() + -->
+<!--   theme( -->
+<!--     panel.border = element_rect(fill = NA), -->
+<!--     axis.text.x = element_blank(), -->
+<!--     legend.position = "top" -->
+<!--   ) + -->
+<!--   scale_fill_discrete(labels = c("BVAR", "BVHAR-S", "BVHAR-L", "VAR", "VHAR")) -->
+<!-- ``` -->
+
 ``` r
-autoplot(pred_var, x_cut = 950, ci_alpha = .8, type = "wrap") +
+autoplot(pred_var, x_cut = 860, ci_alpha = .8, type = "wrap") +
   autolayer(pred_vhar, ci_alpha = .7) +
   autolayer(pred_bvar, ci_alpha = .6) +
   autolayer(pred_bvhar, ci_alpha = .5) +
   autolayer(pred_bvhar_vhar, ci_alpha = .4) +
-  geom_eval(etf_test, num_train = nrow(etf_train), alpha = .3) +
+  geom_eval(etf_test, num_train = nrow(etf_train), alpha = .5) +
   theme_minimal() +
   theme(
     panel.border = element_rect(fill = NA),
     axis.text.x = element_blank(),
     legend.position = "top"
   ) +
-  scale_fill_discrete(labels = c("BVAR", "BVHAR-S", "BVHAR-L", "VAR", "VHAR"))
+  scale_fill_viridis_d(labels = c("BVAR", "BVHAR-S", "BVHAR-L", "VAR", "VHAR"))
 ```
 
 <img src="../output/figs/analysis-credplot-1.png" width="70%" style="display: block; margin: auto;" />

@@ -509,3 +509,73 @@ get_rmafetex_tr <- function(mod_list,
     row_spec(0, angle = header_angle) %>% 
     collapse_rows(columns = 1, latex_hline = "major")
 }
+#----------------------------------------------------------------------------
+get_rmafetex_tr_2 <- function(mod_list, 
+                            y, 
+                            ahead_list = c("One", "Five", "Twenty"), 
+                            benchmark_id, 
+                            caption = "", 
+                            label = "",
+                            header_angle = NULL) {
+  error_tab <- 
+    # c("rmafe", "rmsfe", "mase") %>% 
+    c("rmafe", "rmsfe", "mape", "mase") %>% 
+    lapply(
+      function(er) {
+        get_rmfe_tr(
+          mod_list,
+          y,
+          ahead_list = ahead_list,
+          benchmark_id = benchmark_id,
+          error = er
+        ) %>% 
+          rownames_to_column(var = "h") %>% 
+          add_column(Loss = str_to_upper(er), .before = 1)
+      }
+    ) %>% 
+    bind_rows() %>% 
+    pivot_longer(-c(h, Loss), names_to = "model", values_to = "error") %>% 
+    group_by(Loss, h) %>% 
+    mutate(
+      error = cell_spec(
+        paste0(
+          "\\num{", 
+          format(error, nsmall = 3, scientific = -2) %>% 
+            str_remove(pattern = "0(?=\\.)"), # .xxx
+          "}"
+        ), # siunitx
+        format = "latex",
+        escape = FALSE,
+        color = ifelse(error == min(error), "red", "black")
+      )
+    ) %>% 
+    ungroup() %>% 
+    pivot_wider(names_from = c(Loss, h), values_from = error)
+  colnames(error_tab) <- str_remove_all(colnames(error_tab), pattern = ".*\\_")
+  colnames(error_tab)[1] <- c("")
+  align <- 
+    c(
+      "c|",
+      rep("c", 2)
+    )
+  # kable------------------------------------------
+  error_tab %>% 
+    kable(
+      format = "latex",
+      booktabs = TRUE,
+      escape = FALSE,
+      align = align,
+      caption = caption,
+      label = label
+    ) %>% 
+    kable_paper(full_width = FALSE, latex_options = c("scale_down", "HOLD_position")) %>% 
+    add_header_above(c(
+      " " = 1,
+      "RMAFE" = 3,
+      "RMSFE" = 3,
+      "RMAPE" = 3,
+      "RMASE" = 3
+    )) %>%
+    row_spec(0, angle = header_angle) %>% 
+    collapse_rows(columns = 1, latex_hline = "major")
+}
