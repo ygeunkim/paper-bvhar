@@ -1,5 +1,5 @@
 ---
-title: "Simulating VHAR-type Minnesota BVHAR"
+title: "Simulating Minnesota VAR"
 author: "Young Geun Kim"
 date: "`r format(Sys.time(), '%d %b, %Y')`"
 output: 
@@ -16,7 +16,7 @@ knit:
 ---
 
 ```{r simdata}
-sim_data <- "../data/processed/bvharsim_dgp_l.rds"
+sim_data <- "../data/processed/bvarsim_dgp_wn.rds"
 ```
 
 ```{r cacheset, include=FALSE, cache=TRUE, cache.extra = tools::md5sum(sim_data)}
@@ -28,7 +28,7 @@ knitr::opts_chunk$set(
   comment = "#>",
   collapse = TRUE,
   out.width = "70%",
-  fig.path = "../output/figs/DGP-4-",
+  fig.path = "../output/figs/DGP-BVAR-WN-",
   fig.align = "center",
   fig.width = 6,
   fig.asp = .618
@@ -68,26 +68,26 @@ source("param-fns.R")
 dgp <- readRDS(sim_data)
 ```
 
-# BVHAR Coefficient
+# BVAR Coefficient
 
-## VAR-type Minnesota prior
+## Minnesota prior
 
 ```{r smalltruesetting, comment=NULL, echo=FALSE}
-bvhar_small_spec <- dgp$small_spec
+bvar_small_spec <- dgp$small_spec
 ```
 
 ```{r medtruesetting, comment=NULL, echo=FALSE}
-bvhar_medium_spec <- dgp$medium_spec
+bvar_medium_spec <- dgp$medium_spec
 ```
 
 ```{r largetruesetting, comment=NULL, echo=FALSE}
-bvhar_large_spec <- dgp$large_spec
+bvar_large_spec <- dgp$large_spec
 ```
 
 ```{r simulcase}
-n_small <- length(bvhar_small_spec$sigma)
-n_medium <- length(bvhar_medium_spec$sigma)
-n_large <- length(bvhar_large_spec$sigma)
+n_small <- length(bvar_small_spec$sigma)
+n_medium <- length(bvar_medium_spec$sigma)
+n_large <- length(bvar_large_spec$sigma)
 ```
 
 ## VAR(5)
@@ -115,6 +115,7 @@ y_small_train %>%
     alpha = .7,
     fill = "grey" # test set
   ) +
+  # geom_path(aes(colour = asset), show.legend = FALSE, alpha = .5) +
   geom_path() +
   facet_grid(asset ~ ., scales = "free_y") +
   scale_x_continuous(
@@ -207,8 +208,11 @@ y_large_train %>%
   )
 ```
 
-
 # Modeling
+
+```{r includemean}
+(mean_include <- FALSE)
+```
 
 ## VAR
 
@@ -217,43 +221,27 @@ y_large_train %>%
 ```
 
 ```{r varfit}
-fit_var_small <- var_lm(y_small_train, var_lag, include_mean = FALSE)
-fit_var_medium <- var_lm(y_medium_train, var_lag, include_mean = FALSE)
-fit_var_large <- var_lm(y_large_train, var_lag, include_mean = FALSE)
+fit_var_small <- var_lm(y_small_train, var_lag, include_mean = mean_include)
+fit_var_medium <- var_lm(y_medium_train, var_lag, include_mean = mean_include)
+fit_var_large <- var_lm(y_large_train, var_lag, include_mean = mean_include)
 ```
 
 ## VHAR
 
+```{r harorder}
+har <- c(5, 22)
+```
+
 ```{r vharfit}
-fit_vhar_small <- vhar_lm(y_small_train, include_mean = FALSE)
-fit_vhar_medium <- vhar_lm(y_medium_train, include_mean = FALSE)
-fit_vhar_large <- vhar_lm(y_large_train, include_mean = FALSE)
+fit_vhar_small <- vhar_lm(y_small_train, har = har, include_mean = mean_include)
+fit_vhar_medium <- vhar_lm(y_medium_train, har = har, include_mean = mean_include)
+fit_vhar_large <- vhar_lm(y_large_train, har = har, include_mean = mean_include)
 ```
 
 ## BVAR
 
 ```{r bvarorder}
-(bvar_lag <- 5)
-```
-
-```{r bvarsetting}
-bvar_small_spec <- set_bvar(
-  sigma = bvhar_small_spec$sigma,
-  lambda = bvhar_small_spec$lambda,
-  delta = bvhar_small_spec$daily
-)
-#----------------------------
-bvar_medium_spec <- set_bvar(
-  sigma = bvhar_medium_spec$sigma,
-  lambda = bvhar_medium_spec$lambda,
-  delta = bvhar_medium_spec$daily
-)
-#----------------------------
-bvar_large_spec <- set_bvar(
-  sigma = bvhar_large_spec$sigma,
-  lambda = bvhar_large_spec$lambda,
-  delta = bvhar_large_spec$daily
-)
+(bvar_lag <- var_lag)
 ```
 
 ```{r smallbvaroptim, cache = 1}
@@ -271,7 +259,7 @@ bvar_large_spec <- set_bvar(
   ), 
   y = y_small_train, 
   p = bvar_lag, 
-  include_mean = FALSE,
+  include_mean = mean_include,
   parallel = list(cl = cl, forward = FALSE, loginfo = FALSE)
 ))
 ```
@@ -291,7 +279,7 @@ bvar_large_spec <- set_bvar(
   ), 
   y = y_medium_train, 
   p = bvar_lag, 
-  include_mean = FALSE,
+  include_mean = mean_include,
   parallel = list(cl = cl, forward = FALSE, loginfo = FALSE)
 ))
 ```
@@ -311,7 +299,7 @@ bvar_large_spec <- set_bvar(
   ), 
   y = y_large_train, 
   p = bvar_lag, 
-  include_mean = FALSE,
+  include_mean = mean_include,
   parallel = list(cl = cl, forward = FALSE, loginfo = FALSE)
 ))
 ```
@@ -326,21 +314,21 @@ fit_large_bvar <- bvar_large_optim$fit
 
 ```{r bvharvarsetting}
 bvhar_var_small_spec <- set_bvhar(
-  sigma = bvhar_small_spec$sigma,
-  lambda = bvhar_small_spec$lambda,
-  delta = bvhar_small_spec$daily
+  sigma = bvar_small_spec$sigma,
+  lambda = bvar_small_spec$lambda,
+  delta = bvar_small_spec$delta
 )
-#-----------------------------------------
+#----------------------------
 bvhar_var_medium_spec <- set_bvhar(
-  sigma = bvhar_medium_spec$sigma,
-  lambda = bvhar_medium_spec$lambda,
-  delta = bvhar_medium_spec$daily
+  sigma = bvar_medium_spec$sigma,
+  lambda = bvar_medium_spec$lambda,
+  delta = bvar_medium_spec$delta
 )
-#-----------------------------------------
+#----------------------------
 bvhar_var_large_spec <- set_bvhar(
-  sigma = bvhar_large_spec$sigma,
-  lambda = bvhar_large_spec$lambda,
-  delta = bvhar_large_spec$daily
+  sigma = bvar_large_spec$sigma,
+  lambda = bvar_large_spec$lambda,
+  delta = bvar_large_spec$delta
 )
 ```
 
@@ -358,7 +346,8 @@ bvhar_var_large_spec <- set_bvhar(
     rep(1, n_small) # delta
   ), 
   y = y_small_train, 
-  include_mean = FALSE,
+  har = har,
+  include_mean = mean_include,
   parallel = list(cl = cl, forward = FALSE, loginfo = FALSE)
 ))
 ```
@@ -377,7 +366,8 @@ bvhar_var_large_spec <- set_bvhar(
     rep(1, n_medium) # delta
   ), 
   y = y_medium_train, 
-  include_mean = FALSE,
+  har = har,
+  include_mean = mean_include,
   parallel = list(cl = cl, forward = FALSE, loginfo = FALSE)
 ))
 ```
@@ -396,7 +386,8 @@ bvhar_var_large_spec <- set_bvhar(
     rep(1, n_large) # delta
   ), 
   y = y_large_train, 
-  include_mean = FALSE,
+  har = har,
+  include_mean = mean_include,
   parallel = list(cl = cl, forward = FALSE, loginfo = FALSE)
 ))
 ```
@@ -409,9 +400,35 @@ fit_bvhar_large_var <- bvhar_var_large_optim$fit
 
 ## BVHAR-VHAR
 
+```{r bvharvharsetting}
+bvhar_vhar_small_spec <- set_weight_bvhar(
+  sigma = bvar_small_spec$sigma,
+  lambda = bvar_small_spec$lambda,
+  daily = bvar_small_spec$delta,
+  weekly = bvar_small_spec$delta,
+  monthly = bvar_small_spec$delta
+)
+#-----------------------------------------
+bvhar_vhar_medium_spec <- set_weight_bvhar(
+  sigma = bvar_medium_spec$sigma,
+  lambda = bvar_medium_spec$lambda,
+  daily = bvar_medium_spec$delta,
+  weekly = bvar_medium_spec$delta,
+  monthly = bvar_medium_spec$delta
+)
+#-----------------------------------------
+bvhar_vhar_large_spec <- set_weight_bvhar(
+  sigma = bvar_large_spec$sigma,
+  lambda = bvar_large_spec$lambda,
+  daily = bvar_large_spec$delta,
+  weekly = bvar_large_spec$delta,
+  monthly = bvar_large_spec$delta
+)
+```
+
 ```{r smallbvharvharoptim, cache = 1}
 (bvhar_vhar_small_optim <- choose_bvhar(
-  bvhar_small_spec, 
+  bvhar_vhar_small_spec, 
   lower = c(
     rep(.5, n_small), # sigma
     1e-4, # lambda
@@ -427,14 +444,15 @@ fit_bvhar_large_var <- bvhar_var_large_optim$fit
     rep(1, n_small) # monthly
   ), 
   y = y_small_train, 
-  include_mean = FALSE,
+  har = har,
+  include_mean = mean_include,
   parallel = list(cl = cl, forward = FALSE, loginfo = FALSE)
 ))
 ```
 
 ```{r medbvharvharoptim, cache = 1}
 (bvhar_vhar_medium_optim <- choose_bvhar(
-  bvhar_medium_spec, 
+  bvhar_vhar_medium_spec, 
   lower = c(
     rep(.5, n_medium), # sigma
     1e-4, # lambda
@@ -450,14 +468,15 @@ fit_bvhar_large_var <- bvhar_var_large_optim$fit
     rep(1, n_medium) # monthly
   ), 
   y = y_medium_train, 
-  include_mean = FALSE,
+  har = har,
+  include_mean = mean_include,
   parallel = list(cl = cl, forward = FALSE, loginfo = FALSE)
 ))
 ```
 
 ```{r largebvharvharoptim, cache = 1}
 (bvhar_vhar_large_optim <- choose_bvhar(
-  bvhar_large_spec, 
+  bvhar_vhar_large_spec, 
   lower = c(
     rep(.5, n_large), # sigma
     1e-4, # lambda
@@ -473,7 +492,8 @@ fit_bvhar_large_var <- bvhar_var_large_optim$fit
     rep(1, n_large) # monthly
   ), 
   y = y_large_train, 
-  include_mean = FALSE,
+  har = har,
+  include_mean = mean_include,
   parallel = list(cl = cl, forward = FALSE, loginfo = FALSE)
 ))
 ```
@@ -487,7 +507,6 @@ fit_bvhar_large_vhar <- bvhar_vhar_large_optim$fit
 ```{r stopcl}
 parallel::stopCluster(cl)
 ```
-
 
 ## Hyperparameters
 
@@ -510,7 +529,7 @@ spec_optim_list <- list(
   )
 )
 # report-------------------
-report_hyperparam(spec_optim_list, report_true = FALSE, caption = "Empirical Bayes Results for DGP4.", label = "empdgp4") %>% 
+report_hyperparam(spec_optim_list, report_true = FALSE, caption = "Empirical Bayes Results for DGP1.", label = "empdgp1") %>% 
   writeLines()
 ```
 
@@ -518,8 +537,8 @@ report_hyperparam(spec_optim_list, report_true = FALSE, caption = "Empirical Bay
 
 ## Rolling Windows
 
-```{r listroll, cache = 1}
-# model lists-------------------------
+```{r listroll, echo=FALSE, cache = 1}
+# model lists--------------------------
 mod_small_list <- list(
   fit_var_small,
   fit_vhar_small,
@@ -585,7 +604,7 @@ cv_large_list <-
   )
 ```
 
-## Relative Error
+## Relative Errors
 
 Set VAR as the benchmark model.
 
@@ -595,356 +614,49 @@ get_rmafetex_tr(
   y_list = list(y_small_test, y_medium_test, y_large_test), 
   ahead_list = c("$h = 1$", "$h = 5$", "$h = 10$", "$h = 20$"),
   benchmark_id = 1,
-  caption = "Out-of-sample forecasting performance measures for DGP4 with VAR(5) model as benchmark.", 
-  label = "dgp4result",
+  caption = "Out-of-sample forecasting performance measures for DGP1 with VAR(5) model as benchmark.", 
+  label = "dgp1result",
   header_angle = 0
 ) %>% 
   writeLines()
 ```
 
-## Piecewise Errors
+# Additional
 
-### SMALL
-
-Plots
-
-```{r smallcvonefig, echo=FALSE}
-cv_small_list[[1]] %>% 
-  gg_loss(
-    y_small_test, 
-    mean_line = TRUE, 
-    line_param = list(size = .3), 
-    mean_param = list(alpha = .5, size = .3), 
-    viridis = TRUE, 
-    show.legend = FALSE
+```{r modlegend, echo=FALSE}
+tibble(
+  x = 1:100,
+  BVAR_Minnesota = 5,
+  BVHAR_MN_VAR = 4,
+  BVHAR_MN_VHAR = 3,
+  VAR = 2,
+  VHAR = 1
+) %>% 
+  pivot_longer(-x, names_to = "mod", values_to = "y") %>% 
+  mutate(
+    mod = str_replace_all(mod, pattern = "\\_", replacement = "-"),
+    mod = str_remove_all(mod, pattern = "-Minnesota$"),
+    mod = str_replace_all(mod, pattern = "MN-VAR$", replacement = "S"),
+    mod = str_replace_all(mod, pattern = "MN-VHAR$", replacement = "L"),
+    mod_label = ifelse(x == max(x), mod, NA_character_)
+  ) %>% 
+  ggplot(aes(y = y)) +
+  geom_path(aes(x = x, colour = mod)) +
+  geom_text(
+    aes(x = x + 3, label = mod_label),
+    na.rm = TRUE,
+    hjust = 0,
+    size = 5
   ) +
+  scale_colour_viridis_d() +
   theme_minimal() +
   theme(
-    axis.text.x = element_text(angle = -30, vjust = -1),
-    legend.title = element_text(size = 8),
-    legend.text = element_text(size = 7),
-    legend.key.size = unit(.3, "cm")
-  )
-```
-
-```{r smallcvfivefig, echo=FALSE}
-cv_small_list[[2]] %>% 
-  gg_loss(
-    y_small_test, 
-    mean_line = TRUE, 
-    line_param = list(size = .3), 
-    mean_param = list(alpha = .5, size = .3), 
-    viridis = TRUE, 
-    show.legend = FALSE
+    legend.position = "none",
+    axis.text = element_blank(),
+    axis.title = element_blank()
   ) +
-  theme_minimal() +
-  theme(
-    axis.text.x = element_text(angle = -30, vjust = -1),
-    legend.title = element_text(size = 8),
-    legend.text = element_text(size = 7),
-    legend.key.size = unit(.3, "cm")
-  )
+  xlim(1, 125)
 ```
-
-```{r smallcvtwentyfig, echo=FALSE}
-cv_small_list[[3]] %>% 
-  gg_loss(
-    y_small_test, 
-    mean_line = TRUE, 
-    line_param = list(size = .3), 
-    mean_param = list(alpha = .5, size = .3), 
-    viridis = TRUE, 
-    show.legend = FALSE
-  ) +
-  theme_minimal() +
-  theme(
-    axis.text.x = element_text(angle = -30, vjust = -1),
-    legend.title = element_text(size = 8),
-    legend.text = element_text(size = 7),
-    legend.key.size = unit(.3, "cm")
-  )
-```
-
-Tables
-
-1-step:
-
-```{r smallcvconetab, comment=NULL, echo=FALSE}
-cv_small_list[[1]] %>% 
-  get_losstex(y_small_test, "SMALL Simulation - 1-step ahead Rolling Window Forecasting Loss", label = "smallone") %>% 
-  writeLines()
-```
-
-5-step:
-
-```{r smallcvfivetab, comment=NULL, echo=FALSE}
-cv_small_list[[2]] %>% 
-  get_losstex(y_small_test, "SMALL Simulation - 5-step ahead Rolling Window Forecasting Loss", label = "smallfive") %>% 
-  writeLines()
-```
-
-20-step:
-
-```{r smallcvtwentytab, comment=NULL, echo=FALSE}
-cv_small_list[[3]] %>% 
-  get_losstex(y_small_test, "SMALL Simulation - 20-step ahead Rolling Window Forecasting Loss", label = "smalltwenty") %>% 
-  writeLines()
-```
-
-### MEDIUM
-
-Plots
-
-```{r medcvonefig}
-cv_medium_list[[1]] %>% 
-  gg_loss(
-    y_medium_test, 
-    mean_line = TRUE, 
-    line_param = list(size = .3), 
-    mean_param = list(alpha = .5, size = .3), 
-    viridis = TRUE, 
-    show.legend = FALSE
-  ) +
-  theme_minimal() +
-  theme(
-    axis.text.x = element_text(angle = -30, vjust = -1),
-    legend.title = element_text(size = 8),
-    legend.text = element_text(size = 7),
-    legend.key.size = unit(.3, "cm")
-  )
-```
-
-```{r medcvfivefig}
-cv_medium_list[[2]] %>% 
-  gg_loss(
-    y_medium_test, 
-    mean_line = TRUE, 
-    line_param = list(size = .3), 
-    mean_param = list(alpha = .5, size = .3), 
-    viridis = TRUE, 
-    show.legend = FALSE
-  ) +
-  theme_minimal() +
-  theme(
-    axis.text.x = element_text(angle = -30, vjust = -1),
-    legend.title = element_text(size = 8),
-    legend.text = element_text(size = 7),
-    legend.key.size = unit(.3, "cm")
-  )
-```
-
-```{r medcvtwentyfig}
-cv_medium_list[[3]] %>% 
-  gg_loss(
-    y_medium_test, 
-    mean_line = TRUE, 
-    line_param = list(size = .3), 
-    mean_param = list(alpha = .5, size = .3), 
-    viridis = TRUE, 
-    show.legend = FALSE
-  ) +
-  theme_minimal() +
-  theme(
-    axis.text.x = element_text(angle = -30, vjust = -1),
-    legend.title = element_text(size = 8),
-    legend.text = element_text(size = 7),
-    legend.key.size = unit(.3, "cm")
-  )
-```
-
-Tables
-
-1-step:
-
-```{r medcvonetab, comment=NULL, echo=FALSE}
-cv_medium_list[[1]] %>% 
-  get_losstex(y_medium_test, "MEDIUM Simulation - 1-step ahead Rolling Window Forecasting Loss", label = "medone") %>% 
-  writeLines()
-```
-
-5-step:
-
-```{r medcvfivetab, comment=NULL, echo=FALSE}
-cv_medium_list[[2]] %>% 
-  get_losstex(y_medium_test, "MEDIUM Simulation - 5-step ahead Rolling Window Forecasting Loss", label = "medfive") %>% 
-  writeLines()
-```
-
-20-step:
-
-```{r medcvtwentytab, comment=NULL, echo=FALSE}
-cv_medium_list[[3]] %>% 
-  get_losstex(y_medium_test, "MEDIUM Simulation - 20-step ahead Rolling Window Forecasting Loss", label = "medtwenty") %>% 
-  writeLines()
-```
-
-### LARGE
-
-Plots
-
-```{r largecvonefig}
-cv_large_list[[1]] %>% 
-  gg_loss(
-    y_large_test, 
-    mean_line = TRUE, 
-    line_param = list(size = .3),
-    mean_param = list(alpha = .5, size = .3), 
-    viridis = TRUE, 
-    show.legend = FALSE
-  ) +
-  theme_minimal() +
-  theme(
-    axis.text.x = element_text(angle = -30, vjust = -1),
-    legend.title = element_text(size = 8),
-    legend.text = element_text(size = 7),
-    legend.key.size = unit(.3, "cm")
-  )
-```
-
-```{r largecvfivefig}
-cv_large_list[[2]] %>% 
-  gg_loss(
-    y_large_test, 
-    mean_line = TRUE, 
-    line_param = list(size = .3),
-    mean_param = list(alpha = .5, size = .3), 
-    viridis = TRUE, 
-    show.legend = FALSE
-  ) +
-  theme_minimal() +
-  theme(
-    axis.text.x = element_text(angle = -30, vjust = -1),
-    legend.title = element_text(size = 8),
-    legend.text = element_text(size = 7),
-    legend.key.size = unit(.3, "cm")
-  )
-```
-
-```{r largecvtwentyfig}
-cv_large_list[[3]] %>% 
-  gg_loss(
-    y_large_test, 
-    mean_line = TRUE, 
-    line_param = list(size = .3),
-    mean_param = list(alpha = .5, size = .3), 
-    viridis = TRUE, 
-    show.legend = FALSE
-  ) +
-  theme_minimal() +
-  theme(
-    axis.text.x = element_text(angle = -30, vjust = -1),
-    legend.title = element_text(size = 8),
-    legend.text = element_text(size = 7),
-    legend.key.size = unit(.3, "cm")
-  )
-```
-
-Tables
-
-1-step:
-
-```{r largecvonetab, comment=NULL, echo=FALSE}
-cv_large_list[[1]] %>% 
-  get_losstex(y_large_test, "LARGE Simulation - 1-step ahead Rolling Window Forecasting Loss", label = "largeone") %>% 
-  writeLines()
-```
-
-5-step:
-
-```{r largecvfivetab, comment=NULL, echo=FALSE}
-cv_large_list[[2]] %>% 
-  get_losstex(y_large_test, "LARGE Simulation - 5-step ahead Rolling Window Forecasting Loss", label = "largefive") %>% 
-  writeLines()
-```
-
-20-step:
-
-```{r largecvtwentytab, comment=NULL, echo=FALSE}
-cv_large_list[[3]] %>% 
-  get_losstex(y_large_test, "LARGE Simulation - 20-step ahead Rolling Window Forecasting Loss", label = "largetwenty") %>% 
-  writeLines()
-```
-
-### Average
-
-SMALL
-
-1-step:
-
-```{r smallcvonemeantab, comment=NULL, echo=FALSE}
-cv_small_list[[1]] %>% 
-  kable_lossmean(y_small_test, kable = TRUE, caption = "SMALL Simulation - 1-step ahead Rolling Window Forecasting Average Loss", label = "smallonemean") %>% 
-  writeLines()
-```
-
-5-step:
-
-```{r smallcvfivemeantab, comment=NULL, echo=FALSE}
-cv_small_list[[2]] %>% 
-  kable_lossmean(y_small_test, kable = TRUE, caption = "SMALL Simulation - 5-step ahead Rolling Window Forecasting Average Loss", label = "smallfivemean") %>% 
-  writeLines()
-```
-
-20-step:
-
-```{r smallcvtwentymeantab, comment=NULL, echo=FALSE}
-cv_small_list[[3]] %>% 
-  kable_lossmean(y_small_test, kable = TRUE, caption = "SMALL Simulation - 20-step ahead Rolling Window Forecasting Average Loss", label = "smalltwentyemean") %>% 
-  writeLines()
-```
-
-MEDIUM
-
-1-step:
-
-```{r medcvonemeantab, comment=NULL, echo=FALSE}
-cv_medium_list[[1]] %>% 
-  kable_lossmean(y_medium_test, kable = TRUE, caption = "MEDIUM Simulation - 1-step ahead Rolling Window Forecasting Average Loss", label = "medonemean") %>% 
-  writeLines()
-```
-
-5-step:
-
-```{r medcvfivemeantab, comment=NULL, echo=FALSE}
-cv_medium_list[[2]] %>% 
-  kable_lossmean(y_medium_test, kable = TRUE, caption = "MEDIUM Simulation - 5-step ahead Rolling Window Forecasting Average Loss", label = "medfivemean") %>% 
-  writeLines()
-```
-
-20-step:
-
-```{r medcvtwentymeantab, comment=NULL, echo=FALSE}
-cv_medium_list[[3]] %>% 
-  kable_lossmean(y_medium_test, kable = TRUE, caption = "MEDIUM Simulation - 20-step ahead Rolling Window Forecasting Average Loss", label = "medtwentyemean") %>% 
-  writeLines()
-```
-
-LARGE
-
-1-step:
-
-```{r largecvonemeantab, comment=NULL, echo=FALSE}
-cv_large_list[[1]] %>% 
-  kable_lossmean(y_large_test, kable = TRUE, caption = "LARGE Simulation - 1-step ahead Rolling Window Forecasting Average Loss", label = "largeonemean") %>% 
-  writeLines()
-```
-
-5-step:
-
-```{r largecvfivemeantab, comment=NULL, echo=FALSE}
-cv_large_list[[2]] %>% 
-  kable_lossmean(y_large_test, kable = TRUE, caption = "LARGE Simulation - 5-step ahead Rolling Window Forecasting Average Loss", label = "largefivemean") %>% 
-  writeLines()
-```
-
-20-step:
-
-```{r largecvtwentymeantab, comment=NULL, echo=FALSE}
-cv_large_list[[3]] %>% 
-  kable_lossmean(y_large_test, kable = TRUE, caption = "LARGE Simulation - 20-step ahead Rolling Window Forecasting Average Loss", label = "largetwentyemean") %>% 
-  writeLines()
-```
-
 
 # Coefficients
 
@@ -980,7 +692,7 @@ lapply(
       function(y) {
         file_name <- 
           paste0(
-            "../output/dgp03-figs/small-coef/", 
+            "../output/dgp01-figs/small-coef/", 
             str_replace_all(process_name, pattern = "\\_", replacement = "\\-"), 
             "-", 
             str_remove_all(y, pattern = "\\_"),
@@ -1025,7 +737,7 @@ lapply(
       function(y) {
         file_name <- 
           paste0(
-            "../output/dgp03-figs/med-coef/", 
+            "../output/dgp01-figs/med-coef/", 
             str_replace_all(process_name, pattern = "\\_", replacement = "\\-"), 
             "-", 
             str_remove_all(y, pattern = "\\_"),
@@ -1070,7 +782,7 @@ lapply(
       function(y) {
         file_name <- 
           paste0(
-            "../output/dgp03-figs/large-coef/", 
+            "../output/dgp01-figs/large-coef/", 
             str_replace_all(process_name, pattern = "\\_", replacement = "\\-"), 
             "-", 
             str_remove_all(y, pattern = "\\_"),
@@ -1082,5 +794,3 @@ lapply(
   }
 )
 ```
-
-

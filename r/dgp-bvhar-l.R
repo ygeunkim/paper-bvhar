@@ -22,8 +22,8 @@ bvhar_small_spec <- set_weight_bvhar(
   sigma = runif(n_small, min = .9, max = 1.2),
   lambda = .1,
   daily = runif(n_small, min = 0, max = .5),
-  weekly = runif(n_small, min = .5 / 5, max = 1 / 5),
-  monthly = runif(n_small, min = 1 / 22, max = 1.5 / 22)
+  weekly = runif(n_small, min = 0, max = .5),
+  monthly = runif(n_small, min = 0, max = .5)
 )
 # generate SMALL coef--------------------
 set.seed(1)
@@ -47,8 +47,8 @@ bvhar_medium_spec <- set_weight_bvhar(
   sigma = runif(n_medium, min = .9, max = 1.2),
   lambda = 5e-2,
   daily = runif(n_medium, min = 0, max = .5),
-  weekly = runif(n_medium, min = .5 / 5, max = 1 / 5),
-  monthly = runif(n_medium, min = 1 / 22, max = 1.5 / 22)
+  weekly = runif(n_medium, min = 0, max = .5),
+  monthly = runif(n_medium, min = 0, max = .5)
 )
 # generate MEDIUM coef----------------
 set.seed(1)
@@ -72,8 +72,8 @@ bvhar_large_spec <- set_weight_bvhar(
   sigma = runif(n_large, min = .9, max = 1.2),
   lambda = 1e-2,
   daily = runif(n_large, min = 0, max = .5),
-  weekly = runif(n_large, min = .5 / 5, max = 1 / 5),
-  monthly = runif(n_large, min = 1 / 22, max = 1.5 / 22)
+  weekly = runif(n_large, min = 0, max = .5),
+  monthly = runif(n_large, min = 0, max = .5)
 )
 # generate LARGE coef-----------------
 set.seed(1)
