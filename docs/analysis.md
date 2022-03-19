@@ -1,7 +1,7 @@
 Empirical Analysis
 ================
 Young Geun Kim
-12 Mar, 2022
+16 Mar, 2022
 
 -   [Data](#data)
     -   [Split](#split)
@@ -30,6 +30,8 @@ library(bvhar)
 cl <- parallel::makeCluster(8, type = "FORK")
 # set seed for reproducible result-----
 set.seed(1)
+# width of figure when save------------
+fig_width <- 20
 ```
 
 ``` r
@@ -95,6 +97,20 @@ etf_raw$data_long %>%
 ```
 
 <img src="../output/figs/analysis-dataplot-1.png" width="70%" style="display: block; margin: auto;" />
+
+``` r
+ggsave(
+  "../output/figs/analysis-dataplot.pdf", 
+  last_plot(),
+  device = "pdf",
+  scale = .618,
+  width = fig_width, 
+  units = "in",
+  dpi = 1500,
+  limitsize = FALSE
+)
+#> Saving 12.4 x 2.29 in image
+```
 
 ``` r
 etf_split <- divide_ts(etf_vix, h)
@@ -504,6 +520,20 @@ roll_list[[1]] %>%
 
 <img src="../output/figs/analysis-piecewise-error-1.png" width="70%" style="display: block; margin: auto;" />
 
+``` r
+ggsave(
+  "../output/figs/analysis-piecewise-error.pdf", 
+  last_plot(),
+  device = "pdf",
+  scale = .618,
+  width = fig_width, 
+  units = "in",
+  dpi = 1500,
+  limitsize = FALSE
+)
+#> Saving 12.4 x 2.29 in image
+```
+
 # Intervals
 
 ``` r
@@ -547,3 +577,17 @@ autoplot(pred_var, x_cut = 860, ci_alpha = .8, type = "wrap") +
 ```
 
 <img src="../output/figs/analysis-credplot-1.png" width="70%" style="display: block; margin: auto;" />
+
+``` r
+ggsave(
+  "../output/figs/analysis-credplot.pdf", 
+  last_plot(),
+  device = "pdf",
+  scale = .618,
+  width = fig_width, 
+  units = "in",
+  dpi = 1500,
+  limitsize = FALSE
+)
+#> Saving 12.4 x 2.29 in image
+```

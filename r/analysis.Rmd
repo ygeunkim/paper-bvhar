@@ -57,6 +57,8 @@ library(bvhar)
 cl <- parallel::makeCluster(8, type = "FORK")
 # set seed for reproducible result-----
 set.seed(1)
+# width of figure when save------------
+fig_width <- 20
 ```
 
 ```{r fns, message=FALSE}
@@ -94,7 +96,8 @@ etf_raw <- readRDS(etf_data)
 
 ```{r dataplot}
 te_date <- tail(etf_raw$data_wide$date, h)[1]
-etf_raw$data_long %>% 
+data_plt <- 
+  etf_raw$data_long %>% 
   mutate(
     train = date < te_date,
     xmin = min(date[train == FALSE]),
@@ -118,8 +121,21 @@ etf_raw$data_long %>%
     x = element_blank(),
     y = "Volatility index"
   )
+data_plt
 ```
 
+```{r savedataplot}
+ggsave(
+  filename = "../output/figs/analysis-dataplot.pdf", 
+  plot = data_plt,
+  device = "pdf",
+  scale = .618,
+  width = fig_width, 
+  units = "in",
+  dpi = 1500,
+  limitsize = FALSE
+)
+```
 
 ```{r splittest}
 etf_split <- divide_ts(etf_vix, h)
@@ -384,7 +400,8 @@ get_rmfe_tr(
 ## Piecewise Errors
 
 ```{r piecewise-error}
-roll_list[[1]] %>% 
+err_plt <- 
+  roll_list[[1]] %>% 
   gg_loss(
     etf_test, 
     mean_line = TRUE, 
@@ -398,6 +415,20 @@ roll_list[[1]] %>%
     legend.position = "top"
   ) +
   scale_colour_viridis_d(labels = c("BVAR", "BVHAR-S", "BVHAR-L", "VAR", "VHAR"))
+err_plt
+```
+
+```{r savepiecewise-error}
+ggsave(
+  filename = "../output/figs/analysis-piecewise-error.pdf", 
+  plot = err_plt,
+  device = "pdf",
+  scale = .618,
+  width = fig_width, 
+  units = "in",
+  dpi = 1500,
+  limitsize = FALSE
+)
 ```
 
 
@@ -428,7 +459,8 @@ pred_bvhar_vhar <- predict(fit_bvhar_vhar, h)
 <!-- ``` -->
 
 ```{r credplot}
-autoplot(pred_var, x_cut = 860, ci_alpha = .8, type = "wrap") +
+interval_plt <- 
+  autoplot(pred_var, x_cut = 860, ci_alpha = .8, type = "wrap") +
   autolayer(pred_vhar, ci_alpha = .7) +
   autolayer(pred_bvar, ci_alpha = .6) +
   autolayer(pred_bvhar, ci_alpha = .5) +
@@ -441,8 +473,21 @@ autoplot(pred_var, x_cut = 860, ci_alpha = .8, type = "wrap") +
     legend.position = "top"
   ) +
   scale_fill_viridis_d(labels = c("BVAR", "BVHAR-S", "BVHAR-L", "VAR", "VHAR"))
+interval_plt
 ```
 
+```{r savecredplot}
+ggsave(
+  filename = "../output/figs/analysis-credplot.pdf", 
+  plot = interval_plt,
+  device = "pdf",
+  scale = .618,
+  width = fig_width, 
+  units = "in",
+  dpi = 1500,
+  limitsize = FALSE
+)
+```
 
 
 

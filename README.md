@@ -47,6 +47,9 @@ This is a repository for researching Bayesian VHAR.
 
 ### Empirical analysis
 
+-   [VIX](https://github.com/ygeunkim/paper-bvhar/blob/master/docs/analysis.md)
+    CBOE ETF VIX
+
 ## Code of Conduct
 
 Please note that the paper-bvhar project is released with a [Contributor
