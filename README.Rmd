@@ -34,7 +34,7 @@ This is a repository for researching Bayesian VHAR.
 ### Files
 
 - [R/](https://github.com/ygeunkim/paper-bvhar/tree/master/r) Codes and R markdown
-- [data/](https://github.com/ygeunkim/paper-bvhar/tree/master/data) Simulated and real datasets used in this research
+- [data/](https://github.com/ygeunkim/paper-bvhar/tree/master/data) Datasets used in this research
 - [docs/](https://github.com/ygeunkim/paper-bvhar/tree/master/docs) Rendered documents
 
 ### Tools
@@ -48,19 +48,9 @@ This is a repository for researching Bayesian VHAR.
 - [kableExtra](https://haozhu233.github.io/kableExtra/)
 - [ygeunkim/bvhar](https://github.com/ygeunkim/bvhar)
 
-## Results
-
-### Simulation
-
-- [DGP1](https://github.com/ygeunkim/paper-bvhar/blob/master/docs/model-dgp01.md) BVAR(5) with WN setting
-- [DGP2](https://github.com/ygeunkim/paper-bvhar/blob/master/docs/model-dgp02.md) BVAR(5) with another setting
-- [DGP3](https://github.com/ygeunkim/paper-bvhar/blob/master/docs/model-dgp03.md) BVHAR-S
-- [DGP4](https://github.com/ygeunkim/paper-bvhar/blob/master/docs/model-dgp04.md) BVHAR-L
-
-### Empirical analysis
+## Results: Empirical analysis
 
 - [VIX](https://github.com/ygeunkim/paper-bvhar/blob/master/docs/analysis.md) CBOE ETF VIX
-
 
 ## Code of Conduct
 
