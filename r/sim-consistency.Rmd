@@ -1,0 +1,79 @@
+---
+title: "Simulation for Consistency"
+author: "Young Geun Kim"
+date: "`r format(Sys.time(), '%d %b, %Y')`"
+output: 
+  github_document:
+    toc: true
+knit:
+  (function(inputFile, encoding) {
+    rmarkdown::render(
+      input = inputFile,
+      output_dir = "../docs", 
+      encoding = encoding
+    )
+  })
+---
+
+```{r simdata}
+sim_data <- "../data/processed/dgp_bvhar_consistency.rds"
+```
+
+```{r cacheset, include=FALSE, cache=TRUE, cache.extra = tools::md5sum(sim_data)}
+knitr::opts_chunk$set(cache.rebuild = TRUE)
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  comment = "#>",
+  collapse = TRUE,
+  out.width = "70%",
+  fig.path = "../output/figs/sim-consistency-",
+  fig.align = "center",
+  fig.width = 6,
+  fig.asp = .618
+)
+knitr::knit_hooks$set(
+  document = function(x) {
+    sub("\\usepackage[]{color}", "\\usepackage{xcolor}", x, fixed = TRUE)
+  }
+)
+options(digits = 3)
+# options(scipen = -2) # scientific notation digits
+options(knitr.kable.NA = "")
+options(kableExtra.latex.load_packages = FALSE)
+is_html <- knitr::opts_knit$get("rmarkdown.pandoc.to") == "html"
+is_latex <- knitr::opts_knit$get("rmarkdown.pandoc.to") == "latex"
+kable_format <- ifelse(!is_html, "latex", "html")
+kable_format <- ifelse(length(kable_format) == 0, "html", kable_format) # for excecutable
+```
+
+```{r pkgs, message=FALSE}
+# tidyverse----------------------------
+library(tidyverse)
+# BVHAR custom package-----------------
+library(bvhar)
+# Set the number of processor cores----
+# cl <- parallel::makeCluster(8, type = "FORK")
+# set seed for reproducible result-----
+set.seed(1)
+# width of figure when save------------
+fig_width <- 20
+```
+
+```{r fns, message=FALSE}
+# result table-------------------------
+source("report-fns.R")
+# hyperparameter setting table---------
+source("param-fns.R")
+# Simulated data-----------------------
+sim_raw <- readRDS(sim_data)
+```
+
+
+
+
+
+
+
+
