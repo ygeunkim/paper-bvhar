@@ -1,54 +1,31 @@
----
-title: "Simulation for Consistency"
-author: "Young Geun Kim"
-date: "`r format(Sys.time(), '%d %b, %Y')`"
-output: 
-  github_document:
-    toc: true
-knit:
-  (function(inputFile, encoding) {
-    rmarkdown::render(
-      input = inputFile,
-      output_dir = "../docs", 
-      encoding = encoding
-    )
-  })
----
+Simulation for Consistency
+================
+Young Geun Kim
+07 Jun, 2022
 
-```{r simdata}
+-   [Fit Models](#fit-models)
+    -   [VHAR](#vhar)
+        -   [SMALL](#small)
+        -   [MEDIUM](#medium)
+        -   [LARGE](#large)
+    -   [BVHAR-S](#bvhar-s)
+        -   [SMALL](#small-1)
+        -   [MEDIUM](#medium-1)
+        -   [LARGE](#large-1)
+    -   [BVHAR-L](#bvhar-l)
+        -   [SMALL](#small-2)
+        -   [MEDIUM](#medium-2)
+        -   [LARGE](#large-2)
+-   [Compare](#compare)
+    -   [VHAR](#vhar-1)
+    -   [BVHAR](#bvhar)
+    -   [Result](#result)
+
+``` r
 sim_data <- "../data/processed/dgp_bvhar_consistency.rds"
 ```
 
-```{r cacheset, include=FALSE, cache=TRUE, cache.extra = tools::md5sum(sim_data)}
-knitr::opts_chunk$set(cache.rebuild = TRUE)
-```
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(
-  comment = "#>",
-  collapse = TRUE,
-  out.width = "70%",
-  fig.path = "../output/figs/sim-consistency-",
-  fig.align = "center",
-  fig.width = 6,
-  fig.asp = .618
-)
-knitr::knit_hooks$set(
-  document = function(x) {
-    sub("\\usepackage[]{color}", "\\usepackage{xcolor}", x, fixed = TRUE)
-  }
-)
-options(digits = 3)
-# options(scipen = -2) # scientific notation digits
-options(knitr.kable.NA = "")
-options(kableExtra.latex.load_packages = FALSE)
-is_html <- knitr::opts_knit$get("rmarkdown.pandoc.to") == "html"
-is_latex <- knitr::opts_knit$get("rmarkdown.pandoc.to") == "latex"
-kable_format <- ifelse(!is_html, "latex", "html")
-kable_format <- ifelse(length(kable_format) == 0, "html", kable_format) # for excecutable
-```
-
-```{r pkgs, message=FALSE}
+``` r
 # tidyverse----------------------------
 library(tidyverse)
 # BVHAR custom package-----------------
@@ -64,7 +41,7 @@ set.seed(1)
 fig_width <- 20
 ```
 
-```{r fns, message=FALSE}
+``` r
 # result table-------------------------
 source("report-fns.R")
 # hyperparameter setting table---------
@@ -75,7 +52,7 @@ sim_consistency <- readRDS(sim_data)
 
 # Fit Models
 
-```{r datalists}
+``` r
 y_small <- sim_consistency$y_small_list
 y_medium <- sim_consistency$y_medium_list
 y_large <- sim_consistency$y_large_list
@@ -85,7 +62,7 @@ y_large <- sim_consistency$y_large_list
 
 ### SMALL
 
-```{r smallvharfit}
+``` r
 fit_vhar_small <- parallel::mclapply(
   1:3,
   function(id) {
@@ -101,7 +78,7 @@ fit_vhar_small <- parallel::mclapply(
 
 ### MEDIUM
 
-```{r medvharfit}
+``` r
 fit_vhar_medium <- parallel::mclapply(
   1:3,
   function(id) {
@@ -117,7 +94,7 @@ fit_vhar_medium <- parallel::mclapply(
 
 ### LARGE
 
-```{r largevharfit}
+``` r
 fit_vhar_large <- parallel::mclapply(
   1:3,
   function(id) {
@@ -135,7 +112,7 @@ fit_vhar_large <- parallel::mclapply(
 
 ### SMALL
 
-```{r smallbvharsfit}
+``` r
 fit_bvhars_small <- parallel::mclapply(
   1:3,
   function(id) {
@@ -151,7 +128,7 @@ fit_bvhars_small <- parallel::mclapply(
 
 ### MEDIUM
 
-```{r medbvharsfit}
+``` r
 fit_bvhars_medium <- parallel::mclapply(
   1:3,
   function(id) {
@@ -167,7 +144,7 @@ fit_bvhars_medium <- parallel::mclapply(
 
 ### LARGE
 
-```{r largebvharsfit}
+``` r
 fit_bvhars_large <- parallel::mclapply(
   1:3,
   function(id) {
@@ -181,10 +158,9 @@ fit_bvhars_large <- parallel::mclapply(
 )
 ```
 
-
 ## BVHAR-L
 
-```{r}
+``` r
 n_small <- ncol(sim_consistency$y_small[[1]])
 n_medium <- ncol(sim_consistency$y_medium[[1]])
 n_large <- ncol(sim_consistency$y_large[[1]])
@@ -192,7 +168,7 @@ n_large <- ncol(sim_consistency$y_large[[1]])
 
 ### SMALL
 
-```{r smallbvharlspec}
+``` r
 bvharl_small_spec <- set_weight_bvhar(
   sigma = sim_consistency$small_spec$sigma,
   lambda = sim_consistency$small_spec$lambda,
@@ -202,7 +178,7 @@ bvharl_small_spec <- set_weight_bvhar(
 )
 ```
 
-```{r smallbvharlfit}
+``` r
 fit_bvharl_small <- parallel::mclapply(
   1:3,
   function(id) {
@@ -218,7 +194,7 @@ fit_bvharl_small <- parallel::mclapply(
 
 ### MEDIUM
 
-```{r medbvharlspec}
+``` r
 bvharl_medium_spec <- set_weight_bvhar(
   sigma = sim_consistency$medium_spec$sigma,
   lambda = sim_consistency$medium_spec$lambda,
@@ -228,7 +204,7 @@ bvharl_medium_spec <- set_weight_bvhar(
 )
 ```
 
-```{r medbvharlfit}
+``` r
 fit_bvharl_medium <- parallel::mclapply(
   1:3,
   function(id) {
@@ -244,7 +220,7 @@ fit_bvharl_medium <- parallel::mclapply(
 
 ### LARGE
 
-```{r largebvharlspec}
+``` r
 bvharl_large_spec <- set_weight_bvhar(
   sigma = sim_consistency$large_spec$sigma,
   lambda = sim_consistency$large_spec$lambda,
@@ -254,7 +230,7 @@ bvharl_large_spec <- set_weight_bvhar(
 )
 ```
 
-```{r largebvharlfit}
+``` r
 fit_bvharl_large <- parallel::mclapply(
   1:3,
   function(id) {
@@ -268,12 +244,11 @@ fit_bvharl_large <- parallel::mclapply(
 )
 ```
 
-
 # Compare
 
 ## VHAR
 
-```{r vharnorm}
+``` r
 small_vhar_norm <- parallel::pvec(
   1:3,
   function(id) {
@@ -301,7 +276,7 @@ large_vhar_norm <- parallel::pvec(
 
 ## BVHAR
 
-```{r bvharnorm}
+``` r
 small_s_norm <- parallel::pvec(
   1:3,
   function(id) {
@@ -353,7 +328,7 @@ large_l_norm <- parallel::pvec(
 
 ## Result
 
-```{r errortable}
+``` r
 errtibble <- tibble(
   size = gl(n = 3, k = 3, labels = c("SMALL", "MEDIUM", "LARGE")),
   sample_size = c(
@@ -367,7 +342,7 @@ errtibble <- tibble(
 )
 ```
 
-```{r textable, comment=NULL}
+``` r
 errtibble %>% 
   mutate_at(
     vars(vhar, bvhar_s, bvhar_l),
@@ -375,7 +350,7 @@ errtibble %>%
       paste0(
         "\\num{",
         format(., nsmall = 3, scientific = -2) %>% 
-          str_remove(pattern = "(?<![1-9])0(?=\\.)"), # .xxx
+          str_remove(pattern = "0(?=\\.)"), # .xxx
         "}"
       ),
       format = "latex",
@@ -402,6 +377,32 @@ errtibble %>%
   ) %>% 
   collapse_rows(1, latex_hline = "major") %>% 
   writeLines()
+\begin{table}
+
+\caption{\label{tab:simconsistency}Relative Estimation Error}
+\centering
+\begin{tabular}[t]{ccccc}
+\toprule
+$k$ & $T = n - 22$ & VHAR & BVHAR-S & BVHAR-L\\
+\midrule
+ & \multicolumn{1}{c|}{40} & \multicolumn{1}{c}{\num{ 435.022}} & \multicolumn{1}{c}{\num{.966}} & \multicolumn{1}{c}{\num{.966}}\\
+
+ & \multicolumn{1}{c|}{80} & \multicolumn{1}{c}{\num{  56.599}} & \multicolumn{1}{c}{\num{.879}} & \multicolumn{1}{c}{\num{.879}}\\
+
+\multirow{-3}{*}{\centering\arraybackslash SMALL} & \multicolumn{1}{c|}{120} & \multicolumn{1}{c}{\num{  4.437}} & \multicolumn{1}{c}{\num{.795}} & \multicolumn{1}{c}{\num{.795}}\\
+\cmidrule{1-5}
+ & \multicolumn{1}{c|}{200} & \multicolumn{1}{c}{\num{ 187.085}} & \multicolumn{1}{c}{\num{.869}} & \multicolumn{1}{c}{\num{.869}}\\
+
+ & \multicolumn{1}{c|}{400} & \multicolumn{1}{c}{\num{  6.274}} & \multicolumn{1}{c}{\num{.852}} & \multicolumn{1}{c}{\num{.852}}\\
+
+\multirow{-3}{*}{\centering\arraybackslash MEDIUM} & \multicolumn{1}{c|}{600} & \multicolumn{1}{c}{\num{  39.176}} & \multicolumn{1}{c}{\num{.892}} & \multicolumn{1}{c}{\num{.892}}\\
+\cmidrule{1-5}
+ & \multicolumn{1}{c|}{400} & \multicolumn{1}{c}{\num{1986.343}} & \multicolumn{1}{c}{\num{.981}} & \multicolumn{1}{c}{\num{.981}}\\
+
+ & \multicolumn{1}{c|}{800} & \multicolumn{1}{c}{\num{ 782.026}} & \multicolumn{1}{c}{\num{.975}} & \multicolumn{1}{c}{\num{.975}}\\
+
+\multirow{-3}{*}{\centering\arraybackslash LARGE} & \multicolumn{1}{c|}{1200} & \multicolumn{1}{c}{\num{ 475.817}} & \multicolumn{1}{c}{\num{.967}} & \multicolumn{1}{c}{\num{.967}}\\
+\bottomrule
+\end{tabular}
+\end{table}
 ```
-
-

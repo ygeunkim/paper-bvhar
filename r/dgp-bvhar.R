@@ -6,97 +6,96 @@ if (requireNamespace("bvhar", quietly = TRUE)) {
 }
 set.seed(1)
 # Minnesota prior-------------------------------------
-# SMALL: 5
-# MEDIUM: 10
-# LARGE: 50
-# delta: zero prior mean
+# SMALL: 10
+# MEDIUM: 50
+# LARGE: 100
+# dimension vary with n (k = o(n))
+# BUT same k / n
+# small sample size: 40 (burn-in = 20), 80 (burn-in = 30), 120 (burn-in = 50)
+# medium sample size: 200 (burn-in = 100), 400 (burn-in = 200), 600 (burn-in = 300)
+# large sample size: 400 (burn-in = 200), 800 (burn-in = 300), 1200 (burn-in = 500)
+# delta: zero prior mean => zero vector
 # sigma
 # lambda
-#-----------------------------------------------------
-num_gen <- 1000
-num_burin <- 300
+generate_bvharlist <- function(num_dim, num, burn, coef_mat, sig) {
+  lapply(
+    1:3,
+    function(id) {
+      sim_vhar(
+        num_sim = num[id],
+        num_burn = burn[id],
+        vhar_coef = coef_mat,
+        week = 5,
+        month = 22,
+        sig_error = sig,
+        init = matrix(0L, nrow = 22L, ncol = num_dim)
+      ) %>% 
+        as.data.frame() %>% 
+        setNames(paste("asset", sprintf(1:num_dim, fmt = "%02d"), sep = "_"))
+    }
+  )
+}
 # SMALL-----------------------------------------------
-n_small <- 5
+n_small <- 10
 bvhar_small_spec <- set_bvhar(
   sigma = rep(1, n_small),
-  lambda = .1,
-  delta = rep(0, n_small)
+  lambda = .2,
+  delta = rep(.1, n_small)
 )
 # generate SMALL coef--------------------
 set.seed(1)
-bvhar_small_coef <- sim_mnvhar_coef(bvhar_small_spec, full = FALSE)
+bvhar_small_coef <- sim_mnvhar_coef(bvhar_small_spec, full = TRUE)
 # SMALL dataset--------------------------
+num_small <- c(40, 80, 120)
+num_small_burn <- c(20, 30, 50)
 set.seed(1)
-bvhar_small <- sim_vhar(
-  num_sim = num_gen,
-  num_burn = num_burin,
-  vhar_coef = bvhar_small_coef$coefficients,
-  week = 5,
-  month = 22,
-  sig_error = bvhar_small_coef$covmat,
-  init = matrix(0L, nrow = 22L, ncol = n_small)
-) %>% 
-  as.data.frame()
-colnames(bvhar_small) <- paste("asset", sprintf(1:n_small, fmt = "%02d"), sep = "_")
+bvhar_small <- generate_bvharlist(n_small, num_small, num_small_burn, bvhar_small_coef$coefficients, bvhar_small_coef$covmat)
 # MEDIUM----------------------------------------------
-n_medium <- 10
+n_medium <- 50
 bvhar_medium_spec <- set_bvhar(
   sigma = rep(1, n_medium),
-  lambda = 5e-2,
-  delta = rep(0, n_medium)
+  lambda = .1,
+  delta = rep(.1, n_medium)
 )
 # generate MEDIUM coef----------------
 set.seed(1)
-bvhar_medium_coef <- sim_mnvhar_coef(bvhar_medium_spec, full = FALSE)
+bvhar_medium_coef <- sim_mnvhar_coef(bvhar_medium_spec, full = TRUE)
 # MEDIUM dataset----------------------
+num_medium <- c(200, 400, 600)
+num_medium_burn <- c(100, 200, 300)
 set.seed(1)
-bvhar_medium <- sim_vhar(
-  num_sim = num_gen,
-  num_burn = num_burin,
-  vhar_coef = bvhar_medium_coef$coefficients,
-  week = 5,
-  month = 22,
-  sig_error = bvhar_medium_coef$covmat,
-  init = matrix(0L, nrow = 22L, ncol = n_medium)
-) %>% 
-  as.data.frame()
-colnames(bvhar_medium) <- paste("asset", sprintf(1:n_medium, fmt = "%02d"), sep = "_")
+bvhar_medium <- generate_bvharlist(n_medium, num_medium, num_medium_burn, bvhar_medium_coef$coefficients, bvhar_medium_coef$covmat)
 # LARGE----------------------------------------------
-n_large <- 50
+n_large <- 100
 bvhar_large_spec <- set_bvhar(
   sigma = rep(1, n_large),
   lambda = 1e-2,
-  delta = rep(0, n_large)
+  delta = rep(.1, n_large)
 )
 # generate LARGE coef-----------------
 set.seed(1)
-bvhar_large_coef <- sim_mnvhar_coef(bvhar_large_spec, full = FALSE)
+bvhar_large_coef <- sim_mnvhar_coef(bvhar_large_spec, full = TRUE)
 # LARGE dataset------------------------
+num_large <- c(400, 800, 1200)
+num_large_burn <- c(200, 300, 500)
 set.seed(1)
-bvhar_large <- sim_vhar(
-  num_sim = num_gen,
-  num_burn = num_burin,
-  vhar_coef = bvhar_large_coef$coefficients,
-  week = 5,
-  month = 22,
-  sig_error = bvhar_large_coef$covmat,
-  init = matrix(0L, nrow = 22L, ncol = n_large)
-) %>% 
-  as.data.frame()
-colnames(bvhar_large) <- paste("asset", sprintf(1:n_large, fmt = "%02d"), sep = "_")
+bvhar_large <- generate_bvharlist(n_large, num_large, num_large_burn, bvhar_large_coef$coefficients, bvhar_large_coef$covmat)
 # Save----------------------------------------------
 # in data/processed/
 # File name: bvharsim_dgp_s.rds
 # saved objects: bvharspec and data
 #---------------------------------------------------
-dgp3 <- list(
+dgp_consistency <- list(
   small_spec = bvhar_small_spec,
-  y_small = bvhar_small,
+  small_coef = bvhar_small_coef,
+  y_small_list = bvhar_small,
   medium_spec = bvhar_medium_spec,
-  y_medium = bvhar_medium,
+  medium_coef = bvhar_medium_coef,
+  y_medium_list = bvhar_medium,
   large_spec = bvhar_large_spec,
-  y_large = bvhar_large
+  large_coef = bvhar_large_coef,
+  y_large_list = bvhar_large
 )
-saveRDS(dgp3, "data/processed/dgp_bvhar_consistency.rds")
+saveRDS(dgp_consistency, "data/processed/dgp_bvhar_consistency.rds")
 rm(list = ls())
 ls()

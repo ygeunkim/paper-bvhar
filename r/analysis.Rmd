@@ -100,6 +100,7 @@ data_plt <-
   etf_raw$data_long %>% 
   mutate(
     train = date < te_date,
+    series_id = str_remove_all(series_id, pattern = "CLS$"),
     xmin = min(date[train == FALSE]),
     xmax = max(date)
   ) %>% 
@@ -114,7 +115,7 @@ data_plt <-
   theme_minimal() +
   theme(
     panel.border = element_rect(fill = NA),
-    strip.text = element_text(size = 3),
+    # strip.text = element_text(size = 5),
     axis.text.y = element_text(size = 5)
   ) +
   labs(
@@ -138,10 +139,47 @@ ggsave(
 ```
 
 ```{r splittest}
-etf_split <- divide_ts(etf_vix, h)
+etf_split <- 
+  divide_ts(
+    etf_vix %>% rename_with(~str_remove_all(., pattern = "CLS$")), 
+    h
+  )
 etf_train <- etf_split$train
 etf_test <- etf_split$test
 ```
+
+## Long-range dependency
+
+SACF and SCCF:
+
+```{r ovxacf}
+ovx_acf <- 
+  etf_train %>% 
+  select(EVZ, OVX) %>% 
+  forecast::ggAcf(lag.max = 50) +
+  theme_minimal() +
+  theme(
+    panel.border = element_rect(fill = NA),
+    axis.text.y = element_text(size = 5),
+    axis.text.x = element_text(size = 5)
+  ) +
+  labs(title = element_blank())
+ovx_acf
+```
+
+```{r saveacfplot}
+ggsave(
+  filename = "../output/figs/analysis-lrdacf.pdf", 
+  plot = ovx_acf,
+  device = "pdf",
+  scale = .618,
+  width = fig_width, 
+  units = "in",
+  dpi = 1500,
+  limitsize = FALSE
+)
+```
+
 
 
 # Model

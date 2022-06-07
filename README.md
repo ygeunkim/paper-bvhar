@@ -28,11 +28,20 @@ This is a repository for researching Bayesian VHAR.
 
 ### Required R packages
 
--   [tidyverse](https://www.tidyverse.org)
--   [kableExtra](https://haozhu233.github.io/kableExtra/)
 -   [ygeunkim/bvhar](https://github.com/ygeunkim/bvhar)
+-   [tidyverse](https://www.tidyverse.org)
+-   [knitr](https://yihui.org/knitr/)
+-   [kableExtra](https://haozhu233.github.io/kableExtra/)
+-   [parallel](https://stat.ethz.ch/R-manual/R-devel/library/parallel/doc/parallel.pdf)
 
-## Results: Empirical analysis
+## Results
+
+### Simulation
+
+-   [Consistency](https://github.com/ygeunkim/paper-bvhar/blob/master/docs/sim-consistency.md)
+    Consistency Simulation
+
+### Empirical analysis
 
 -   [VIX](https://github.com/ygeunkim/paper-bvhar/blob/master/docs/analysis.md)
     CBOE ETF VIX
