@@ -27,7 +27,7 @@ generate_bvharlist <- function(num_dim, num, burn, coef_mat, sig) {
         vhar_coef = coef_mat,
         week = 5,
         month = 22,
-        sig_error = sig,
+        sig_error = diag(sig) %>% diag(),
         init = matrix(0L, nrow = 22L, ncol = num_dim)
       ) %>% 
         as.data.frame() %>% 
