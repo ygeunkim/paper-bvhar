@@ -1,23 +1,26 @@
 Simulation for Consistency
 ================
 Young Geun Kim
-07 Jun, 2022
+08 Jun, 2022
 
 -   [Fit Models](#fit-models)
-    -   [VHAR](#vhar)
+    -   [BVHAR-S](#bvhar-s)
         -   [SMALL](#small)
         -   [MEDIUM](#medium)
         -   [LARGE](#large)
-    -   [BVHAR-S](#bvhar-s)
+    -   [BVHAR-L](#bvhar-l)
         -   [SMALL](#small-1)
         -   [MEDIUM](#medium-1)
         -   [LARGE](#large-1)
-    -   [BVHAR-L](#bvhar-l)
+-   [Heatmap](#heatmap)
+    -   [BVHAR-S](#bvhar-s-1)
         -   [SMALL](#small-2)
         -   [MEDIUM](#medium-2)
         -   [LARGE](#large-2)
+    -   [BVHAR-L](#bvhar-l-1)
+        -   [SMALL](#small-3)
+    -   [Save](#save)
 -   [Compare](#compare)
-    -   [VHAR](#vhar-1)
     -   [BVHAR](#bvhar)
     -   [Result](#result)
 
@@ -32,6 +35,8 @@ library(tidyverse)
 library(bvhar)
 # Set the number of processor cores----
 # cl <- parallel::makeCluster(8, type = "FORK")
+# foreach to use bind------------------
+library(foreach)
 # latex table--------------------------
 library(knitr)
 library(kableExtra)
@@ -41,11 +46,9 @@ set.seed(1)
 fig_width <- 20
 ```
 
+Simulated data:
+
 ``` r
-# result table-------------------------
-source("report-fns.R")
-# hyperparameter setting table---------
-source("param-fns.R")
 # Simulated data-----------------------
 sim_consistency <- readRDS(sim_data)
 ```
@@ -58,55 +61,49 @@ y_medium <- sim_consistency$y_medium_list
 y_large <- sim_consistency$y_large_list
 ```
 
-## VHAR
-
-### SMALL
-
-``` r
-fit_vhar_small <- parallel::mclapply(
-  1:3,
-  function(id) {
-    vhar_lm(
-      y = y_small[[id]],
-      har = c(5, 22),
-      include_mean = FALSE
-    )
-  },
-  mc.cores = 3
-)
-```
-
-### MEDIUM
-
-``` r
-fit_vhar_medium <- parallel::mclapply(
-  1:3,
-  function(id) {
-    vhar_lm(
-      y = y_medium[[id]],
-      har = c(5, 22),
-      include_mean = FALSE
-    )
-  },
-  mc.cores = 3
-)
-```
-
-### LARGE
-
-``` r
-fit_vhar_large <- parallel::mclapply(
-  1:3,
-  function(id) {
-    vhar_lm(
-      y = y_large[[id]],
-      har = c(5, 22),
-      include_mean = FALSE
-    )
-  },
-  mc.cores = 6
-)
-```
+<!-- ## VHAR -->
+<!-- ### SMALL -->
+<!-- ```{r smallvharfit} -->
+<!-- fit_vhar_small <- parallel::mclapply( -->
+<!--   1:3, -->
+<!--   function(id) { -->
+<!--     vhar_lm( -->
+<!--       y = y_small[[id]], -->
+<!--       har = c(5, 22), -->
+<!--       include_mean = FALSE -->
+<!--     ) -->
+<!--   }, -->
+<!--   mc.cores = 3 -->
+<!-- ) -->
+<!-- ``` -->
+<!-- ### MEDIUM -->
+<!-- ```{r medvharfit} -->
+<!-- fit_vhar_medium <- parallel::mclapply( -->
+<!--   1:3, -->
+<!--   function(id) { -->
+<!--     vhar_lm( -->
+<!--       y = y_medium[[id]], -->
+<!--       har = c(5, 22), -->
+<!--       include_mean = FALSE -->
+<!--     ) -->
+<!--   }, -->
+<!--   mc.cores = 3 -->
+<!-- ) -->
+<!-- ``` -->
+<!-- ### LARGE -->
+<!-- ```{r largevharfit} -->
+<!-- fit_vhar_large <- parallel::mclapply( -->
+<!--   1:3, -->
+<!--   function(id) { -->
+<!--     vhar_lm( -->
+<!--       y = y_large[[id]], -->
+<!--       har = c(5, 22), -->
+<!--       include_mean = FALSE -->
+<!--     ) -->
+<!--   }, -->
+<!--   mc.cores = 6 -->
+<!-- ) -->
+<!-- ``` -->
 
 ## BVHAR-S
 
@@ -244,35 +241,376 @@ fit_bvharl_large <- parallel::mclapply(
 )
 ```
 
-# Compare
+# Heatmap
 
-## VHAR
+Bind two coefficients as data frame.
 
 ``` r
-small_vhar_norm <- parallel::pvec(
-  1:3,
-  function(id) {
-    norm(sim_consistency$small_coef$coefficients - fit_vhar_small[[id]]$coef, type = "2") / norm(sim_consistency$small_coef$coefficients, type = "2")
-  },
-  mc.cores = 3
-)
-#---------------------------------
-medium_vhar_norm <- parallel::pvec(
-  1:3,
-  function(id) {
-    norm(sim_consistency$medium_coef$coefficients - fit_vhar_medium[[id]]$coef, type = "2") / norm(sim_consistency$medium_coef$coefficients, type = "2")
-  },
-  mc.cores = 3
-)
-#-----------------------------------
-large_vhar_norm <- parallel::pvec(
-  1:3,
-  function(id) {
-    norm(sim_consistency$large_coef$coefficients - fit_vhar_large[[id]]$coef, type = "2") / norm(sim_consistency$large_coef$coefficients, type = "2")
-  },
-  mc.cores = 3
-)
+bind_harcoef <- function(true_coef, mod) {
+  true_coef_df <- as.data.frame(true_coef)
+  # assign row and column names--------
+  rownames(true_coef_df) <- rownames(mod[[1]]$coefficients)
+  colnames(true_coef_df) <- colnames(mod[[1]]$coefficients)
+  # make true coef as data frame-------
+  true_coef_df <- 
+    true_coef_df %>% 
+    rownames_to_column("var_names") %>% 
+    mutate(model = "true")
+  # each model coefficient-------------
+  mod_coef <- foreach(i = 1:3, .combine = rbind) %do% {
+    mod[[i]]$coefficients %>% 
+      as.data.frame() %>% 
+      rownames_to_column("var_names") %>% 
+      mutate(model = paste0("bvhar", i))
+  }
+  bind_rows(true_coef_df, mod_coef)
+}
 ```
+
+## BVHAR-S
+
+### SMALL
+
+``` r
+small_s_heatmap <- 
+  bind_harcoef(sim_consistency$small_coef$coefficients, fit_bvhars_small) %>% 
+  pivot_longer(-c(var_names, model), names_to = "series_id", values_to = "values") %>% 
+  mutate(
+    model = case_when(
+      model == "bvhar1" ~ "T = 40",
+      model == "bvhar2" ~ "T = 80",
+      model == "bvhar3" ~ "T = 120",
+      model == "true" ~ "True"
+    ),
+    model = factor(
+      model, 
+      levels = c("True", "T = 40", "T = 80", "T = 120"),
+      ordered = TRUE
+    )
+  ) %>% 
+  ggplot(aes(x = series_id, y = var_names)) +
+  geom_tile(aes(fill = values)) +
+  scale_fill_gradient2(
+    name = "Value",
+    low = "#132B43", 
+    mid = "#56B1F7", 
+    high = "#43132b"
+  ) +
+  theme_minimal() +
+  theme(
+    strip.text.x = element_text(size = 20),
+    axis.ticks = element_blank(),
+    axis.text = element_blank(),
+    axis.title = element_blank()
+  ) +
+  facet_wrap(model ~ .)
+small_s_heatmap
+```
+
+<img src="../output/figs/sim-consistency-smallsheatmap-1.png" width="70%" style="display: block; margin: auto;" />
+
+### MEDIUM
+
+``` r
+medium_s_heatmap <- 
+  bind_harcoef(sim_consistency$medium_coef$coefficients, fit_bvhars_medium) %>% 
+  pivot_longer(-c(var_names, model), names_to = "series_id", values_to = "values") %>% 
+  mutate(
+    model = case_when(
+      model == "bvhar1" ~ "T = 80",
+      model == "bvhar2" ~ "T = 400",
+      model == "bvhar3" ~ "T = 800",
+      model == "true" ~ "True"
+    ),
+    model = factor(
+      model, 
+      levels = c("True", "T = 80", "T = 400", "T = 800"),
+      ordered = TRUE
+    )
+  ) %>% 
+  ggplot(aes(x = series_id, y = var_names)) +
+  geom_tile(aes(fill = values)) +
+  scale_fill_gradient2(
+    name = "Value",
+    low = "#132B43", 
+    mid = "#56B1F7", 
+    high = "#43132b"
+  ) +
+  theme_minimal() +
+  theme(
+    strip.text.x = element_text(size = 20),
+    axis.ticks = element_blank(),
+    axis.text = element_blank(),
+    axis.title = element_blank()
+  ) +
+  facet_wrap(model ~ .)
+medium_s_heatmap
+```
+
+<img src="../output/figs/sim-consistency-medsheatmap-1.png" width="70%" style="display: block; margin: auto;" />
+
+### LARGE
+
+``` r
+large_s_heatmap <- 
+  bind_harcoef(sim_consistency$large_coef$coefficients, fit_bvhars_large) %>% 
+  pivot_longer(-c(var_names, model), names_to = "series_id", values_to = "values") %>% 
+  mutate(
+    model = case_when(
+      model == "bvhar1" ~ "T = 120",
+      model == "bvhar2" ~ "T = 600",
+      model == "bvhar3" ~ "T = 1200",
+      model == "true" ~ "True"
+    ),
+    model = factor(
+      model, 
+      levels = c("True", "T = 120", "T = 600", "T = 1200"),
+      ordered = TRUE
+    )
+  ) %>% 
+  ggplot(aes(x = series_id, y = var_names)) +
+  geom_tile(aes(fill = values)) +
+  scale_fill_gradient2(
+    name = "Value",
+    low = "#132B43", 
+    mid = "#56B1F7", 
+    high = "#43132b"
+  ) +
+  theme_minimal() +
+  theme(
+    strip.text.x = element_text(size = 20),
+    axis.ticks = element_blank(),
+    axis.text = element_blank(),
+    axis.title = element_blank()
+  ) +
+  facet_wrap(model ~ .)
+large_s_heatmap
+```
+
+<img src="../output/figs/sim-consistency-largesheatmap-1.png" width="70%" style="display: block; margin: auto;" />
+
+## BVHAR-L
+
+### SMALL
+
+``` r
+small_l_heatmap <- 
+  bind_harcoef(sim_consistency$small_coef$coefficients, fit_bvharl_small) %>% 
+  pivot_longer(-c(var_names, model), names_to = "series_id", values_to = "values") %>% 
+  mutate(
+    model = case_when(
+      model == "bvhar1" ~ "T = 40",
+      model == "bvhar2" ~ "T = 80",
+      model == "bvhar3" ~ "T = 120",
+      model == "true" ~ "True"
+    ),
+    model = factor(
+      model, 
+      levels = c("True", "T = 40", "T = 80", "T = 120"),
+      ordered = TRUE
+    )
+  ) %>% 
+  ggplot(aes(x = series_id, y = var_names)) +
+  geom_tile(aes(fill = values)) +
+  scale_fill_gradient2(
+    name = "Value",
+    low = "#132B43", 
+    mid = "#56B1F7", 
+    high = "#43132b"
+  ) +
+  theme_minimal() +
+  theme(
+    strip.text.x = element_text(size = 20),
+    axis.ticks = element_blank(),
+    axis.text = element_blank(),
+    axis.title = element_blank()
+  ) +
+  facet_wrap(model ~ .)
+small_l_heatmap
+```
+
+<img src="../output/figs/sim-consistency-smalllheatmap-1.png" width="70%" style="display: block; margin: auto;" />
+
+``` r
+medium_l_heatmap <- 
+  bind_harcoef(sim_consistency$medium_coef$coefficients, fit_bvharl_medium) %>% 
+  pivot_longer(-c(var_names, model), names_to = "series_id", values_to = "values") %>% 
+  mutate(
+    model = case_when(
+      model == "bvhar1" ~ "T = 80",
+      model == "bvhar2" ~ "T = 400",
+      model == "bvhar3" ~ "T = 800",
+      model == "true" ~ "True"
+    ),
+    model = factor(
+      model, 
+      levels = c("True", "T = 80", "T = 400", "T = 800"),
+      ordered = TRUE
+    )
+  ) %>% 
+  ggplot(aes(x = series_id, y = var_names)) +
+  geom_tile(aes(fill = values)) +
+  scale_fill_gradient2(
+    name = "Value",
+    low = "#132B43", 
+    mid = "#56B1F7", 
+    high = "#43132b"
+  ) +
+  theme_minimal() +
+  theme(
+    strip.text.x = element_text(size = 20),
+    axis.ticks = element_blank(),
+    axis.text = element_blank(),
+    axis.title = element_blank()
+  ) +
+  facet_wrap(model ~ .)
+medium_l_heatmap
+```
+
+<img src="../output/figs/sim-consistency-medlheatmap-1.png" width="70%" style="display: block; margin: auto;" />
+
+``` r
+large_l_heatmap <- 
+  bind_harcoef(sim_consistency$large_coef$coefficients, fit_bvharl_large) %>% 
+  pivot_longer(-c(var_names, model), names_to = "series_id", values_to = "values") %>% 
+  mutate(
+    model = case_when(
+      model == "bvhar1" ~ "T = 120",
+      model == "bvhar2" ~ "T = 600",
+      model == "bvhar3" ~ "T = 1200",
+      model == "true" ~ "True"
+    ),
+    model = factor(
+      model, 
+      levels = c("True", "T = 120", "T = 600", "T = 1200"),
+      ordered = TRUE
+    )
+  ) %>% 
+  ggplot(aes(x = series_id, y = var_names)) +
+  geom_tile(aes(fill = values)) +
+  scale_fill_gradient2(
+    name = "Value",
+    low = "#132B43", 
+    mid = "#56B1F7", 
+    high = "#43132b"
+  ) +
+  theme_minimal() +
+  theme(
+    strip.text.x = element_text(size = 20),
+    axis.ticks = element_blank(),
+    axis.text = element_blank(),
+    axis.title = element_blank()
+  ) +
+  facet_wrap(model ~ .)
+large_l_heatmap
+```
+
+<img src="../output/figs/sim-consistency-largelheatmap-1.png" width="70%" style="display: block; margin: auto;" />
+
+## Save
+
+``` r
+ggsave(
+  filename = "../output/figs/simulation-smallsheatmap.pdf", 
+  plot = small_s_heatmap,
+  device = "pdf",
+  scale = .618,
+  width = fig_width, 
+  units = "in",
+  dpi = 1500,
+  limitsize = FALSE
+)
+#> Saving 12.4 x 2.29 in image
+#------------------
+ggsave(
+  filename = "../output/figs/simulation-medsheatmap.pdf", 
+  plot = medium_s_heatmap,
+  device = "pdf",
+  scale = .618,
+  width = fig_width, 
+  units = "in",
+  dpi = 1500,
+  limitsize = FALSE
+)
+#> Saving 12.4 x 2.29 in image
+#------------------
+ggsave(
+  filename = "../output/figs/simulation-largesheatmap.pdf", 
+  plot = large_s_heatmap,
+  device = "pdf",
+  scale = .618,
+  width = fig_width, 
+  units = "in",
+  dpi = 1500,
+  limitsize = FALSE
+)
+#> Saving 12.4 x 2.29 in image
+# BVHAR-L----------
+ggsave(
+  filename = "../output/figs/simulation-smalllheatmap.pdf", 
+  plot = small_l_heatmap,
+  device = "pdf",
+  scale = .618,
+  width = fig_width, 
+  units = "in",
+  dpi = 1500,
+  limitsize = FALSE
+)
+#> Saving 12.4 x 2.29 in image
+#------------------
+ggsave(
+  filename = "../output/figs/simulation-medlheatmap.pdf", 
+  plot = medium_l_heatmap,
+  device = "pdf",
+  scale = .618,
+  width = fig_width, 
+  units = "in",
+  dpi = 1500,
+  limitsize = FALSE
+)
+#> Saving 12.4 x 2.29 in image
+#------------------
+ggsave(
+  filename = "../output/figs/simulation-largelheatmap.pdf", 
+  plot = large_l_heatmap,
+  device = "pdf",
+  scale = .618,
+  width = fig_width, 
+  units = "in",
+  dpi = 1500,
+  limitsize = FALSE
+)
+#> Saving 12.4 x 2.29 in image
+```
+
+# Compare
+
+<!-- ## VHAR -->
+<!-- ```{r vharnorm} -->
+<!-- small_vhar_norm <- parallel::pvec( -->
+<!--   1:3, -->
+<!--   function(id) { -->
+<!--     norm(sim_consistency$small_coef$coefficients - fit_vhar_small[[id]]$coef, type = "2") / norm(sim_consistency$small_coef$coefficients, type = "2") -->
+<!--   }, -->
+<!--   mc.cores = 3 -->
+<!-- ) -->
+<!-- #--------------------------------- -->
+<!-- medium_vhar_norm <- parallel::pvec( -->
+<!--   1:3, -->
+<!--   function(id) { -->
+<!--     norm(sim_consistency$medium_coef$coefficients - fit_vhar_medium[[id]]$coef, type = "2") / norm(sim_consistency$medium_coef$coefficients, type = "2") -->
+<!--   }, -->
+<!--   mc.cores = 3 -->
+<!-- ) -->
+<!-- #----------------------------------- -->
+<!-- large_vhar_norm <- parallel::pvec( -->
+<!--   1:3, -->
+<!--   function(id) { -->
+<!--     norm(sim_consistency$large_coef$coefficients - fit_vhar_large[[id]]$coef, type = "2") / norm(sim_consistency$large_coef$coefficients, type = "2") -->
+<!--   }, -->
+<!--   mc.cores = 3 -->
+<!-- ) -->
+<!-- ``` -->
 
 ## BVHAR
 
@@ -336,73 +674,36 @@ errtibble <- tibble(
     nrow(y_medium[[1]]), nrow(y_medium[[2]]), nrow(y_medium[[3]]),
     nrow(y_large[[1]]), nrow(y_large[[2]]), nrow(y_large[[3]])
   ),
-  vhar = c(small_vhar_norm, medium_vhar_norm, large_vhar_norm),
   bvhar_s = c(small_s_norm, medium_s_norm, large_s_norm),
   bvhar_l = c(small_s_norm, medium_s_norm, large_s_norm)
 )
 ```
 
-``` r
-errtibble %>% 
-  mutate_at(
-    vars(vhar, bvhar_s, bvhar_l),
-    ~cell_spec(
-      paste0(
-        "\\num{",
-        format(., nsmall = 3, scientific = -2) %>% 
-          str_remove(pattern = "0(?=\\.)"), # .xxx
-        "}"
-      ),
-      format = "latex",
-      align = "c",
-      escape = FALSE
-    )
-  ) %>% 
-  mutate(
-    sample_size = cell_spec(
-      sample_size, 
-      format = "latex", 
-      escape = FALSE, 
-      align = "c|"
-    )
-  ) %>% 
-  kable(
-    format = "latex", 
-    booktabs = TRUE,
-    escape = FALSE,
-    align = "c",
-    col.names = c("$k$", "$T = n - 22$", "VHAR", "BVHAR-S", "BVHAR-L"),
-    caption = "Relative Estimation Error",
-    label = "simconsistency"
-  ) %>% 
-  collapse_rows(1, latex_hline = "major") %>% 
-  writeLines()
-\begin{table}
+    \begin{table}
 
-\caption{\label{tab:simconsistency}Relative Estimation Error}
-\centering
-\begin{tabular}[t]{ccccc}
-\toprule
-$k$ & $T = n - 22$ & VHAR & BVHAR-S & BVHAR-L\\
-\midrule
- & \multicolumn{1}{c|}{40} & \multicolumn{1}{c}{\num{ 435.022}} & \multicolumn{1}{c}{\num{.966}} & \multicolumn{1}{c}{\num{.966}}\\
+    \caption{\label{tab:simconsistency}Relative Estimation Error}
+    \centering
+    \begin{tabular}[t]{cccc}
+    \toprule
+    $k$ & $T = n - 22$ & BVHAR-S & BVHAR-L\\
+    \midrule
+     & \multicolumn{1}{c|}{40} & \multicolumn{1}{c}{\num{.966}} & \multicolumn{1}{c}{\num{.966}}\\
 
- & \multicolumn{1}{c|}{80} & \multicolumn{1}{c}{\num{  56.599}} & \multicolumn{1}{c}{\num{.879}} & \multicolumn{1}{c}{\num{.879}}\\
+     & \multicolumn{1}{c|}{80} & \multicolumn{1}{c}{\num{.879}} & \multicolumn{1}{c}{\num{.879}}\\
 
-\multirow{-3}{*}{\centering\arraybackslash SMALL} & \multicolumn{1}{c|}{120} & \multicolumn{1}{c}{\num{  4.437}} & \multicolumn{1}{c}{\num{.795}} & \multicolumn{1}{c}{\num{.795}}\\
-\cmidrule{1-5}
- & \multicolumn{1}{c|}{200} & \multicolumn{1}{c}{\num{ 187.085}} & \multicolumn{1}{c}{\num{.869}} & \multicolumn{1}{c}{\num{.869}}\\
+    \multirow{-3}{*}{\centering\arraybackslash SMALL} & \multicolumn{1}{c|}{120} & \multicolumn{1}{c}{\num{.795}} & \multicolumn{1}{c}{\num{.795}}\\
+    \cmidrule{1-4}
+     & \multicolumn{1}{c|}{200} & \multicolumn{1}{c}{\num{.869}} & \multicolumn{1}{c}{\num{.869}}\\
 
- & \multicolumn{1}{c|}{400} & \multicolumn{1}{c}{\num{  6.274}} & \multicolumn{1}{c}{\num{.852}} & \multicolumn{1}{c}{\num{.852}}\\
+     & \multicolumn{1}{c|}{400} & \multicolumn{1}{c}{\num{.852}} & \multicolumn{1}{c}{\num{.852}}\\
 
-\multirow{-3}{*}{\centering\arraybackslash MEDIUM} & \multicolumn{1}{c|}{600} & \multicolumn{1}{c}{\num{  39.176}} & \multicolumn{1}{c}{\num{.892}} & \multicolumn{1}{c}{\num{.892}}\\
-\cmidrule{1-5}
- & \multicolumn{1}{c|}{400} & \multicolumn{1}{c}{\num{1986.343}} & \multicolumn{1}{c}{\num{.981}} & \multicolumn{1}{c}{\num{.981}}\\
+    \multirow{-3}{*}{\centering\arraybackslash MEDIUM} & \multicolumn{1}{c|}{600} & \multicolumn{1}{c}{\num{.892}} & \multicolumn{1}{c}{\num{.892}}\\
+    \cmidrule{1-4}
+     & \multicolumn{1}{c|}{400} & \multicolumn{1}{c}{\num{.981}} & \multicolumn{1}{c}{\num{.981}}\\
 
- & \multicolumn{1}{c|}{800} & \multicolumn{1}{c}{\num{ 782.026}} & \multicolumn{1}{c}{\num{.975}} & \multicolumn{1}{c}{\num{.975}}\\
+     & \multicolumn{1}{c|}{800} & \multicolumn{1}{c}{\num{.975}} & \multicolumn{1}{c}{\num{.975}}\\
 
-\multirow{-3}{*}{\centering\arraybackslash LARGE} & \multicolumn{1}{c|}{1200} & \multicolumn{1}{c}{\num{ 475.817}} & \multicolumn{1}{c}{\num{.967}} & \multicolumn{1}{c}{\num{.967}}\\
-\bottomrule
-\end{tabular}
-\end{table}
-```
+    \multirow{-3}{*}{\centering\arraybackslash LARGE} & \multicolumn{1}{c|}{1200} & \multicolumn{1}{c}{\num{.967}} & \multicolumn{1}{c}{\num{.967}}\\
+    \bottomrule
+    \end{tabular}
+    \end{table}

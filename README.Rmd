@@ -49,6 +49,7 @@ This is a repository for researching Bayesian VHAR.
 - [knitr](https://yihui.org/knitr/)
 - [kableExtra](https://haozhu233.github.io/kableExtra/)
 - [parallel](https://stat.ethz.ch/R-manual/R-devel/library/parallel/doc/parallel.pdf)
+- [foreach](https://github.com/RevolutionAnalytics/foreach)
 
 ## Results
 
