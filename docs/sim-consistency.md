@@ -1,7 +1,7 @@
 Simulation for Consistency
 ================
 Young Geun Kim
-08 Jun, 2022
+09 Jun, 2022
 
 -   [Fit Models](#fit-models)
     -   [BVHAR-S](#bvhar-s)
@@ -20,9 +20,11 @@ Young Geun Kim
     -   [BVHAR-L](#bvhar-l-1)
         -   [SMALL](#small-3)
     -   [Save](#save)
--   [Compare](#compare)
-    -   [BVHAR](#bvhar)
-    -   [Result](#result)
+-   [Iterations](#iterations)
+    -   [SMALL](#small-4)
+    -   [MEDIUM](#medium-3)
+    -   [LARGE](#large-3)
+    -   [Bind](#bind)
 
 ``` r
 sim_data <- "../data/processed/dgp_bvhar_consistency.rds"
@@ -60,50 +62,6 @@ y_small <- sim_consistency$y_small_list
 y_medium <- sim_consistency$y_medium_list
 y_large <- sim_consistency$y_large_list
 ```
-
-<!-- ## VHAR -->
-<!-- ### SMALL -->
-<!-- ```{r smallvharfit} -->
-<!-- fit_vhar_small <- parallel::mclapply( -->
-<!--   1:3, -->
-<!--   function(id) { -->
-<!--     vhar_lm( -->
-<!--       y = y_small[[id]], -->
-<!--       har = c(5, 22), -->
-<!--       include_mean = FALSE -->
-<!--     ) -->
-<!--   }, -->
-<!--   mc.cores = 3 -->
-<!-- ) -->
-<!-- ``` -->
-<!-- ### MEDIUM -->
-<!-- ```{r medvharfit} -->
-<!-- fit_vhar_medium <- parallel::mclapply( -->
-<!--   1:3, -->
-<!--   function(id) { -->
-<!--     vhar_lm( -->
-<!--       y = y_medium[[id]], -->
-<!--       har = c(5, 22), -->
-<!--       include_mean = FALSE -->
-<!--     ) -->
-<!--   }, -->
-<!--   mc.cores = 3 -->
-<!-- ) -->
-<!-- ``` -->
-<!-- ### LARGE -->
-<!-- ```{r largevharfit} -->
-<!-- fit_vhar_large <- parallel::mclapply( -->
-<!--   1:3, -->
-<!--   function(id) { -->
-<!--     vhar_lm( -->
-<!--       y = y_large[[id]], -->
-<!--       har = c(5, 22), -->
-<!--       include_mean = FALSE -->
-<!--     ) -->
-<!--   }, -->
-<!--   mc.cores = 6 -->
-<!-- ) -->
-<!-- ``` -->
 
 ## BVHAR-S
 
@@ -158,14 +116,7 @@ fit_bvhars_large <- parallel::mclapply(
 ## BVHAR-L
 
 ``` r
-n_small <- ncol(sim_consistency$y_small[[1]])
-n_medium <- ncol(sim_consistency$y_medium[[1]])
-n_large <- ncol(sim_consistency$y_large[[1]])
-```
-
-### SMALL
-
-``` r
+# small------------------------------
 bvharl_small_spec <- set_weight_bvhar(
   sigma = sim_consistency$small_spec$sigma,
   lambda = sim_consistency$small_spec$lambda,
@@ -173,7 +124,25 @@ bvharl_small_spec <- set_weight_bvhar(
   weekly = sim_consistency$small_spec$delta,
   monthly = sim_consistency$small_spec$delta
 )
+# medium-----------------------------
+bvharl_medium_spec <- set_weight_bvhar(
+  sigma = sim_consistency$medium_spec$sigma,
+  lambda = sim_consistency$medium_spec$lambda,
+  daily = sim_consistency$medium_spec$delta,
+  weekly = sim_consistency$medium_spec$delta,
+  monthly = sim_consistency$medium_spec$delta
+)
+# large------------------------------
+bvharl_large_spec <- set_weight_bvhar(
+  sigma = sim_consistency$large_spec$sigma,
+  lambda = sim_consistency$large_spec$lambda,
+  daily = sim_consistency$large_spec$delta,
+  weekly = sim_consistency$large_spec$delta,
+  monthly = sim_consistency$large_spec$delta
+)
 ```
+
+### SMALL
 
 ``` r
 fit_bvharl_small <- parallel::mclapply(
@@ -192,16 +161,6 @@ fit_bvharl_small <- parallel::mclapply(
 ### MEDIUM
 
 ``` r
-bvharl_medium_spec <- set_weight_bvhar(
-  sigma = sim_consistency$medium_spec$sigma,
-  lambda = sim_consistency$medium_spec$lambda,
-  daily = sim_consistency$medium_spec$delta,
-  weekly = sim_consistency$medium_spec$delta,
-  monthly = sim_consistency$medium_spec$delta
-)
-```
-
-``` r
 fit_bvharl_medium <- parallel::mclapply(
   1:3,
   function(id) {
@@ -216,16 +175,6 @@ fit_bvharl_medium <- parallel::mclapply(
 ```
 
 ### LARGE
-
-``` r
-bvharl_large_spec <- set_weight_bvhar(
-  sigma = sim_consistency$large_spec$sigma,
-  lambda = sim_consistency$large_spec$lambda,
-  daily = sim_consistency$large_spec$delta,
-  weekly = sim_consistency$large_spec$delta,
-  monthly = sim_consistency$large_spec$delta
-)
-```
 
 ``` r
 fit_bvharl_large <- parallel::mclapply(
@@ -292,9 +241,9 @@ small_s_heatmap <-
   geom_tile(aes(fill = values)) +
   scale_fill_gradient2(
     name = "Value",
-    low = "#132B43", 
-    mid = "#56B1F7", 
-    high = "#43132b"
+    low = "#1A85FF", 
+    mid = "#FFFFFF", 
+    high = "#D41159"
   ) +
   theme_minimal() +
   theme(
@@ -332,9 +281,9 @@ medium_s_heatmap <-
   geom_tile(aes(fill = values)) +
   scale_fill_gradient2(
     name = "Value",
-    low = "#132B43", 
-    mid = "#56B1F7", 
-    high = "#43132b"
+    low = "#1A85FF", 
+    mid = "#FFFFFF", 
+    high = "#D41159"
   ) +
   theme_minimal() +
   theme(
@@ -372,9 +321,9 @@ large_s_heatmap <-
   geom_tile(aes(fill = values)) +
   scale_fill_gradient2(
     name = "Value",
-    low = "#132B43", 
-    mid = "#56B1F7", 
-    high = "#43132b"
+    low = "#1A85FF", 
+    mid = "#FFFFFF", 
+    high = "#D41159"
   ) +
   theme_minimal() +
   theme(
@@ -414,9 +363,9 @@ small_l_heatmap <-
   geom_tile(aes(fill = values)) +
   scale_fill_gradient2(
     name = "Value",
-    low = "#132B43", 
-    mid = "#56B1F7", 
-    high = "#43132b"
+    low = "#1A85FF", 
+    mid = "#FFFFFF", 
+    high = "#D41159"
   ) +
   theme_minimal() +
   theme(
@@ -452,9 +401,9 @@ medium_l_heatmap <-
   geom_tile(aes(fill = values)) +
   scale_fill_gradient2(
     name = "Value",
-    low = "#132B43", 
-    mid = "#56B1F7", 
-    high = "#43132b"
+    low = "#1A85FF", 
+    mid = "#FFFFFF", 
+    high = "#D41159"
   ) +
   theme_minimal() +
   theme(
@@ -490,9 +439,9 @@ large_l_heatmap <-
   geom_tile(aes(fill = values)) +
   scale_fill_gradient2(
     name = "Value",
-    low = "#132B43", 
-    mid = "#56B1F7", 
-    high = "#43132b"
+    low = "#1A85FF", 
+    mid = "#FFFFFF", 
+    high = "#D41159"
   ) +
   theme_minimal() +
   theme(
@@ -583,100 +532,212 @@ ggsave(
 #> Saving 12.4 x 2.29 in image
 ```
 
-# Compare
-
-<!-- ## VHAR -->
-<!-- ```{r vharnorm} -->
-<!-- small_vhar_norm <- parallel::pvec( -->
-<!--   1:3, -->
-<!--   function(id) { -->
-<!--     norm(sim_consistency$small_coef$coefficients - fit_vhar_small[[id]]$coef, type = "2") / norm(sim_consistency$small_coef$coefficients, type = "2") -->
-<!--   }, -->
-<!--   mc.cores = 3 -->
-<!-- ) -->
-<!-- #--------------------------------- -->
-<!-- medium_vhar_norm <- parallel::pvec( -->
-<!--   1:3, -->
-<!--   function(id) { -->
-<!--     norm(sim_consistency$medium_coef$coefficients - fit_vhar_medium[[id]]$coef, type = "2") / norm(sim_consistency$medium_coef$coefficients, type = "2") -->
-<!--   }, -->
-<!--   mc.cores = 3 -->
-<!-- ) -->
-<!-- #----------------------------------- -->
-<!-- large_vhar_norm <- parallel::pvec( -->
-<!--   1:3, -->
-<!--   function(id) { -->
-<!--     norm(sim_consistency$large_coef$coefficients - fit_vhar_large[[id]]$coef, type = "2") / norm(sim_consistency$large_coef$coefficients, type = "2") -->
-<!--   }, -->
-<!--   mc.cores = 3 -->
-<!-- ) -->
-<!-- ``` -->
-
-## BVHAR
+# Iterations
 
 ``` r
-small_s_norm <- parallel::pvec(
-  1:3,
-  function(id) {
-    norm(sim_consistency$small_coef$coefficients - fit_bvhars_small[[id]]$coef, type = "2") / norm(sim_consistency$small_coef$coefficients, type = "2")
-  },
-  mc.cores = 3
-)
-#----------------------------------
-small_l_norm <- parallel::pvec(
-  1:3,
-  function(id) {
-    norm(sim_consistency$small_coef$coefficients - fit_bvharl_small[[id]]$coef, type = "2") / norm(sim_consistency$small_coef$coefficients, type = "2")
-  },
-  mc.cores = 3
-)
-#----------------------------------
-medium_s_norm <- parallel::pvec(
-  1:3,
-  function(id) {
-    norm(sim_consistency$medium_coef$coefficients - fit_bvhars_medium[[id]]$coef, type = "2") / norm(sim_consistency$medium_coef$coefficients, type = "2")
-  },
-  mc.cores = 3
-)
-#----------------------------------
-medium_l_norm <- parallel::pvec(
-  1:3,
-  function(id) {
-    norm(sim_consistency$medium_coef$coefficients - fit_bvharl_medium[[id]]$coef, type = "2") / norm(sim_consistency$medium_coef$coefficients, type = "2")
-  },
-  mc.cores = 3
-)
-#-----------------------------------
-large_s_norm <- parallel::pvec(
-  1:3,
-  function(id) {
-    norm(sim_consistency$large_coef$coefficients - fit_bvhars_large[[id]]$coef, type = "2") / norm(sim_consistency$large_coef$coefficients, type = "2")
-  },
-  mc.cores = 3
-)
-#----------------------------------
-large_l_norm <- parallel::pvec(
-  1:3,
-  function(id) {
-    norm(sim_consistency$large_coef$coefficients - fit_bvharl_large[[id]]$coef, type = "2") / norm(sim_consistency$large_coef$coefficients, type = "2")
-  },
-  mc.cores = 3
-)
+# small--------------------------
+n_small <- ncol(sim_consistency$y_small[[1]])
+num_small <- c(40, 80, 120)
+num_small_burn <- c(20, 30, 50)
+# medium-------------------------
+n_medium <- ncol(sim_consistency$y_medium[[1]])
+num_medium <- c(200, 400, 600)
+num_medium_burn <- c(100, 200, 300)
+# large--------------------------
+n_large <- ncol(sim_consistency$y_large[[1]])
+num_large <- c(400, 800, 1200)
+num_large_burn <- c(200, 300, 500)
 ```
 
-## Result
+## SMALL
 
 ``` r
-errtibble <- tibble(
-  size = gl(n = 3, k = 3, labels = c("SMALL", "MEDIUM", "LARGE")),
-  sample_size = c(
-    nrow(y_small[[1]]), nrow(y_small[[2]]), nrow(y_small[[3]]),
-    nrow(y_medium[[1]]), nrow(y_medium[[2]]), nrow(y_medium[[3]]),
-    nrow(y_large[[1]]), nrow(y_large[[2]]), nrow(y_large[[3]])
-  ),
-  bvhar_s = c(small_s_norm, medium_s_norm, large_s_norm),
-  bvhar_l = c(small_s_norm, medium_s_norm, large_s_norm)
-)
+set.seed(1)
+cl <- parallel::makeForkCluster(12)
+doParallel::registerDoParallel(cl, cores = 8)
+small_err <-
+  foreach(id = 1:3, .combine = rbind) %:%
+  foreach(i = 1:100, .combine = rbind) %dopar% {
+    # generate VHAR----------------------
+    y_sim <- sim_vhar(
+      num_sim = num_small[id],
+      num_burn = num_small_burn[id],
+      vhar_coef = sim_consistency$small_coef$coefficients,
+      week = 5,
+      month = 22,
+      sig_error = sim_consistency$small_coef$covmat,
+      init = matrix(0L, nrow = 22L, ncol = n_small)
+    ) %>%
+      as.data.frame() %>%
+      setNames(paste("asset", sprintf(1:n_small, fmt = "%02d"), sep = "_"))
+    # Fit the model---------------------
+    # BVHAR-S---------------------------
+    fit_bvhars <- bvhar_minnesota(
+      y = y_sim,
+      bayes_spec = sim_consistency$small_spec,
+      include_mean = FALSE
+    )
+    # BVHAR-L---------------------------
+    fit_bvharl <- bvhar_minnesota(
+      y = y_sim,
+      bayes_spec = bvharl_small_spec,
+      include_mean = FALSE
+    )
+    # norm------------------------------
+    true_norm <- norm(sim_consistency$small_coef$coefficients, type = "2")
+    coef_s_norm <- norm(fit_bvhars$coefficients, type = "2")
+    coef_l_norm <- norm(fit_bvharl$coefficients, type = "2")
+    # Relative estimation error---------
+    ree_s <- norm(fit_bvhars$coefficients - sim_consistency$small_coef$coefficients, type = "2") / true_norm
+    ree_l <- norm(fit_bvharl$coefficients - sim_consistency$small_coef$coefficients, type = "2") / true_norm
+    tibble(
+      S = ree_s,
+      L = ree_l,
+      se_s = coef_s_norm,
+      se_l = coef_l_norm,
+      size = id
+    )
+  }
+```
+
+## MEDIUM
+
+``` r
+set.seed(1)
+doParallel::registerDoParallel(cl, cores = 8)
+medium_err <-
+  foreach(id = 1:3, .combine = rbind) %:%
+  foreach(i = 1:100, .combine = rbind) %dopar% {
+    # generate VHAR----------------------
+    y_sim <- sim_vhar(
+      num_sim = num_medium[id],
+      num_burn = num_medium_burn[id],
+      vhar_coef = sim_consistency$medium_coef$coefficients,
+      week = 5,
+      month = 22,
+      sig_error = sim_consistency$medium_coef$covmat,
+      init = matrix(0L, nrow = 22L, ncol = n_medium)
+    ) %>%
+      as.data.frame() %>%
+      setNames(paste("asset", sprintf(1:n_medium, fmt = "%02d"), sep = "_"))
+    # Fit the model---------------------
+    # BVHAR-S---------------------------
+    fit_bvhars <- bvhar_minnesota(
+      y = y_sim,
+      bayes_spec = sim_consistency$medium_spec,
+      include_mean = FALSE
+    )
+    # BVHAR-L---------------------------
+    fit_bvharl <- bvhar_minnesota(
+      y = y_sim,
+      bayes_spec = bvharl_medium_spec,
+      include_mean = FALSE
+    )
+    # norm------------------------------
+    true_norm <- norm(sim_consistency$medium_coef$coefficients, type = "2")
+    coef_s_norm <- norm(fit_bvhars$coefficients, type = "2")
+    coef_l_norm <- norm(fit_bvharl$coefficients, type = "2")
+    # Relative estimation error---------
+    ree_s <- norm(fit_bvhars$coefficients - sim_consistency$medium_coef$coefficients, type = "2") / true_norm
+    ree_l <- norm(fit_bvharl$coefficients - sim_consistency$medium_coef$coefficients, type = "2") / true_norm
+    tibble(
+      S = ree_s,
+      L = ree_l,
+      se_s = coef_s_norm,
+      se_l = coef_l_norm,
+      size = id
+    )
+  }
+```
+
+## LARGE
+
+``` r
+set.seed(1)
+doParallel::registerDoParallel(cl, cores = 8)
+large_err <-
+  foreach(id = 1:3, .combine = rbind) %:%
+  foreach(i = 1:100, .combine = rbind) %dopar% {
+    # generate VHAR----------------------
+    y_sim <- sim_vhar(
+      num_sim = num_large[id],
+      num_burn = num_large_burn[id],
+      vhar_coef = sim_consistency$large_coef$coefficients,
+      week = 5,
+      month = 22,
+      sig_error = sim_consistency$large_coef$covmat,
+      init = matrix(0L, nrow = 22L, ncol = n_large)
+    ) %>%
+      as.data.frame() %>%
+      setNames(paste("asset", sprintf(1:n_large, fmt = "%02d"), sep = "_"))
+    # Fit the model---------------------
+    # BVHAR-S---------------------------
+    fit_bvhars <- bvhar_minnesota(
+      y = y_sim,
+      bayes_spec = sim_consistency$large_spec,
+      include_mean = FALSE
+    )
+    # BVHAR-L---------------------------
+    fit_bvharl <- bvhar_minnesota(
+      y = y_sim,
+      bayes_spec = bvharl_large_spec,
+      include_mean = FALSE
+    )
+    # norm------------------------------
+    true_norm <- norm(sim_consistency$large_coef$coefficients, type = "2")
+    coef_s_norm <- norm(fit_bvhars$coefficients, type = "2")
+    coef_l_norm <- norm(fit_bvharl$coefficients, type = "2")
+    # Relative estimation error---------
+    ree_s <- norm(fit_bvhars$coefficients - sim_consistency$large_coef$coefficients, type = "2") / true_norm
+    ree_l <- norm(fit_bvharl$coefficients - sim_consistency$large_coef$coefficients, type = "2") / true_norm
+    tibble(
+      S = ree_s,
+      L = ree_l,
+      se_s = coef_s_norm,
+      se_l = coef_l_norm,
+      size = id
+    )
+  }
+```
+
+## Bind
+
+``` r
+# small----------------
+small_ree <- 
+  small_err %>% 
+  group_by(size) %>%
+  summarise(
+    error_s = mean(S),
+    error_l = mean(L),
+    sd_s = sd(se_s),
+    sd_l = sd(se_l)
+  ) %>% 
+  mutate(model = "SMALL")
+# medium---------------
+medium_ree <- 
+  medium_err %>% 
+  group_by(size) %>%
+  summarise(
+    error_s = mean(S),
+    error_l = mean(L),
+    sd_s = sd(se_s),
+    sd_l = sd(se_l)
+  ) %>% 
+  mutate(model = "MEDIUM")
+# large----------------
+large_ree <- 
+  large_err %>% 
+  group_by(size) %>%
+  summarise(
+    error_s = mean(S),
+    error_l = mean(L),
+    sd_s = sd(se_s),
+    sd_l = sd(se_l)
+  ) %>% 
+  mutate(model = "LARGE")
+# bind------------------
+ree_table <- bind_rows(small_ree, medium_ree, large_ree)
 ```
 
     \begin{table}
@@ -685,25 +746,71 @@ errtibble <- tibble(
     \centering
     \begin{tabular}[t]{cccc}
     \toprule
-    $k$ & $T = n - 22$ & BVHAR-S & BVHAR-L\\
+    $k$ & $T = n + 22$ & BVHAR-S & BVHAR-L\\
     \midrule
-     & \multicolumn{1}{c|}{40} & \multicolumn{1}{c}{\num{.966}} & \multicolumn{1}{c}{\num{.966}}\\
+     & \multicolumn{1}{c|}{40} & \makecell[c]{\num{.936}\\(\num{.0705})} & \makecell[c]{\num{.944}\\(\num{.0706})}\\
 
-     & \multicolumn{1}{c|}{80} & \multicolumn{1}{c}{\num{.879}} & \multicolumn{1}{c}{\num{.879}}\\
+     & \multicolumn{1}{c|}{80} & \makecell[c]{\num{.874}\\(\num{.0714})} & \makecell[c]{\num{.882}\\(\num{.0705})}\\
 
-    \multirow{-3}{*}{\centering\arraybackslash SMALL} & \multicolumn{1}{c|}{120} & \multicolumn{1}{c}{\num{.795}} & \multicolumn{1}{c}{\num{.795}}\\
+    \multirow{-3}{*}{\centering\arraybackslash SMALL} & \multicolumn{1}{c|}{120} & \makecell[c]{\num{.840}\\(\num{.0782})} & \makecell[c]{\num{.852}\\(\num{.0781})}\\
     \cmidrule{1-4}
-     & \multicolumn{1}{c|}{200} & \multicolumn{1}{c}{\num{.869}} & \multicolumn{1}{c}{\num{.869}}\\
+     & \multicolumn{1}{c|}{200} & \makecell[c]{\num{.886}\\(\num{.1941})} & \makecell[c]{\num{.887}\\(\num{.1927})}\\
 
-     & \multicolumn{1}{c|}{400} & \multicolumn{1}{c}{\num{.852}} & \multicolumn{1}{c}{\num{.852}}\\
+     & \multicolumn{1}{c|}{400} & \makecell[c]{\num{.844}\\(\num{.1416})} & \makecell[c]{\num{.844}\\(\num{.1415})}\\
 
-    \multirow{-3}{*}{\centering\arraybackslash MEDIUM} & \multicolumn{1}{c|}{600} & \multicolumn{1}{c}{\num{.892}} & \multicolumn{1}{c}{\num{.892}}\\
+    \multirow{-3}{*}{\centering\arraybackslash MEDIUM} & \multicolumn{1}{c|}{600} & \makecell[c]{\num{.837}\\(\num{.1451})} & \makecell[c]{\num{.837}\\(\num{.1450})}\\
     \cmidrule{1-4}
-     & \multicolumn{1}{c|}{400} & \multicolumn{1}{c}{\num{.981}} & \multicolumn{1}{c}{\num{.981}}\\
+     & \multicolumn{1}{c|}{400} & \makecell[c]{\num{.978}\\(\num{.0124})} & \makecell[c]{\num{.984}\\(\num{.0108})}\\
 
-     & \multicolumn{1}{c|}{800} & \multicolumn{1}{c}{\num{.975}} & \multicolumn{1}{c}{\num{.975}}\\
+     & \multicolumn{1}{c|}{800} & \makecell[c]{\num{.976}\\(\num{.0184})} & \makecell[c]{\num{.982}\\(\num{.0162})}\\
 
-    \multirow{-3}{*}{\centering\arraybackslash LARGE} & \multicolumn{1}{c|}{1200} & \multicolumn{1}{c}{\num{.967}} & \multicolumn{1}{c}{\num{.967}}\\
+    \multirow{-3}{*}{\centering\arraybackslash LARGE} & \multicolumn{1}{c|}{1200} & \makecell[c]{\num{.975}\\(\num{.0115})} & \makecell[c]{\num{.980}\\(\num{.0103})}\\
     \bottomrule
     \end{tabular}
     \end{table}
+
+``` r
+ree_boxplt <- 
+  ree_table %>% 
+  pivot_longer(c(error_s, error_l), names_to = "bvhar", values_to = "error") %>% 
+  mutate(
+    size = case_when(
+      size == 1 ~ 4,
+      size == 2 ~ 8,
+      size == 3 ~ 12
+    ),
+    model = factor(model, levels = c("SMALL", "MEDIUM", "LARGE")),
+    bvhar = ifelse(bvhar == "error_s", "BVHAR-S", "BVHAR-L"),
+    bvhar = factor(bvhar, levels = c("BVHAR-S", "BVHAR-L"))
+  ) %>% 
+  ggplot() +
+  geom_boxplot(aes(x = model, y = error, fill = factor(size))) +
+  facet_grid(~ bvhar) +
+  theme_minimal() +
+  theme(
+    panel.border = element_rect(fill = NA), 
+    legend.position = "top"
+  ) +
+  labs(
+    x = "DGP",
+    y = "Relative estimation error",
+    fill = "T / k"
+  )
+ree_boxplt
+```
+
+<img src="../output/figs/sim-consistency-reesbox-1.png" width="70%" style="display: block; margin: auto;" />
+
+``` r
+ggsave(
+  filename = "../output/figs/simulation-ree.pdf", 
+  plot = ree_boxplt,
+  device = "pdf",
+  scale = .618,
+  width = fig_width, 
+  units = "in",
+  dpi = 1500,
+  limitsize = FALSE
+)
+#> Saving 12.4 x 2.29 in image
+```
