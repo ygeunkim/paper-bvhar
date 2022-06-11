@@ -745,7 +745,7 @@ ree_table <- bind_rows(small_ree, medium_ree, large_ree)
 ```
 
 
-```{r reetex, echo=FALSE, comment=NULL}
+```{r reetex, comment=NULL}
 ree_table %>% 
   select(model, size, error_s, error_l, sd_s, sd_l) %>% 
   mutate(
@@ -802,7 +802,11 @@ ree_table %>%
     caption = "Relative Estimation Error",
     label = "simconsistency"
   ) %>% 
-  collapse_rows(1, latex_hline = "major") %>% 
+  collapse_rows(
+    columns = 1,
+    valign = "top",
+    latex_hline = "major"
+  ) %>% 
   writeLines()
 ```
 

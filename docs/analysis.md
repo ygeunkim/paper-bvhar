@@ -1,10 +1,12 @@
 Empirical Analysis
 ================
 Young Geun Kim
-16 Mar, 2022
+11 Jun, 2022
 
 -   [Data](#data)
     -   [Split](#split)
+    -   [Long-range dependency](#long-range-dependency)
+        -   [Plot](#plot)
 -   [Model](#model)
     -   [VAR](#var)
     -   [VHAR](#vhar)
@@ -70,9 +72,11 @@ etf_raw <- readRDS(etf_data)
 
 ``` r
 te_date <- tail(etf_raw$data_wide$date, h)[1]
-etf_raw$data_long %>% 
+data_plt <- 
+  etf_raw$data_long %>% 
   mutate(
     train = date < te_date,
+    series_id = str_remove_all(series_id, pattern = "CLS$"),
     xmin = min(date[train == FALSE]),
     xmax = max(date)
   ) %>% 
@@ -87,21 +91,22 @@ etf_raw$data_long %>%
   theme_minimal() +
   theme(
     panel.border = element_rect(fill = NA),
-    strip.text = element_text(size = 3),
+    # strip.text = element_text(size = 5),
     axis.text.y = element_text(size = 5)
   ) +
   labs(
     x = element_blank(),
     y = "Volatility index"
   )
+data_plt
 ```
 
 <img src="../output/figs/analysis-dataplot-1.png" width="70%" style="display: block; margin: auto;" />
 
 ``` r
 ggsave(
-  "../output/figs/analysis-dataplot.pdf", 
-  last_plot(),
+  filename = "../output/figs/analysis-dataplot.pdf", 
+  plot = data_plt,
   device = "pdf",
   scale = .618,
   width = fig_width, 
@@ -113,9 +118,126 @@ ggsave(
 ```
 
 ``` r
-etf_split <- divide_ts(etf_vix, h)
+etf_split <- 
+  divide_ts(
+    etf_vix %>% rename_with(~str_remove_all(., pattern = "CLS$")), 
+    h
+  )
 etf_train <- etf_split$train
 etf_test <- etf_split$test
+```
+
+## Long-range dependency
+
+### Plot
+
+ACF:
+
+``` r
+gvz_acf <- 
+  etf_train %>% 
+  select(GVZ) %>% 
+  forecast::ggAcf(lag.max = 50) +
+  theme_minimal() +
+  theme(
+    panel.border = element_rect(fill = NA),
+    axis.text.y = element_text(size = 5),
+    axis.text.x = element_text(size = 5)
+  ) +
+  labs(title = element_blank())
+#> Registered S3 method overwritten by 'quantmod':
+#>   method            from
+#>   as.zoo.data.frame zoo
+gvz_acf
+```
+
+<img src="../output/figs/analysis-gvzacf-1.png" width="70%" style="display: block; margin: auto;" />
+
+``` r
+ovx_acf <- 
+  etf_train %>% 
+  select(OVX) %>% 
+  forecast::ggAcf(lag.max = 50) +
+  theme_minimal() +
+  theme(
+    panel.border = element_rect(fill = NA),
+    axis.text.y = element_text(size = 5),
+    axis.text.x = element_text(size = 5)
+  ) +
+  labs(title = element_blank())
+ovx_acf
+```
+
+<img src="../output/figs/analysis-ovxacf-1.png" width="70%" style="display: block; margin: auto;" />
+
+Prewhitening for CCF:
+
+``` r
+gvz_ar <- forecast::Arima(etf_train$GVZ, order = c(30L, 0L, 0L), include.mean = FALSE, include.drift = FALSE)
+ovx_ar <- forecast::Arima(etf_train$OVX, order = c(30L, 0L, 0L), include.mean = FALSE, include.drift = FALSE)
+# prewhitening---------------
+gvz_resid <- gvz_ar$residuals
+ovx_resid <- ovx_ar$residuals
+```
+
+CCF:
+
+``` r
+resid_ccf <- 
+  data.frame(
+    Prewhitened_GVZ = gvz_resid,
+    Prewhitened_OVX = ovx_resid
+  ) %>% 
+  forecast::ggAcf(lag.max = 50) +
+  theme_minimal() +
+  theme(
+    panel.border = element_rect(fill = NA),
+    axis.text.y = element_text(size = 5),
+    axis.text.x = element_text(size = 5)
+  ) +
+  labs(title = element_blank())
+resid_ccf
+```
+
+<img src="../output/figs/analysis-residccf-1.png" width="70%" style="display: block; margin: auto;" />
+
+``` r
+# acf of GVZ---------------
+ggsave(
+  filename = "../output/figs/analysis-lrdacf-gvz.pdf", 
+  plot = gvz_acf,
+  device = "pdf",
+  scale = .618,
+  width = fig_width, 
+  units = "in",
+  dpi = 1500,
+  limitsize = FALSE
+)
+#> Saving 12.4 x 2.29 in image
+# acf of OVX---------------
+ggsave(
+  filename = "../output/figs/analysis-lrdacf-ovx.pdf", 
+  plot = ovx_acf,
+  device = "pdf",
+  scale = .618,
+  width = fig_width, 
+  units = "in",
+  dpi = 1500,
+  limitsize = FALSE
+)
+#> Saving 12.4 x 2.29 in image
+# ccf after prewhitening---
+ggsave(
+  filename = "../output/figs/analysis-lrdccf.pdf", 
+  plot = resid_ccf,
+  device = "pdf",
+  scale = .618,
+  width = fig_width, 
+  units = "in",
+  dpi = 1500,
+  limitsize = FALSE
+)
+#> Saving 12.4 x 2.29 in image
 ```
 
 # Model
@@ -502,7 +624,8 @@ get_rmfe_tr(
 ## Piecewise Errors
 
 ``` r
-roll_list[[1]] %>% 
+err_plt <- 
+  roll_list[[1]] %>% 
   gg_loss(
     etf_test, 
     mean_line = TRUE, 
@@ -516,14 +639,15 @@ roll_list[[1]] %>%
     legend.position = "top"
   ) +
   scale_colour_viridis_d(labels = c("BVAR", "BVHAR-S", "BVHAR-L", "VAR", "VHAR"))
+err_plt
 ```
 
 <img src="../output/figs/analysis-piecewise-error-1.png" width="70%" style="display: block; margin: auto;" />
 
 ``` r
 ggsave(
-  "../output/figs/analysis-piecewise-error.pdf", 
-  last_plot(),
+  filename = "../output/figs/analysis-piecewise-error.pdf", 
+  plot = err_plt,
   device = "pdf",
   scale = .618,
   width = fig_width, 
@@ -561,7 +685,8 @@ pred_bvhar_vhar <- predict(fit_bvhar_vhar, h)
 <!-- ``` -->
 
 ``` r
-autoplot(pred_var, x_cut = 860, ci_alpha = .8, type = "wrap") +
+interval_plt <- 
+  autoplot(pred_var, x_cut = 860, ci_alpha = .8, type = "wrap") +
   autolayer(pred_vhar, ci_alpha = .7) +
   autolayer(pred_bvar, ci_alpha = .6) +
   autolayer(pred_bvhar, ci_alpha = .5) +
@@ -574,14 +699,15 @@ autoplot(pred_var, x_cut = 860, ci_alpha = .8, type = "wrap") +
     legend.position = "top"
   ) +
   scale_fill_viridis_d(labels = c("BVAR", "BVHAR-S", "BVHAR-L", "VAR", "VHAR"))
+interval_plt
 ```
 
 <img src="../output/figs/analysis-credplot-1.png" width="70%" style="display: block; margin: auto;" />
 
 ``` r
 ggsave(
-  "../output/figs/analysis-credplot.pdf", 
-  last_plot(),
+  filename = "../output/figs/analysis-credplot.pdf", 
+  plot = interval_plt,
   device = "pdf",
   scale = .618,
   width = fig_width, 

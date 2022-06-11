@@ -1,7 +1,7 @@
 Simulation for Consistency
 ================
 Young Geun Kim
-09 Jun, 2022
+10 Jun, 2022
 
 -   [Fit Models](#fit-models)
     -   [BVHAR-S](#bvhar-s)
@@ -740,34 +740,98 @@ large_ree <-
 ree_table <- bind_rows(small_ree, medium_ree, large_ree)
 ```
 
-    \begin{table}
+``` r
+ree_table %>% 
+  select(model, size, error_s, error_l, sd_s, sd_l) %>% 
+  mutate(
+    size = case_when(
+      model == "SMALL" & size == 1 ~ 40,
+      model == "SMALL" & size == 2 ~ 80,
+      model == "SMALL" & size == 3 ~ 120,
+      model == "MEDIUM" & size == 1 ~ 200,
+      model == "MEDIUM" & size == 2 ~ 400,
+      model == "MEDIUM" & size == 3 ~ 600,
+      model == "LARGE" & size == 1 ~ 400,
+      model == "LARGE" & size == 2 ~ 800,
+      model == "LARGE" & size == 3 ~ 1200,
+    )
+  ) %>% 
+  mutate_at(
+    vars(error_s, error_l),
+    ~paste0(
+      "\\num{",
+      format(., nsmall = 3, scientific = -2) %>% 
+        str_remove(pattern = "(?<![1-9])0(?=\\.)"), # .xxx
+      "}"
+    )
+  ) %>% 
+  mutate_at(
+    vars(sd_s, sd_l),
+    ~paste0(
+      "(\\num{",
+      format(., nsmall = 3, scientific = -2) %>% 
+        str_remove(pattern = "(?<![1-9])0(?=\\.)"), # .xxx
+      "})"
+    )
+  ) %>% 
+  unite(col = "bvhar_s", c(error_s, sd_s), sep = "\n") %>%
+  unite(col = "bvhar_l", c(error_l, sd_l), sep = "\n") %>% 
+  mutate(
+    size = cell_spec(
+      size,
+      format = "latex",
+      escape = FALSE,
+      align = "c|"
+    )
+  ) %>%
+  mutate_at(
+    vars(bvhar_s, bvhar_l),
+    ~linebreak(., align = "c")
+  ) %>% 
+  kable(
+    format = "latex", 
+    booktabs = TRUE,
+    escape = FALSE,
+    align = "c",
+    col.names = c("$k$", "$T = n + 22$", "BVHAR-S", "BVHAR-L"),
+    caption = "Relative Estimation Error",
+    label = "simconsistency"
+  ) %>% 
+  collapse_rows(
+    columns = 1,
+    valign = "top",
+    latex_hline = "major"
+  ) %>% 
+  writeLines()
+\begin{table}
 
-    \caption{\label{tab:simconsistency}Relative Estimation Error}
-    \centering
-    \begin{tabular}[t]{cccc}
-    \toprule
-    $k$ & $T = n + 22$ & BVHAR-S & BVHAR-L\\
-    \midrule
-     & \multicolumn{1}{c|}{40} & \makecell[c]{\num{.936}\\(\num{.0705})} & \makecell[c]{\num{.944}\\(\num{.0706})}\\
+\caption{\label{tab:simconsistency}Relative Estimation Error}
+\centering
+\begin{tabular}[t]{cccc}
+\toprule
+$k$ & $T = n + 22$ & BVHAR-S & BVHAR-L\\
+\midrule
+ & \multicolumn{1}{c|}{40} & \makecell[c]{\num{.936}\\(\num{.0705})} & \makecell[c]{\num{.944}\\(\num{.0706})}\\
 
-     & \multicolumn{1}{c|}{80} & \makecell[c]{\num{.874}\\(\num{.0714})} & \makecell[c]{\num{.882}\\(\num{.0705})}\\
+ & \multicolumn{1}{c|}{80} & \makecell[c]{\num{.874}\\(\num{.0714})} & \makecell[c]{\num{.882}\\(\num{.0705})}\\
 
-    \multirow{-3}{*}{\centering\arraybackslash SMALL} & \multicolumn{1}{c|}{120} & \makecell[c]{\num{.840}\\(\num{.0782})} & \makecell[c]{\num{.852}\\(\num{.0781})}\\
-    \cmidrule{1-4}
-     & \multicolumn{1}{c|}{200} & \makecell[c]{\num{.886}\\(\num{.1941})} & \makecell[c]{\num{.887}\\(\num{.1927})}\\
+\multirow[t]{-3}{*}{\centering\arraybackslash SMALL} & \multicolumn{1}{c|}{120} & \makecell[c]{\num{.840}\\(\num{.0782})} & \makecell[c]{\num{.852}\\(\num{.0781})}\\
+\cmidrule{1-4}
+ & \multicolumn{1}{c|}{200} & \makecell[c]{\num{.886}\\(\num{.1941})} & \makecell[c]{\num{.887}\\(\num{.1927})}\\
 
-     & \multicolumn{1}{c|}{400} & \makecell[c]{\num{.844}\\(\num{.1416})} & \makecell[c]{\num{.844}\\(\num{.1415})}\\
+ & \multicolumn{1}{c|}{400} & \makecell[c]{\num{.844}\\(\num{.1416})} & \makecell[c]{\num{.844}\\(\num{.1415})}\\
 
-    \multirow{-3}{*}{\centering\arraybackslash MEDIUM} & \multicolumn{1}{c|}{600} & \makecell[c]{\num{.837}\\(\num{.1451})} & \makecell[c]{\num{.837}\\(\num{.1450})}\\
-    \cmidrule{1-4}
-     & \multicolumn{1}{c|}{400} & \makecell[c]{\num{.978}\\(\num{.0124})} & \makecell[c]{\num{.984}\\(\num{.0108})}\\
+\multirow[t]{-3}{*}{\centering\arraybackslash MEDIUM} & \multicolumn{1}{c|}{600} & \makecell[c]{\num{.837}\\(\num{.1451})} & \makecell[c]{\num{.837}\\(\num{.1450})}\\
+\cmidrule{1-4}
+ & \multicolumn{1}{c|}{400} & \makecell[c]{\num{.978}\\(\num{.0124})} & \makecell[c]{\num{.984}\\(\num{.0108})}\\
 
-     & \multicolumn{1}{c|}{800} & \makecell[c]{\num{.976}\\(\num{.0184})} & \makecell[c]{\num{.982}\\(\num{.0162})}\\
+ & \multicolumn{1}{c|}{800} & \makecell[c]{\num{.976}\\(\num{.0184})} & \makecell[c]{\num{.982}\\(\num{.0162})}\\
 
-    \multirow{-3}{*}{\centering\arraybackslash LARGE} & \multicolumn{1}{c|}{1200} & \makecell[c]{\num{.975}\\(\num{.0115})} & \makecell[c]{\num{.980}\\(\num{.0103})}\\
-    \bottomrule
-    \end{tabular}
-    \end{table}
+\multirow[t]{-3}{*}{\centering\arraybackslash LARGE} & \multicolumn{1}{c|}{1200} & \makecell[c]{\num{.975}\\(\num{.0115})} & \makecell[c]{\num{.980}\\(\num{.0103})}\\
+\bottomrule
+\end{tabular}
+\end{table}
+```
 
 ``` r
 ree_boxplt <- 

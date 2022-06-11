@@ -150,12 +150,29 @@ etf_test <- etf_split$test
 
 ## Long-range dependency
 
-SACF and SCCF:
+### Plot
+
+ACF:
+
+```{r gvzacf}
+gvz_acf <- 
+  etf_train %>% 
+  select(GVZ) %>% 
+  forecast::ggAcf(lag.max = 50) +
+  theme_minimal() +
+  theme(
+    panel.border = element_rect(fill = NA),
+    axis.text.y = element_text(size = 5),
+    axis.text.x = element_text(size = 5)
+  ) +
+  labs(title = element_blank())
+gvz_acf
+```
 
 ```{r ovxacf}
 ovx_acf <- 
   etf_train %>% 
-  select(EVZ, OVX) %>% 
+  select(OVX) %>% 
   forecast::ggAcf(lag.max = 50) +
   theme_minimal() +
   theme(
@@ -167,10 +184,62 @@ ovx_acf <-
 ovx_acf
 ```
 
+Prewhitening for CCF:
+
+```{r prewhitem, cache=TRUE}
+gvz_ar <- forecast::Arima(etf_train$GVZ, order = c(30L, 0L, 0L), include.mean = FALSE, include.drift = FALSE)
+ovx_ar <- forecast::Arima(etf_train$OVX, order = c(30L, 0L, 0L), include.mean = FALSE, include.drift = FALSE)
+# prewhitening---------------
+gvz_resid <- gvz_ar$residuals
+ovx_resid <- ovx_ar$residuals
+```
+
+CCF:
+
+```{r residccf}
+resid_ccf <- 
+  data.frame(
+    Prewhitened_GVZ = gvz_resid,
+    Prewhitened_OVX = ovx_resid
+  ) %>% 
+  forecast::ggAcf(lag.max = 50) +
+  theme_minimal() +
+  theme(
+    panel.border = element_rect(fill = NA),
+    axis.text.y = element_text(size = 5),
+    axis.text.x = element_text(size = 5)
+  ) +
+  labs(title = element_blank())
+resid_ccf
+```
+
 ```{r saveacfplot}
+# acf of GVZ---------------
 ggsave(
-  filename = "../output/figs/analysis-lrdacf.pdf", 
+  filename = "../output/figs/analysis-lrdacf-gvz.pdf", 
+  plot = gvz_acf,
+  device = "pdf",
+  scale = .618,
+  width = fig_width, 
+  units = "in",
+  dpi = 1500,
+  limitsize = FALSE
+)
+# acf of OVX---------------
+ggsave(
+  filename = "../output/figs/analysis-lrdacf-ovx.pdf", 
   plot = ovx_acf,
+  device = "pdf",
+  scale = .618,
+  width = fig_width, 
+  units = "in",
+  dpi = 1500,
+  limitsize = FALSE
+)
+# ccf after prewhitening---
+ggsave(
+  filename = "../output/figs/analysis-lrdccf.pdf", 
+  plot = resid_ccf,
   device = "pdf",
   scale = .618,
   width = fig_width, 
