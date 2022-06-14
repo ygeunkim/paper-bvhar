@@ -1,5 +1,5 @@
 
-# Bayesian Vector Autoregressive Heterogeneous Modeling
+# Bayesian Vector Heterogeneous Autoregressive Modeling
 
 <!-- badges: start -->
 <!-- badges: end -->
@@ -28,12 +28,13 @@ This is a repository for researching Bayesian VHAR.
 
 ### Required R packages
 
--   [ygeunkim/bvhar](https://github.com/ygeunkim/bvhar)
+-   [ygeunkim/bvhar](https://github.com/ygeunkim/bvhar): private repo
 -   [tidyverse](https://www.tidyverse.org)
 -   [knitr](https://yihui.org/knitr/)
 -   [kableExtra](https://haozhu233.github.io/kableExtra/)
 -   [parallel](https://stat.ethz.ch/R-manual/R-devel/library/parallel/doc/parallel.pdf)
 -   [foreach](https://github.com/RevolutionAnalytics/foreach)
+-   [gridExtra](https://cran.r-project.org/web/packages/gridExtra/index.html)
 
 ## Results
 

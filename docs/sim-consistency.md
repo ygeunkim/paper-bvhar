@@ -1,7 +1,7 @@
 Simulation for Consistency
 ================
 Young Geun Kim
-10 Jun, 2022
+14 Jun, 2022
 
 -   [Fit Models](#fit-models)
     -   [BVHAR-S](#bvhar-s)
@@ -35,6 +35,8 @@ sim_data <- "../data/processed/dgp_bvhar_consistency.rds"
 library(tidyverse)
 # BVHAR custom package-----------------
 library(bvhar)
+# ggplot grid--------------------------
+library(gridExtra)
 # Set the number of processor cores----
 # cl <- parallel::makeCluster(8, type = "FORK")
 # foreach to use bind------------------
@@ -45,7 +47,7 @@ library(kableExtra)
 # set seed for reproducible result-----
 set.seed(1)
 # width of figure when save------------
-fig_width <- 20
+fig_width <- 21
 ```
 
 Simulated data:
@@ -192,6 +194,15 @@ fit_bvharl_large <- parallel::mclapply(
 
 # Heatmap
 
+``` r
+heatmapfacet_size <- 7
+heatmaplegend_width <- 1
+heatmaplegend_height <- .3
+heatmaplegend_title <- 7
+heatmaplegend_text <- 5
+legend_position <- "bottom"
+```
+
 Bind two coefficients as data frame.
 
 ``` r
@@ -247,12 +258,18 @@ small_s_heatmap <-
   ) +
   theme_minimal() +
   theme(
-    strip.text.x = element_text(size = 20),
+    strip.text.x = element_text(size = heatmapfacet_size),
     axis.ticks = element_blank(),
     axis.text = element_blank(),
-    axis.title = element_blank()
+    axis.title = element_blank(),
+    legend.position = legend_position,
+    legend.key.width = unit(heatmaplegend_width, "cm"),
+    legend.key.height = unit(heatmaplegend_height, "cm"),
+    legend.title = element_text(size = heatmaplegend_title),
+    legend.text = element_text(size = heatmaplegend_text)
   ) +
-  facet_wrap(model ~ .)
+  facet_wrap(model ~ .) +
+  labs(title = "SMALL (T / k = 4)")
 small_s_heatmap
 ```
 
@@ -287,12 +304,18 @@ medium_s_heatmap <-
   ) +
   theme_minimal() +
   theme(
-    strip.text.x = element_text(size = 20),
+    strip.text.x = element_text(size = heatmapfacet_size),
     axis.ticks = element_blank(),
     axis.text = element_blank(),
-    axis.title = element_blank()
+    axis.title = element_blank(),
+    legend.position = legend_position,
+    legend.key.width = unit(heatmaplegend_width, "cm"),
+    legend.key.height = unit(heatmaplegend_height, "cm"),
+    legend.title = element_text(size = heatmaplegend_title),
+    legend.text = element_text(size = heatmaplegend_text)
   ) +
-  facet_wrap(model ~ .)
+  facet_wrap(model ~ .) +
+  labs(title = "MEDIUM (T / k = 8)")
 medium_s_heatmap
 ```
 
@@ -327,16 +350,34 @@ large_s_heatmap <-
   ) +
   theme_minimal() +
   theme(
-    strip.text.x = element_text(size = 20),
+    strip.text.x = element_text(size = heatmapfacet_size),
     axis.ticks = element_blank(),
     axis.text = element_blank(),
-    axis.title = element_blank()
+    axis.title = element_blank(),
+    legend.position = legend_position,
+    legend.key.width = unit(heatmaplegend_width, "cm"),
+    legend.key.height = unit(heatmaplegend_height, "cm"),
+    legend.title = element_text(size = heatmaplegend_title),
+    legend.text = element_text(size = heatmaplegend_text)
   ) +
-  facet_wrap(model ~ .)
+  facet_wrap(model ~ .) +
+  labs(title = "LARGE (T / k = 12)")
 large_s_heatmap
 ```
 
 <img src="../output/figs/sim-consistency-largesheatmap-1.png" width="70%" style="display: block; margin: auto;" />
+
+BVHAR-S grid:
+
+``` r
+heatmap_s_grid <- 
+  arrangeGrob(
+    small_s_heatmap, 
+    medium_s_heatmap, 
+    large_s_heatmap,
+    ncol = 3
+  )
+```
 
 ## BVHAR-L
 
@@ -369,12 +410,18 @@ small_l_heatmap <-
   ) +
   theme_minimal() +
   theme(
-    strip.text.x = element_text(size = 20),
+    strip.text.x = element_text(size = heatmapfacet_size),
     axis.ticks = element_blank(),
     axis.text = element_blank(),
-    axis.title = element_blank()
+    axis.title = element_blank(),
+    legend.position = legend_position,
+    legend.key.width = unit(heatmaplegend_width, "cm"),
+    legend.key.height = unit(heatmaplegend_height, "cm"),
+    legend.title = element_text(size = heatmaplegend_title),
+    legend.text = element_text(size = heatmaplegend_text)
   ) +
-  facet_wrap(model ~ .)
+  facet_wrap(model ~ .) +
+  labs(title = "SMALL (T / k = 4)")
 small_l_heatmap
 ```
 
@@ -407,12 +454,18 @@ medium_l_heatmap <-
   ) +
   theme_minimal() +
   theme(
-    strip.text.x = element_text(size = 20),
+    strip.text.x = element_text(size = heatmapfacet_size),
     axis.ticks = element_blank(),
     axis.text = element_blank(),
-    axis.title = element_blank()
+    axis.title = element_blank(),
+    legend.position = legend_position,
+    legend.key.width = unit(heatmaplegend_width, "cm"),
+    legend.key.height = unit(heatmaplegend_height, "cm"),
+    legend.title = element_text(size = heatmaplegend_title),
+    legend.text = element_text(size = heatmaplegend_text)
   ) +
-  facet_wrap(model ~ .)
+  facet_wrap(model ~ .) +
+  labs(title = "MEDIUM (T / k = 8)")
 medium_l_heatmap
 ```
 
@@ -445,91 +498,59 @@ large_l_heatmap <-
   ) +
   theme_minimal() +
   theme(
-    strip.text.x = element_text(size = 20),
+    strip.text.x = element_text(size = heatmapfacet_size),
     axis.ticks = element_blank(),
     axis.text = element_blank(),
-    axis.title = element_blank()
+    axis.title = element_blank(),
+    legend.position = legend_position,
+    legend.key.width = unit(heatmaplegend_width, "cm"),
+    legend.key.height = unit(heatmaplegend_height, "cm"),
+    legend.title = element_text(size = heatmaplegend_title),
+    legend.text = element_text(size = heatmaplegend_text)
   ) +
-  facet_wrap(model ~ .)
+  facet_wrap(model ~ .) +
+  labs(title = "LARGE (T / k = 12)")
 large_l_heatmap
 ```
 
 <img src="../output/figs/sim-consistency-largelheatmap-1.png" width="70%" style="display: block; margin: auto;" />
 
+BVHAR-L grid:
+
+``` r
+heatmap_l_grid <- 
+  arrangeGrob(
+    small_l_heatmap, 
+    medium_l_heatmap, 
+    large_l_heatmap,
+    ncol = 3
+  )
+```
+
 ## Save
 
 ``` r
 ggsave(
-  filename = "../output/figs/simulation-smallsheatmap.pdf", 
-  plot = small_s_heatmap,
+  filename = "../output/figs/simulation-sheatmap.pdf", 
+  plot = heatmap_s_grid,
   device = "pdf",
-  scale = .618,
   width = fig_width, 
-  units = "in",
+  height = .5 * fig_width,
+  units = "cm",
   dpi = 1500,
   limitsize = FALSE
 )
-#> Saving 12.4 x 2.29 in image
 #------------------
 ggsave(
-  filename = "../output/figs/simulation-medsheatmap.pdf", 
-  plot = medium_s_heatmap,
+  filename = "../output/figs/simulation-lheatmap.pdf", 
+  plot = heatmap_l_grid,
   device = "pdf",
-  scale = .618,
   width = fig_width, 
-  units = "in",
+  height = .5 * fig_width,
+  units = "cm",
   dpi = 1500,
   limitsize = FALSE
 )
-#> Saving 12.4 x 2.29 in image
-#------------------
-ggsave(
-  filename = "../output/figs/simulation-largesheatmap.pdf", 
-  plot = large_s_heatmap,
-  device = "pdf",
-  scale = .618,
-  width = fig_width, 
-  units = "in",
-  dpi = 1500,
-  limitsize = FALSE
-)
-#> Saving 12.4 x 2.29 in image
-# BVHAR-L----------
-ggsave(
-  filename = "../output/figs/simulation-smalllheatmap.pdf", 
-  plot = small_l_heatmap,
-  device = "pdf",
-  scale = .618,
-  width = fig_width, 
-  units = "in",
-  dpi = 1500,
-  limitsize = FALSE
-)
-#> Saving 12.4 x 2.29 in image
-#------------------
-ggsave(
-  filename = "../output/figs/simulation-medlheatmap.pdf", 
-  plot = medium_l_heatmap,
-  device = "pdf",
-  scale = .618,
-  width = fig_width, 
-  units = "in",
-  dpi = 1500,
-  limitsize = FALSE
-)
-#> Saving 12.4 x 2.29 in image
-#------------------
-ggsave(
-  filename = "../output/figs/simulation-largelheatmap.pdf", 
-  plot = large_l_heatmap,
-  device = "pdf",
-  scale = .618,
-  width = fig_width, 
-  units = "in",
-  dpi = 1500,
-  limitsize = FALSE
-)
-#> Saving 12.4 x 2.29 in image
 ```
 
 # Iterations
@@ -870,11 +891,10 @@ ggsave(
   filename = "../output/figs/simulation-ree.pdf", 
   plot = ree_boxplt,
   device = "pdf",
-  scale = .618,
   width = fig_width, 
-  units = "in",
+  height = .618 * fig_width,
+  units = "cm",
   dpi = 1500,
   limitsize = FALSE
 )
-#> Saving 12.4 x 2.29 in image
 ```

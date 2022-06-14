@@ -1,7 +1,7 @@
 Empirical Analysis
 ================
 Young Geun Kim
-11 Jun, 2022
+14 Jun, 2022
 
 -   [Data](#data)
     -   [Split](#split)
@@ -16,7 +16,6 @@ Young Geun Kim
     -   [Hyperparamers](#hyperparamers)
 -   [Errors](#errors)
     -   [Relative Errors](#relative-errors)
-    -   [Piecewise Errors](#piecewise-errors)
 -   [Intervals](#intervals)
 
 ``` r
@@ -28,12 +27,14 @@ etf_data <- "../data/processed/cboe_etf.rds"
 library(tidyverse)
 # BVHAR custom package-----------------
 library(bvhar)
+# ggplot grid--------------------------
+library(gridExtra)
 # Set the number of processor cores----
 cl <- parallel::makeCluster(8, type = "FORK")
 # set seed for reproducible result-----
 set.seed(1)
 # width of figure when save------------
-fig_width <- 20
+fig_width <- 21
 ```
 
 ``` r
@@ -108,13 +109,12 @@ ggsave(
   filename = "../output/figs/analysis-dataplot.pdf", 
   plot = data_plt,
   device = "pdf",
-  scale = .618,
-  width = fig_width, 
-  units = "in",
+  width = fig_width,
+  height = .618 * fig_width,
+  units = "cm",
   dpi = 1500,
   limitsize = FALSE
 )
-#> Saving 12.4 x 2.29 in image
 ```
 
 ``` r
@@ -137,107 +137,111 @@ ACF:
 gvz_acf <- 
   etf_train %>% 
   select(GVZ) %>% 
-  forecast::ggAcf(lag.max = 50) +
-  theme_minimal() +
-  theme(
-    panel.border = element_rect(fill = NA),
-    axis.text.y = element_text(size = 5),
-    axis.text.x = element_text(size = 5)
-  ) +
-  labs(title = element_blank())
+  forecast::ggAcf(lag.max = 50, plot = FALSE)
 #> Registered S3 method overwritten by 'quantmod':
 #>   method            from
 #>   as.zoo.data.frame zoo
-gvz_acf
 ```
-
-<img src="../output/figs/analysis-gvzacf-1.png" width="70%" style="display: block; margin: auto;" />
 
 ``` r
-ovx_acf <- 
+miner_acf <- 
   etf_train %>% 
-  select(OVX) %>% 
-  forecast::ggAcf(lag.max = 50) +
-  theme_minimal() +
-  theme(
-    panel.border = element_rect(fill = NA),
-    axis.text.y = element_text(size = 5),
-    axis.text.x = element_text(size = 5)
-  ) +
-  labs(title = element_blank())
-ovx_acf
+  select(VXGDX) %>% 
+  forecast::ggAcf(lag.max = 50, plot = FALSE)
 ```
-
-<img src="../output/figs/analysis-ovxacf-1.png" width="70%" style="display: block; margin: auto;" />
 
 Prewhitening for CCF:
 
 ``` r
-gvz_ar <- forecast::Arima(etf_train$GVZ, order = c(30L, 0L, 0L), include.mean = FALSE, include.drift = FALSE)
-ovx_ar <- forecast::Arima(etf_train$OVX, order = c(30L, 0L, 0L), include.mean = FALSE, include.drift = FALSE)
+gvz_ar <- forecast::Arima(etf_train$GVZ, order = c(1L, 0L, 0L), include.mean = FALSE, include.drift = FALSE)
+miner_ar <- forecast::Arima(etf_train$VXGDX, order = c(1L, 0L, 0L), include.mean = FALSE, include.drift = FALSE)
 # prewhitening---------------
 gvz_resid <- gvz_ar$residuals
-ovx_resid <- ovx_ar$residuals
+miner_resid <- miner_ar$residuals
 ```
 
-CCF:
+ACF and CCF into one plot:
 
 ``` r
-resid_ccf <- 
+# Compute ccf-----------------------------------
+ccf_compute <- 
   data.frame(
-    Prewhitened_GVZ = gvz_resid,
-    Prewhitened_OVX = ovx_resid
+    gvz = gvz_resid,
+    miner = miner_resid
   ) %>% 
-  forecast::ggAcf(lag.max = 50) +
+  forecast::ggAcf(lag.max = 50, plot = FALSE)
+# testing--------------------------------------
+bartlett_line <- qnorm(.05 / 2, lower.tail = FALSE) / sqrt(ccf_compute$n.used)
+# Change acf values to not-prewhitened one-----
+ccf_compute$acf[, 1, 1] <- gvz_acf$acf[,, 1]
+ccf_compute$acf[, 2, 2] <- miner_acf$acf[,, 1]
+# Data frame-----------------------------------
+ccf_gvz <- ccf_compute$acf[-1,, 1]
+colnames(ccf_gvz) <- c("GVZ", "VXGDX")
+ccf_gvz <- cbind(ccf_gvz, data.frame(idx = "GVZ", lag = 1:50))
+ccf_miner <- ccf_compute$acf[-1,, 2]
+colnames(ccf_miner) <- c("GVZ", "VXGDX")
+ccf_miner <- cbind(ccf_miner, data.frame(idx = "VXGDX", lag = 1:50))
+ccf_df <- 
+  rbind(ccf_gvz, ccf_miner) %>% 
+  pivot_longer(c(GVZ, VXGDX), names_to = "series_id", values_to = "acf") %>% 
+  unite(col = "index", c(idx, series_id)) %>% 
+  mutate(index = factor(index, levels = c("GVZ_GVZ", "VXGDX_GVZ", "GVZ_VXGDX", "VXGDX_VXGDX")))
+# Title of each plot
+give_title <- function(string) {
+  str_split(string, pattern = "\\_", simplify = TRUE) %>% 
+    apply(
+      1,
+      function(x) {
+        if (x[1] == x[2]) {
+          return(paste("ACF for", x[1]))
+        } else {
+          y1 <- paste("Prewhitened", x[1])
+          y2 <- paste("Prewhitened", x[2])
+          return(paste("CCF for", y1, "and", y2))
+        }
+      }
+    )
+}
+# Draw CCF-------------------------------------
+resid_ccf <- 
+  ccf_df %>%
+  ggplot(aes(x = lag)) +
+  geom_linerange(aes(ymin = 0, ymax = acf)) +
+  facet_wrap(
+    index ~ .,
+    scales = "free_y",
+    labeller = labeller(index = give_title)
+  ) +
+  geom_hline(yintercept = bartlett_line, col = "blue", linetype = "dashed") +
+  geom_hline(yintercept = -bartlett_line, col = "blue", linetype = "dashed") +
   theme_minimal() +
   theme(
     panel.border = element_rect(fill = NA),
     axis.text.y = element_text(size = 5),
     axis.text.x = element_text(size = 5)
   ) +
-  labs(title = element_blank())
+  labs(
+    title = element_blank(),
+    x = "Lag",
+    y = "SACF"
+  )
 resid_ccf
 ```
 
 <img src="../output/figs/analysis-residccf-1.png" width="70%" style="display: block; margin: auto;" />
 
 ``` r
-# acf of GVZ---------------
-ggsave(
-  filename = "../output/figs/analysis-lrdacf-gvz.pdf", 
-  plot = gvz_acf,
-  device = "pdf",
-  scale = .618,
-  width = fig_width, 
-  units = "in",
-  dpi = 1500,
-  limitsize = FALSE
-)
-#> Saving 12.4 x 2.29 in image
-# acf of OVX---------------
-ggsave(
-  filename = "../output/figs/analysis-lrdacf-ovx.pdf", 
-  plot = ovx_acf,
-  device = "pdf",
-  scale = .618,
-  width = fig_width, 
-  units = "in",
-  dpi = 1500,
-  limitsize = FALSE
-)
-#> Saving 12.4 x 2.29 in image
-# ccf after prewhitening---
 ggsave(
   filename = "../output/figs/analysis-lrdccf.pdf", 
   plot = resid_ccf,
   device = "pdf",
-  scale = .618,
   width = fig_width, 
-  units = "in",
+  height = .618 * fig_width, 
+  units = "cm",
   dpi = 1500,
   limitsize = FALSE
 )
-#> Saving 12.4 x 2.29 in image
 ```
 
 # Model
@@ -321,10 +325,8 @@ bvar_init <- set_bvar(
 #> ========================================================
 #> 
 #> Setting for 'sigma':
-#>   GVZCLS    OVXCLS  VXFXICLS  VXEEMCLS  VXSLVCLS    EVZCLS  VXXLECLS  VXGDXCLS  
-#>     1.89      6.11      2.49      1.80      4.23      1.30      1.94      5.47  
-#> VXEWZCLS  
-#>     5.74  
+#>   GVZ    OVX  VXFXI  VXEEM  VXSLV    EVZ  VXXLE  VXGDX  VXEWZ  
+#>  1.89   6.11   2.49   1.80   4.23   1.30   1.94   5.47   5.74  
 #> 
 #> Setting for 'lambda':
 #>         
@@ -378,10 +380,8 @@ bvhar_init <- set_bvhar(
 #> ========================================================
 #> 
 #> Setting for 'sigma':
-#>   GVZCLS    OVXCLS  VXFXICLS  VXEEMCLS  VXSLVCLS    EVZCLS  VXXLECLS  VXGDXCLS  
-#>     2.36      4.34      2.64      2.38      3.65      1.22      2.47      4.71  
-#> VXEWZCLS  
-#>     5.30  
+#>   GVZ    OVX  VXFXI  VXEEM  VXSLV    EVZ  VXXLE  VXGDX  VXEWZ  
+#>  2.36   4.34   2.64   2.38   3.65   1.22   2.47   4.71   5.30  
 #> 
 #> Setting for 'lambda':
 #>         
@@ -441,10 +441,8 @@ bvhar_vhar_init <- set_weight_bvhar(
 #> ========================================================
 #> 
 #> Setting for 'sigma':
-#>   GVZCLS    OVXCLS  VXFXICLS  VXEEMCLS  VXSLVCLS    EVZCLS  VXXLECLS  VXGDXCLS  
-#>     3.07      9.51      3.25      3.48      5.54      1.00      3.82      7.01  
-#> VXEWZCLS  
-#>     6.70  
+#>   GVZ    OVX  VXFXI  VXEEM  VXSLV    EVZ  VXXLE  VXGDX  VXEWZ  
+#>  3.07   9.51   3.25   3.48   5.54   1.00   3.82   7.01   6.70  
 #> 
 #> Setting for 'lambda':
 #>        
@@ -621,68 +619,18 @@ get_rmfe_tr(
 #> $h = 20$ 0.737 0.710   0.688   0.540
 ```
 
-## Piecewise Errors
-
-``` r
-err_plt <- 
-  roll_list[[1]] %>% 
-  gg_loss(
-    etf_test, 
-    mean_line = TRUE, 
-    line_param = list(size = .3), 
-    mean_param = list(alpha = .5, size = .3)
-  ) +
-  theme_minimal() +
-  theme(
-    axis.text.x = element_text(angle = -45, vjust = -1, size = 6),
-    panel.border = element_rect(fill = NA),
-    legend.position = "top"
-  ) +
-  scale_colour_viridis_d(labels = c("BVAR", "BVHAR-S", "BVHAR-L", "VAR", "VHAR"))
-err_plt
-```
-
-<img src="../output/figs/analysis-piecewise-error-1.png" width="70%" style="display: block; margin: auto;" />
-
-``` r
-ggsave(
-  filename = "../output/figs/analysis-piecewise-error.pdf", 
-  plot = err_plt,
-  device = "pdf",
-  scale = .618,
-  width = fig_width, 
-  units = "in",
-  dpi = 1500,
-  limitsize = FALSE
-)
-#> Saving 12.4 x 2.29 in image
-```
-
 # Intervals
 
 ``` r
+# predict-----------------------
 pred_var <- predict(fit_var, h)
 pred_vhar <- predict(fit_vhar, h)
 pred_bvar <- predict(fit_bvar, h)
 pred_bvhar <- predict(fit_bvhar, h)
 pred_bvhar_vhar <- predict(fit_bvhar_vhar, h)
+# model name---------------------
+bayesmod_name <- c("BVAR_Minnesota" = "BVAR", "BVHAR_MN_VAR" = "BVHAR-S", "BVHAR_MN_VHAR" = "BVHAR-L", "VAR" = "VAR", "VHAR" = "VHAR")
 ```
-
-<!-- ```{r credplot} -->
-<!-- autoplot(pred_var, x_cut = 850, ci_alpha = .8, type = "wrap") + -->
-<!--   autolayer(pred_vhar, ci_alpha = .7) + -->
-<!--   autolayer(pred_bvar, ci_alpha = .6) + -->
-<!--   autolayer(pred_bvhar, ci_alpha = .5) + -->
-<!--   autolayer(pred_bvhar_vhar, ci_alpha = .4) + -->
-<!--   geom_eval(etf_test, num_train = nrow(etf_train), alpha = .5) + -->
-<!--   theme_minimal() + -->
-<!--   theme( -->
-<!--     panel.border = element_rect(fill = NA), -->
-<!--     axis.text.x = element_blank(), -->
-<!--     legend.position = "top" -->
-<!--   ) + -->
-<!--   scale_fill_discrete(labels = c("BVAR", "BVHAR-S", "BVHAR-L", "VAR", "VHAR")) -->
-<!-- ``` -->
 
 ``` r
 interval_plt <- 
@@ -691,29 +639,60 @@ interval_plt <-
   autolayer(pred_bvar, ci_alpha = .6) +
   autolayer(pred_bvhar, ci_alpha = .5) +
   autolayer(pred_bvhar_vhar, ci_alpha = .4) +
-  geom_eval(etf_test, num_train = nrow(etf_train), alpha = .5) +
+  geom_eval(etf_test, num_train = nrow(etf_train), colour = "#000000", alpha = .5) +
   theme_minimal() +
   theme(
     panel.border = element_rect(fill = NA),
     axis.text.x = element_blank(),
     legend.position = "top"
   ) +
-  scale_fill_viridis_d(labels = c("BVAR", "BVHAR-S", "BVHAR-L", "VAR", "VHAR"))
+  scale_color_discrete(labels = bayesmod_name) +
+  scale_fill_discrete(labels = bayesmod_name)
 interval_plt
 ```
 
 <img src="../output/figs/analysis-credplot-1.png" width="70%" style="display: block; margin: auto;" />
 
 ``` r
+bayesmod_plt <- 
+  autoplot(pred_bvar, x_cut = 860, ci_alpha = .8, type = "wrap") +
+  autolayer(pred_bvhar, ci_alpha = .7) +
+  autolayer(pred_bvhar_vhar, ci_alpha = .6) +
+  geom_eval(etf_test, num_train = nrow(etf_train), colour = "#000000", alpha = .5) +
+  theme_minimal() +
+  theme(
+    panel.border = element_rect(fill = NA),
+    axis.text.x = element_blank(),
+    legend.position = "top"
+  ) +
+  scale_color_discrete(labels = bayesmod_name) +
+  scale_fill_discrete(labels = bayesmod_name)
+bayesmod_plt
+```
+
+<img src="../output/figs/analysis-bayescredplot-1.png" width="70%" style="display: block; margin: auto;" />
+
+``` r
+# Every result---------------------------
 ggsave(
   filename = "../output/figs/analysis-credplot.pdf", 
   plot = interval_plt,
   device = "pdf",
-  scale = .618,
   width = fig_width, 
-  units = "in",
+  height = .618 * fig_width, 
+  units = "cm",
   dpi = 1500,
   limitsize = FALSE
 )
-#> Saving 12.4 x 2.29 in image
+# Bayesian result-----------------------
+ggsave(
+  filename = "../output/figs/analysis-bayespred.pdf", 
+  plot = bayesmod_plt,
+  device = "pdf",
+  width = fig_width, 
+  height = .618 * fig_width, 
+  units = "cm",
+  dpi = 1500,
+  limitsize = FALSE
+)
 ```
