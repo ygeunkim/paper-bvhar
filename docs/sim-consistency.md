@@ -1,7 +1,7 @@
 Simulation for Consistency
 ================
 Young Geun Kim
-14 Jun, 2022
+15 Jun, 2022
 
 -   [Fit Models](#fit-models)
     -   [BVHAR-S](#bvhar-s)
@@ -266,10 +266,11 @@ small_s_heatmap <-
     legend.key.width = unit(heatmaplegend_width, "cm"),
     legend.key.height = unit(heatmaplegend_height, "cm"),
     legend.title = element_text(size = heatmaplegend_title),
-    legend.text = element_text(size = heatmaplegend_text)
+    legend.text = element_text(size = heatmaplegend_text),
+    text = element_text(family = "serif")
   ) +
   facet_wrap(model ~ .) +
-  labs(title = "SMALL (T / k = 4)")
+  labs(title = "SMALL (k = 10)")
 small_s_heatmap
 ```
 
@@ -312,10 +313,11 @@ medium_s_heatmap <-
     legend.key.width = unit(heatmaplegend_width, "cm"),
     legend.key.height = unit(heatmaplegend_height, "cm"),
     legend.title = element_text(size = heatmaplegend_title),
-    legend.text = element_text(size = heatmaplegend_text)
+    legend.text = element_text(size = heatmaplegend_text),
+    text = element_text(family = "serif")
   ) +
   facet_wrap(model ~ .) +
-  labs(title = "MEDIUM (T / k = 8)")
+  labs(title = "MEDIUM (k = 50)")
 medium_s_heatmap
 ```
 
@@ -358,10 +360,11 @@ large_s_heatmap <-
     legend.key.width = unit(heatmaplegend_width, "cm"),
     legend.key.height = unit(heatmaplegend_height, "cm"),
     legend.title = element_text(size = heatmaplegend_title),
-    legend.text = element_text(size = heatmaplegend_text)
+    legend.text = element_text(size = heatmaplegend_text),
+    text = element_text(family = "serif")
   ) +
   facet_wrap(model ~ .) +
-  labs(title = "LARGE (T / k = 12)")
+  labs(title = "LARGE (k = 100)")
 large_s_heatmap
 ```
 
@@ -418,10 +421,11 @@ small_l_heatmap <-
     legend.key.width = unit(heatmaplegend_width, "cm"),
     legend.key.height = unit(heatmaplegend_height, "cm"),
     legend.title = element_text(size = heatmaplegend_title),
-    legend.text = element_text(size = heatmaplegend_text)
+    legend.text = element_text(size = heatmaplegend_text),
+    text = element_text(family = "serif")
   ) +
   facet_wrap(model ~ .) +
-  labs(title = "SMALL (T / k = 4)")
+  labs(title = "SMALL (k = 10)")
 small_l_heatmap
 ```
 
@@ -462,10 +466,11 @@ medium_l_heatmap <-
     legend.key.width = unit(heatmaplegend_width, "cm"),
     legend.key.height = unit(heatmaplegend_height, "cm"),
     legend.title = element_text(size = heatmaplegend_title),
-    legend.text = element_text(size = heatmaplegend_text)
+    legend.text = element_text(size = heatmaplegend_text),
+    text = element_text(family = "serif")
   ) +
   facet_wrap(model ~ .) +
-  labs(title = "MEDIUM (T / k = 8)")
+  labs(title = "MEDIUM (k = 50)")
 medium_l_heatmap
 ```
 
@@ -506,10 +511,11 @@ large_l_heatmap <-
     legend.key.width = unit(heatmaplegend_width, "cm"),
     legend.key.height = unit(heatmaplegend_height, "cm"),
     legend.title = element_text(size = heatmaplegend_title),
-    legend.text = element_text(size = heatmaplegend_text)
+    legend.text = element_text(size = heatmaplegend_text),
+    text = element_text(family = "serif")
   ) +
   facet_wrap(model ~ .) +
-  labs(title = "LARGE (T / k = 12)")
+  labs(title = "LARGE (k = 100)")
 large_l_heatmap
 ```
 
@@ -874,7 +880,8 @@ ree_boxplt <-
   theme_minimal() +
   theme(
     panel.border = element_rect(fill = NA), 
-    legend.position = "top"
+    legend.position = "top",
+    text = element_text(family = "serif")
   ) +
   labs(
     x = "DGP",

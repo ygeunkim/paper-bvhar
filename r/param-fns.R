@@ -116,45 +116,53 @@ report_hyperparam <- function(spec_list,
   if (length(spec_list) != 3) {
     stop("Wrong 'spec_list'.")
   }
-  if (any(names(spec_list) != c("small", "medium", "large"))) {
+  if (any(names(spec_list) != c("bvar", "bvhar_s", "bvhar_l"))) {
     stop("Wrong names of 'spec_list'.")
   }
-  size_id <- c("SMALL", "MEDIUM", "LARGE")
-  large_dim <- length(spec_list$large[[1]]$sigma)
-  cols_add <- list()
-  dim_add <- 0
-  hyperparam_table <- foreach(i = seq_along(spec_list), .combine = rbind) %do% {
-    error_table <- get_hyperparam(spec_list[[i]], report_true = report_true) # small-medium-large
-    dim_add <- large_dim - length(spec_list[[i]][[1]]$sigma)
-    cols_add <- 
-      rep(NA, dim_add) %>% 
-      as.list()
-    if (dim_add != 0) {
-      names(cols_add) <- paste0("y", (length(spec_list[[i]][[1]]$sigma) + 1):large_dim)
-    }
-    error_table %>% 
-      bind_cols(cols_add) %>% 
-      add_column(size = size_id[i], .before = 1)
-  }
-  colnames(hyperparam_table)[1:3] <- c(" ", "  ", "   ")
-  hyperparam_table %>% 
+  var_names <- names(spec_list[[1]]$sigma)
+  errortab_list <- 
+    lapply(
+      seq_along(spec_list),
+      function(id) {
+        kable_hyperparam(spec_list[[id]], kable = FALSE) %>% 
+          rownames_to_column(var = "hyperparam") %>% 
+          add_column(mod = spec_list[[id]]$prior, .before = 1)
+      }
+    )
+  error_tab <- bind_rows(errortab_list)
+  error_tab %>% 
+    mutate(
+      mod = case_when(
+        mod == "Minnesota" ~ "BVAR",
+        mod == "MN_VAR" ~ "BVHAR-S",
+        mod == "MN_VHAR" ~ "BVHAR-L"
+      ),
+      hyperparam = case_when(
+        hyperparam == "sigma" ~ "$\\sigma_j$",
+        hyperparam == "lambda" ~ "$\\lambda$",
+        hyperparam == "delta" ~ "$\\delta_j$ ",
+        hyperparam == "daily" ~ "$d_j$",
+        hyperparam == "weekly" ~ "$w_j$",
+        hyperparam == "monthly" ~ "$m_j$"
+      )
+    ) %>% 
     kable(
       format = "latex",
       booktabs = TRUE,
-      longtable = TRUE,
+      col.names = c("", "", var_names),
+      digits = 4,
       escape = FALSE,
-      # col.names = NULL,
       caption = caption,
       label = label
     ) %>% 
     kable_paper(
       full_width = FALSE,
       font_size = size,
-      latex_options = c("repeat_header")
+      latex_options = c("scale_down")
     ) %>% 
     collapse_rows(
       columns = 1:2,
-      latex_hline = "custom",
+      latex_hline = "major",
       custom_latex_hline = 1:2,
       row_group_label_position = "stack"
     )

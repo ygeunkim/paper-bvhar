@@ -1,7 +1,7 @@
 Empirical Analysis
 ================
 Young Geun Kim
-14 Jun, 2022
+15 Jun, 2022
 
 -   [Data](#data)
     -   [Split](#split)
@@ -92,8 +92,8 @@ data_plt <-
   theme_minimal() +
   theme(
     panel.border = element_rect(fill = NA),
-    # strip.text = element_text(size = 5),
-    axis.text.y = element_text(size = 5)
+    axis.text.y = element_text(size = 5),
+    text = element_text(family = "serif")
   ) +
   labs(
     x = element_blank(),
@@ -103,6 +103,8 @@ data_plt
 ```
 
 <img src="../output/figs/analysis-dataplot-1.png" width="70%" style="display: block; margin: auto;" />
+
+Save:
 
 ``` r
 ggsave(
@@ -219,7 +221,8 @@ resid_ccf <-
   theme(
     panel.border = element_rect(fill = NA),
     axis.text.y = element_text(size = 5),
-    axis.text.x = element_text(size = 5)
+    axis.text.x = element_text(size = 5),
+    text = element_text(family = "serif")
   ) +
   labs(
     title = element_blank(),
@@ -230,6 +233,8 @@ resid_ccf
 ```
 
 <img src="../output/figs/analysis-residccf-1.png" width="70%" style="display: block; margin: auto;" />
+
+Save:
 
 ``` r
 ggsave(
@@ -474,6 +479,58 @@ parallel::stopCluster(cl)
 
 ## Hyperparamers
 
+``` r
+spec_list <- list(
+  bvar = bvar_optim$spec,
+  bvhar_s = bvhar_var_optim$spec,
+  bvhar_l = bvhar_vhar_optim$spec
+)
+```
+
+``` r
+report_hyperparam(spec_list = spec_list, report_true = TRUE, caption = "Hyperparameter Selection", label = "analysis-emp") %>% 
+  writeLines()
+\begin{table}
+
+\caption{\label{tab:analysis-emp}Hyperparameter Selection}
+\centering
+\resizebox{\linewidth}{!}{
+\begin{tabular}[t]{llrrrrrrrrr}
+\toprule
+ &  & GVZ & OVX & VXFXI & VXEEM & VXSLV & EVZ & VXXLE & VXGDX & VXEWZ\\
+\midrule
+\addlinespace[0.3em]
+\multicolumn{11}{l}{\textbf{BVAR}}\\
+\hspace{1em} & $\sigma_j$ & 1.8924 & 6.107 & 2.4877 & 1.7998 & 4.226 & 1.301 & 1.936 & 5.474 & 5.7440\\
+
+\hspace{1em} & $\lambda$ & 0.0279 &  &  &  &  &  &  &  & \\
+
+\hspace{1em} & $\delta_j$ & 0.8953 & 0.976 & 0.9306 & 0.9475 & 0.881 & 0.966 & 0.965 & 0.944 & 0.9703\\
+\cmidrule{1-11}
+\addlinespace[0.3em]
+\multicolumn{11}{l}{\textbf{BVHAR-S}}\\
+\hspace{1em} & $\sigma_j$ & 2.3644 & 4.341 & 2.6413 & 2.3780 & 3.646 & 1.223 & 2.469 & 4.712 & 5.2994\\
+
+\hspace{1em} & $\lambda$ & 0.0332 &  &  &  &  &  &  &  & \\
+
+\hspace{1em} & $\delta_j$ & 0.8784 & 0.973 & 0.9357 & 0.9454 & 0.861 & 0.956 & 0.956 & 0.938 & 0.9729\\
+\cmidrule{1-11}
+\addlinespace[0.3em]
+\multicolumn{11}{l}{\textbf{BVHAR-L}}\\
+\hspace{1em} & $\sigma_j$ & 3.0711 & 9.511 & 3.2453 & 3.4786 & 5.544 & 1.000 & 3.818 & 7.012 & 6.6986\\
+
+\hspace{1em} & $\lambda$ & 0.0001 &  &  &  &  &  &  &  & \\
+
+\hspace{1em} & $d_j$ & 0.8108 & 0.913 & 0.9362 & 0.8638 & 0.766 & 0.930 & 0.908 & 0.846 & 0.9587\\
+
+\hspace{1em} & $w_j$ & 0.1634 & 0.157 & 0.0171 & 0.0987 & 0.238 & 0.010 & 0.010 & 0.200 & 0.0100\\
+
+\hspace{1em} & $m_j$ & 0.2121 & 0.010 & 0.0737 & 0.2057 & 0.234 & 0.166 & 0.189 & 0.102 & 0.0376\\
+\bottomrule
+\end{tabular}}
+\end{table}
+```
+
 # Errors
 
 ``` r
@@ -644,7 +701,8 @@ interval_plt <-
   theme(
     panel.border = element_rect(fill = NA),
     axis.text.x = element_blank(),
-    legend.position = "top"
+    legend.position = "top",
+    text = element_text(family = "serif")
   ) +
   scale_color_discrete(labels = bayesmod_name) +
   scale_fill_discrete(labels = bayesmod_name)
@@ -663,7 +721,8 @@ bayesmod_plt <-
   theme(
     panel.border = element_rect(fill = NA),
     axis.text.x = element_blank(),
-    legend.position = "top"
+    legend.position = "top",
+    text = element_text(family = "serif")
   ) +
   scale_color_discrete(labels = bayesmod_name) +
   scale_fill_discrete(labels = bayesmod_name)

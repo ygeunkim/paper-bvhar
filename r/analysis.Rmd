@@ -117,8 +117,8 @@ data_plt <-
   theme_minimal() +
   theme(
     panel.border = element_rect(fill = NA),
-    # strip.text = element_text(size = 5),
-    axis.text.y = element_text(size = 5)
+    axis.text.y = element_text(size = 5),
+    text = element_text(family = "serif")
   ) +
   labs(
     x = element_blank(),
@@ -126,6 +126,8 @@ data_plt <-
   )
 data_plt
 ```
+
+Save:
 
 ```{r savedataplot}
 ggsave(
@@ -239,7 +241,8 @@ resid_ccf <-
   theme(
     panel.border = element_rect(fill = NA),
     axis.text.y = element_text(size = 5),
-    axis.text.x = element_text(size = 5)
+    axis.text.x = element_text(size = 5),
+    text = element_text(family = "serif")
   ) +
   labs(
     title = element_blank(),
@@ -249,6 +252,7 @@ resid_ccf <-
 resid_ccf
 ```
 
+Save:
 
 ```{r saveacfplot}
 ggsave(
@@ -405,6 +409,19 @@ parallel::stopCluster(cl)
 
 ## Hyperparamers
 
+```{r speclist}
+spec_list <- list(
+  bvar = bvar_optim$spec,
+  bvhar_s = bvhar_var_optim$spec,
+  bvhar_l = bvhar_vhar_optim$spec
+)
+```
+
+```{r reportspec, comment=NULL}
+report_hyperparam(spec_list = spec_list, report_true = TRUE, caption = "Hyperparameter Selection", label = "analysis-emp") %>% 
+  writeLines()
+```
+
 
 # Errors
 
@@ -460,7 +477,6 @@ roll_list <-
     mc.cores = 8
   )
 ```
-
 
 ## Relative Errors
 
@@ -543,7 +559,8 @@ interval_plt <-
   theme(
     panel.border = element_rect(fill = NA),
     axis.text.x = element_blank(),
-    legend.position = "top"
+    legend.position = "top",
+    text = element_text(family = "serif")
   ) +
   scale_color_discrete(labels = bayesmod_name) +
   scale_fill_discrete(labels = bayesmod_name)
@@ -560,7 +577,8 @@ bayesmod_plt <-
   theme(
     panel.border = element_rect(fill = NA),
     axis.text.x = element_blank(),
-    legend.position = "top"
+    legend.position = "top",
+    text = element_text(family = "serif")
   ) +
   scale_color_discrete(labels = bayesmod_name) +
   scale_fill_discrete(labels = bayesmod_name)
