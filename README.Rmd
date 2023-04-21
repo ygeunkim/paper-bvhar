@@ -44,7 +44,9 @@ This is a repository for researching Bayesian VHAR.
 
 ### Required R packages
 
-- [ygeunkim/bvhar](https://github.com/ygeunkim/bvhar): private repo
+- [ygeunkim/bvhar](https://github.com/ygeunkim/bvhar)
+    - v0.9.0
+    - v0.12.0
 - [tidyverse](https://www.tidyverse.org)
 - [knitr](https://yihui.org/knitr/)
 - [kableExtra](https://haozhu233.github.io/kableExtra/)
