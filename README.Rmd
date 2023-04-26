@@ -21,6 +21,7 @@ options(digits = 3)
 # Bayesian Vector Heterogeneous Autoregressive Modeling
 
 <!-- badges: start -->
+[![STATUS](https://img.shields.io/badge/JSCS-Under%20review-brightgreen.svg)](https://img.shields.io/badge/JSCS-Under%20review-brightgreen)
 <!-- badges: end -->
 
 ## Overview
@@ -29,6 +30,7 @@ This is a repository for researching Bayesian VHAR.
 
 - Extend BVAR to vector HAR model
 - Two-forms of priors: BVHAR-S and BVHAR-L
+- Posterior consistency
 - Compare the forecasting performance
 
 ### Files
@@ -46,7 +48,7 @@ This is a repository for researching Bayesian VHAR.
 
 - [ygeunkim/bvhar](https://github.com/ygeunkim/bvhar)
     - v0.9.0
-    - v0.12.0
+    - v0.12.0: for MVT generation
 - [tidyverse](https://www.tidyverse.org)
 - [knitr](https://yihui.org/knitr/)
 - [kableExtra](https://haozhu233.github.io/kableExtra/)
@@ -58,7 +60,8 @@ This is a repository for researching Bayesian VHAR.
 
 ### Simulation
 
-- [Consistency](https://github.com/ygeunkim/paper-bvhar/blob/master/docs/sim-consistency.md) Consistency Simulation
+- [Consistency](https://github.com/ygeunkim/paper-bvhar/blob/master/docs/sim-consistency.md) Posterior Consistency Simulation
+- [MVT](https://github.com/ygeunkim/paper-bvhar/blob/master/docs/sim-stylized.md) Simulation with MVT-generated innovation
 
 ### Empirical analysis
 
