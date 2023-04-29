@@ -1,30 +1,30 @@
 Simulation for Consistency with MVT Innovations
 ================
 Young Geun Kim
-21 Apr, 2023
+29 Apr, 2023
 
-- <a href="#fit-models" id="toc-fit-models">Fit Models</a>
-  - <a href="#bvhar-s" id="toc-bvhar-s">BVHAR-S</a>
-    - <a href="#small" id="toc-small">SMALL</a>
-    - <a href="#medium" id="toc-medium">MEDIUM</a>
-    - <a href="#large" id="toc-large">LARGE</a>
-  - <a href="#bvhar-l" id="toc-bvhar-l">BVHAR-L</a>
-    - <a href="#small-1" id="toc-small-1">SMALL</a>
-    - <a href="#medium-1" id="toc-medium-1">MEDIUM</a>
-    - <a href="#large-1" id="toc-large-1">LARGE</a>
-- <a href="#heatmap" id="toc-heatmap">Heatmap</a>
-  - <a href="#bvhar-s-1" id="toc-bvhar-s-1">BVHAR-S</a>
-    - <a href="#small-2" id="toc-small-2">SMALL</a>
-    - <a href="#medium-2" id="toc-medium-2">MEDIUM</a>
-    - <a href="#large-2" id="toc-large-2">LARGE</a>
-  - <a href="#bvhar-l-1" id="toc-bvhar-l-1">BVHAR-L</a>
-    - <a href="#small-3" id="toc-small-3">SMALL</a>
-  - <a href="#save" id="toc-save">Save</a>
-- <a href="#iterations" id="toc-iterations">Iterations</a>
-  - <a href="#small-4" id="toc-small-4">SMALL</a>
-  - <a href="#medium-3" id="toc-medium-3">MEDIUM</a>
-  - <a href="#large-3" id="toc-large-3">LARGE</a>
-  - <a href="#bind" id="toc-bind">Bind</a>
+- [Fit Models](#fit-models)
+  - [BVHAR-S](#bvhar-s)
+    - [SMALL](#small)
+    - [MEDIUM](#medium)
+    - [LARGE](#large)
+  - [BVHAR-L](#bvhar-l)
+    - [SMALL](#small-1)
+    - [MEDIUM](#medium-1)
+    - [LARGE](#large-1)
+- [Heatmap](#heatmap)
+  - [BVHAR-S](#bvhar-s-1)
+    - [SMALL](#small-2)
+    - [MEDIUM](#medium-2)
+    - [LARGE](#large-2)
+  - [BVHAR-L](#bvhar-l-1)
+    - [SMALL](#small-3)
+  - [Save](#save)
+- [Iterations](#iterations)
+  - [SMALL](#small-4)
+  - [MEDIUM](#medium-3)
+  - [LARGE](#large-3)
+  - [Bind](#bind)
 
 ``` r
 sim_data <- "../data/processed/dgp_bvhar_mvt.rds"
@@ -598,9 +598,9 @@ num_large_burn <- c(200, 300, 500)
 ## SMALL
 
 ``` r
-set.seed(1)
 cl <- parallel::makeForkCluster(12)
 doParallel::registerDoParallel(cl, cores = 8)
+set.seed(1)
 small_err <-
   foreach(id = 1:3, .combine = rbind) %:%
   foreach(i = 1:100, .combine = rbind) %dopar% {
@@ -652,8 +652,8 @@ small_err <-
 ## MEDIUM
 
 ``` r
-set.seed(1)
 doParallel::registerDoParallel(cl, cores = 8)
+set.seed(1)
 medium_err <-
   foreach(id = 1:3, .combine = rbind) %:%
   foreach(i = 1:100, .combine = rbind) %dopar% {
@@ -704,8 +704,8 @@ medium_err <-
 ## LARGE
 
 ``` r
-set.seed(1)
 doParallel::registerDoParallel(cl, cores = 8)
+set.seed(1)
 large_err <-
   foreach(id = 1:3, .combine = rbind) %:%
   foreach(i = 1:100, .combine = rbind) %dopar% {
@@ -846,9 +846,9 @@ ree_table %>%
     booktabs = TRUE,
     escape = FALSE,
     align = "c",
-    col.names = c("$k$", "$T = n + 22$", "BVHAR-S", "BVHAR-L"),
-    caption = "Relative Estimation Error",
-    label = "simconsistency"
+    col.names = c("$k$", "$T$", "BVHAR-S", "BVHAR-L"),
+    caption = "\\textcolor{red}{Relative Estimation Error and the standard error of $\\|\\widehat\\Phi\\|$ (in parenthesis) for MVT Innovation case.}",
+    label = "simmvtconsistency"
   ) %>% 
   collapse_rows(
     columns = 1,
@@ -858,38 +858,40 @@ ree_table %>%
   writeLines()
 \begin{table}
 
-\caption{\label{tab:simconsistency}Relative Estimation Error}
+\caption{\label{tab:simmvtconsistency}\textcolor{red}{Relative Estimation Error and the standard error of $\|\widehat\Phi\|$ (in parenthesis) for MVT Innovation case.}}
 \centering
 \begin{tabular}[t]{cccc}
 \toprule
-$k$ & $T = n + 22$ & BVHAR-S & BVHAR-L\\
+$k$ & $T$ & BVHAR-S & BVHAR-L\\
 \midrule
  & \multicolumn{1}{c|}{40} & \makecell[c]{\num{.866}\\(\num{.2927})} & \makecell[c]{\num{.866}\\(\num{.2905})}\\
 
- & \multicolumn{1}{c|}{80} & \makecell[c]{\num{.767}\\(\num{.1701})} & \makecell[c]{\num{.766}\\(\num{.1707})}\\
+ & \multicolumn{1}{c|}{80} & \makecell[c]{\num{.766}\\(\num{.1698})} & \makecell[c]{\num{.765}\\(\num{.1704})}\\
 
-\multirow[t]{-3}{*}{\centering\arraybackslash SMALL} & \multicolumn{1}{c|}{120} & \makecell[c]{\num{.714}\\(\num{.2177})} & \makecell[c]{\num{.713}\\(\num{.2178})}\\
+\multirow[t]{-3}{*}{\centering\arraybackslash SMALL} & \multicolumn{1}{c|}{120} & \makecell[c]{\num{.706}\\(\num{.1522})} & \makecell[c]{\num{.706}\\(\num{.1515})}\\
 \cmidrule{1-4}
- & \multicolumn{1}{c|}{200} & \makecell[c]{\num{.887}\\(\num{.2350})} & \makecell[c]{\num{.889}\\(\num{.2346})}\\
+ & \multicolumn{1}{c|}{200} & \makecell[c]{\num{.888}\\(\num{.2345})} & \makecell[c]{\num{.890}\\(\num{.2341})}\\
 
- & \multicolumn{1}{c|}{400} & \makecell[c]{\num{.859}\\(\num{.1945})} & \makecell[c]{\num{.861}\\(\num{.1942})}\\
+ & \multicolumn{1}{c|}{400} & \makecell[c]{\num{.862}\\(\num{.2215})} & \makecell[c]{\num{.863}\\(\num{.2212})}\\
 
-\multirow[t]{-3}{*}{\centering\arraybackslash MEDIUM} & \multicolumn{1}{c|}{600} & \makecell[c]{\num{.851}\\(\num{.3000})} & \makecell[c]{\num{.852}\\(\num{.2999})}\\
+\multirow[t]{-3}{*}{\centering\arraybackslash MEDIUM} & \multicolumn{1}{c|}{600} & \makecell[c]{\num{.851}\\(\num{.2533})} & \makecell[c]{\num{.853}\\(\num{.2532})}\\
 \cmidrule{1-4}
- & \multicolumn{1}{c|}{400} & \makecell[c]{\num{.966}\\(\num{.0379})} & \makecell[c]{\num{.975}\\(\num{.0360})}\\
+ & \multicolumn{1}{c|}{400} & \makecell[c]{\num{.965}\\(\num{.0410})} & \makecell[c]{\num{.974}\\(\num{.0390})}\\
 
- & \multicolumn{1}{c|}{800} & \makecell[c]{\num{.950}\\(\num{.0248})} & \makecell[c]{\num{.959}\\(\num{.0235})}\\
+ & \multicolumn{1}{c|}{800} & \makecell[c]{\num{.948}\\(\num{.0281})} & \makecell[c]{\num{.957}\\(\num{.0266})}\\
 
-\multirow[t]{-3}{*}{\centering\arraybackslash LARGE} & \multicolumn{1}{c|}{1200} & \makecell[c]{\num{.936}\\(\num{.0829})} & \makecell[c]{\num{.945}\\(\num{.0816})}\\
+\multirow[t]{-3}{*}{\centering\arraybackslash LARGE} & \multicolumn{1}{c|}{1200} & \makecell[c]{\num{.933}\\(\num{.0264})} & \makecell[c]{\num{.942}\\(\num{.0253})}\\
 \bottomrule
 \end{tabular}
 \end{table}
 ```
 
+Visualizing the REE:
+
 ``` r
-ree_boxplt <- 
-  ree_table %>% 
-  pivot_longer(c(error_s, error_l), names_to = "bvhar", values_to = "error") %>% 
+ree_boxplt <-
+  ree_table %>%
+  pivot_longer(c(error_s, error_l), names_to = "bvhar", values_to = "error") %>%
   mutate(
     size = case_when(
       size == 1 ~ 4,
@@ -899,13 +901,13 @@ ree_boxplt <-
     model = factor(model, levels = c("SMALL", "MEDIUM", "LARGE")),
     bvhar = ifelse(bvhar == "error_s", "BVHAR-S", "BVHAR-L"),
     bvhar = factor(bvhar, levels = c("BVHAR-S", "BVHAR-L"))
-  ) %>% 
+  ) %>%
   ggplot() +
   geom_boxplot(aes(x = model, y = error, fill = factor(size))) +
   facet_grid(~ bvhar) +
   theme_minimal() +
   theme(
-    panel.border = element_rect(fill = NA), 
+    panel.border = element_rect(fill = NA),
     legend.position = "top",
     text = element_text(family = "serif")
   ) +
@@ -918,3 +920,114 @@ ree_boxplt
 ```
 
 <img src="../output/figs/sim-mvt-reesbox-1.png" width="70%" style="display: block; margin: auto;" />
+
+``` r
+res_consistency <- readRDS("../data/processed/result_consistency.rds")
+```
+
+Merge two tables:
+
+``` r
+ree_res <- 
+  ree_table %>% 
+  mutate(innovation = "MVT") %>% 
+  bind_rows(res_consistency$ree %>% mutate(innovation = "Normal")) %>% 
+  select(innovation, model, size, error_s, error_l, sd_s, sd_l) %>% 
+  mutate(
+    size = case_when(
+      model == "SMALL" & size == 1 ~ 40,
+      model == "SMALL" & size == 2 ~ 80,
+      model == "SMALL" & size == 3 ~ 120,
+      model == "MEDIUM" & size == 1 ~ 200,
+      model == "MEDIUM" & size == 2 ~ 400,
+      model == "MEDIUM" & size == 3 ~ 600,
+      model == "LARGE" & size == 1 ~ 400,
+      model == "LARGE" & size == 2 ~ 800,
+      model == "LARGE" & size == 3 ~ 1200,
+    )
+  )
+```
+
+``` r
+ree_res %>% 
+  mutate_at(
+    vars(error_s, error_l),
+    ~paste0(
+      "\\num{",
+      format(., nsmall = 3, scientific = -2) %>% 
+        str_remove(pattern = "(?<![1-9])0(?=\\.)"), # .xxx
+      "}"
+    )
+  ) %>% 
+  mutate_at(
+    vars(sd_s, sd_l),
+    ~paste0(
+      "(\\num{",
+      format(., nsmall = 3, scientific = -2) %>% 
+        str_remove(pattern = "(?<![1-9])0(?=\\.)"), # .xxx
+      "})"
+    )
+  ) %>% 
+  unite(col = "bvhar_s", c(error_s, sd_s), sep = "\n") %>%
+  unite(col = "bvhar_l", c(error_l, sd_l), sep = "\n") %>% 
+  pivot_wider(names_from = innovation, names_glue = "{innovation}_{.value}", values_from = c(bvhar_s, bvhar_l)) %>% 
+  mutate(
+    size = cell_spec(
+      size,
+      format = "latex",
+      escape = FALSE,
+      align = "c|"
+    )
+  ) %>%
+  mutate_at(
+    vars(matches("_bvhar_")),
+    ~linebreak(., align = "c")
+  ) %>% 
+  select(model, size, Normal_bvhar_s, Normal_bvhar_l, MVT_bvhar_s, MVT_bvhar_l) %>% 
+  kable(
+    format = "latex",
+    booktabs = TRUE,
+    escape = FALSE,
+    align = "c",
+    col.names = c("$k$", "$T$", "BVHAR-S", "BVHAR-L", "BVHAR-S", "BVHAR-L"),
+    caption = "\\textcolor{red}{Relative Estimation Error and the standard error of $\\|\\widehat\\Phi\\|$ in parenthesis.}",
+    label = "simmvtconsistency"
+  ) %>%
+  add_header_above(c(" ", " ", "Normal" = 2, "MVT" = 2)) %>% 
+  collapse_rows(
+    columns = 1,
+    valign = "top",
+    latex_hline = "major"
+  ) %>% 
+  writeLines()
+\begin{table}
+
+\caption{\label{tab:simmvtconsistency}\textcolor{red}{Relative Estimation Error and the standard error of $\|\widehat\Phi\|$ in parenthesis.}}
+\centering
+\begin{tabular}[t]{cccccc}
+\toprule
+\multicolumn{1}{c}{ } & \multicolumn{1}{c}{ } & \multicolumn{2}{c}{Normal} & \multicolumn{2}{c}{MVT} \\
+\cmidrule(l{3pt}r{3pt}){3-4} \cmidrule(l{3pt}r{3pt}){5-6}
+$k$ & $T$ & BVHAR-S & BVHAR-L & BVHAR-S & BVHAR-L\\
+\midrule
+ & \multicolumn{1}{c|}{40} & \makecell[c]{\num{.936}\\(\num{.0705})} & \makecell[c]{\num{.944}\\(\num{.0706})} & \makecell[c]{\num{.866}\\(\num{.2927})} & \makecell[c]{\num{.866}\\(\num{.2905})}\\
+
+ & \multicolumn{1}{c|}{80} & \makecell[c]{\num{.874}\\(\num{.0714})} & \makecell[c]{\num{.882}\\(\num{.0705})} & \makecell[c]{\num{.766}\\(\num{.1698})} & \makecell[c]{\num{.765}\\(\num{.1704})}\\
+
+\multirow[t]{-3}{*}{\centering\arraybackslash SMALL} & \multicolumn{1}{c|}{120} & \makecell[c]{\num{.839}\\(\num{.0783})} & \makecell[c]{\num{.852}\\(\num{.0782})} & \makecell[c]{\num{.706}\\(\num{.1522})} & \makecell[c]{\num{.706}\\(\num{.1515})}\\
+\cmidrule{1-6}
+ & \multicolumn{1}{c|}{200} & \makecell[c]{\num{.886}\\(\num{.1915})} & \makecell[c]{\num{.886}\\(\num{.1903})} & \makecell[c]{\num{.888}\\(\num{.2345})} & \makecell[c]{\num{.890}\\(\num{.2341})}\\
+
+ & \multicolumn{1}{c|}{400} & \makecell[c]{\num{.846}\\(\num{.1467})} & \makecell[c]{\num{.846}\\(\num{.1464})} & \makecell[c]{\num{.862}\\(\num{.2215})} & \makecell[c]{\num{.863}\\(\num{.2212})}\\
+
+\multirow[t]{-3}{*}{\centering\arraybackslash MEDIUM} & \multicolumn{1}{c|}{600} & \makecell[c]{\num{.838}\\(\num{.1456})} & \makecell[c]{\num{.837}\\(\num{.1455})} & \makecell[c]{\num{.851}\\(\num{.2533})} & \makecell[c]{\num{.853}\\(\num{.2532})}\\
+\cmidrule{1-6}
+ & \multicolumn{1}{c|}{400} & \makecell[c]{\num{.978}\\(\num{.0126})} & \makecell[c]{\num{.985}\\(\num{.0110})} & \makecell[c]{\num{.965}\\(\num{.0410})} & \makecell[c]{\num{.974}\\(\num{.0390})}\\
+
+ & \multicolumn{1}{c|}{800} & \makecell[c]{\num{.976}\\(\num{.0190})} & \makecell[c]{\num{.981}\\(\num{.0168})} & \makecell[c]{\num{.948}\\(\num{.0281})} & \makecell[c]{\num{.957}\\(\num{.0266})}\\
+
+\multirow[t]{-3}{*}{\centering\arraybackslash LARGE} & \multicolumn{1}{c|}{1200} & \makecell[c]{\num{.975}\\(\num{.0120})} & \makecell[c]{\num{.980}\\(\num{.0106})} & \makecell[c]{\num{.933}\\(\num{.0264})} & \makecell[c]{\num{.942}\\(\num{.0253})}\\
+\bottomrule
+\end{tabular}
+\end{table}
+```

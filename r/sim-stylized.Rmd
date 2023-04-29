@@ -607,9 +607,9 @@ num_large_burn <- c(200, 300, 500)
 ## SMALL
 
 ```{r smalliter, cache=TRUE}
-set.seed(1)
 cl <- parallel::makeForkCluster(12)
 doParallel::registerDoParallel(cl, cores = 8)
+set.seed(1)
 small_err <-
   foreach(id = 1:3, .combine = rbind) %:%
   foreach(i = 1:100, .combine = rbind) %dopar% {
@@ -661,8 +661,8 @@ small_err <-
 ## MEDIUM
 
 ```{r mediter, cache=TRUE}
-set.seed(1)
 doParallel::registerDoParallel(cl, cores = 8)
+set.seed(1)
 medium_err <-
   foreach(id = 1:3, .combine = rbind) %:%
   foreach(i = 1:100, .combine = rbind) %dopar% {
@@ -713,8 +713,8 @@ medium_err <-
 ## LARGE
 
 ```{r largeiter, cache=TRUE}
-set.seed(1)
 doParallel::registerDoParallel(cl, cores = 8)
+set.seed(1)
 large_err <-
   foreach(id = 1:3, .combine = rbind) %:%
   foreach(i = 1:100, .combine = rbind) %dopar% {
@@ -803,7 +803,6 @@ large_ree <-
 ree_table <- bind_rows(small_ree, medium_ree, large_ree)
 ```
 
-
 ```{r reetex, comment=NULL}
 ree_table %>% 
   select(model, size, error_s, error_l, sd_s, sd_l) %>% 
@@ -857,8 +856,8 @@ ree_table %>%
     booktabs = TRUE,
     escape = FALSE,
     align = "c",
-    col.names = c("$k$", "$T = n + 22$", "BVHAR-S", "BVHAR-L"),
-    caption = "Relative Estimation Error",
+    col.names = c("$k$", "$T$", "BVHAR-S", "BVHAR-L"),
+    caption = "\\textcolor{red}{Relative Estimation Error and the standard error of $\\|\\widehat\\Phi\\|$ (in parenthesis) for MVT Innovation case.}",
     label = "simmvtconsistency"
   ) %>% 
   collapse_rows(
@@ -869,11 +868,12 @@ ree_table %>%
   writeLines()
 ```
 
+Visualizing the REE:
 
 ```{r reesbox}
-ree_boxplt <- 
-  ree_table %>% 
-  pivot_longer(c(error_s, error_l), names_to = "bvhar", values_to = "error") %>% 
+ree_boxplt <-
+  ree_table %>%
+  pivot_longer(c(error_s, error_l), names_to = "bvhar", values_to = "error") %>%
   mutate(
     size = case_when(
       size == 1 ~ 4,
@@ -883,13 +883,13 @@ ree_boxplt <-
     model = factor(model, levels = c("SMALL", "MEDIUM", "LARGE")),
     bvhar = ifelse(bvhar == "error_s", "BVHAR-S", "BVHAR-L"),
     bvhar = factor(bvhar, levels = c("BVHAR-S", "BVHAR-L"))
-  ) %>% 
+  ) %>%
   ggplot() +
   geom_boxplot(aes(x = model, y = error, fill = factor(size))) +
   facet_grid(~ bvhar) +
   theme_minimal() +
   theme(
-    panel.border = element_rect(fill = NA), 
+    panel.border = element_rect(fill = NA),
     legend.position = "top",
     text = element_text(family = "serif")
   ) +
@@ -899,5 +899,86 @@ ree_boxplt <-
     fill = "T / k"
   )
 ree_boxplt
+```
+
+```{r consistres}
+res_consistency <- readRDS("../data/processed/result_consistency.rds")
+```
+
+Merge two tables:
+
+```{r mergeree}
+ree_res <- 
+  ree_table %>% 
+  mutate(innovation = "MVT") %>% 
+  bind_rows(res_consistency$ree %>% mutate(innovation = "Normal")) %>% 
+  select(innovation, model, size, error_s, error_l, sd_s, sd_l) %>% 
+  mutate(
+    size = case_when(
+      model == "SMALL" & size == 1 ~ 40,
+      model == "SMALL" & size == 2 ~ 80,
+      model == "SMALL" & size == 3 ~ 120,
+      model == "MEDIUM" & size == 1 ~ 200,
+      model == "MEDIUM" & size == 2 ~ 400,
+      model == "MEDIUM" & size == 3 ~ 600,
+      model == "LARGE" & size == 1 ~ 400,
+      model == "LARGE" & size == 2 ~ 800,
+      model == "LARGE" & size == 3 ~ 1200,
+    )
+  )
+```
+
+```{r finalree, comment=NULL}
+ree_res %>% 
+  mutate_at(
+    vars(error_s, error_l),
+    ~paste0(
+      "\\num{",
+      format(., nsmall = 3, scientific = -2) %>% 
+        str_remove(pattern = "(?<![1-9])0(?=\\.)"), # .xxx
+      "}"
+    )
+  ) %>% 
+  mutate_at(
+    vars(sd_s, sd_l),
+    ~paste0(
+      "(\\num{",
+      format(., nsmall = 3, scientific = -2) %>% 
+        str_remove(pattern = "(?<![1-9])0(?=\\.)"), # .xxx
+      "})"
+    )
+  ) %>% 
+  unite(col = "bvhar_s", c(error_s, sd_s), sep = "\n") %>%
+  unite(col = "bvhar_l", c(error_l, sd_l), sep = "\n") %>% 
+  pivot_wider(names_from = innovation, names_glue = "{innovation}_{.value}", values_from = c(bvhar_s, bvhar_l)) %>% 
+  mutate(
+    size = cell_spec(
+      size,
+      format = "latex",
+      escape = FALSE,
+      align = "c|"
+    )
+  ) %>%
+  mutate_at(
+    vars(matches("_bvhar_")),
+    ~linebreak(., align = "c")
+  ) %>% 
+  select(model, size, Normal_bvhar_s, Normal_bvhar_l, MVT_bvhar_s, MVT_bvhar_l) %>% 
+  kable(
+    format = "latex",
+    booktabs = TRUE,
+    escape = FALSE,
+    align = "c",
+    col.names = c("$k$", "$T$", "BVHAR-S", "BVHAR-L", "BVHAR-S", "BVHAR-L"),
+    caption = "\\textcolor{red}{Relative Estimation Error and the standard error of $\\|\\widehat\\Phi\\|$ in parenthesis.}",
+    label = "simmvtconsistency"
+  ) %>%
+  add_header_above(c(" ", " ", "Normal" = 2, "MVT" = 2)) %>% 
+  collapse_rows(
+    columns = 1,
+    valign = "top",
+    latex_hline = "major"
+  ) %>% 
+  writeLines()
 ```
 

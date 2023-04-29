@@ -844,6 +844,15 @@ ree_table %>%
   writeLines()
 ```
 
+```{r savesimul}
+list(
+  small = small_err,
+  medium = medium_err,
+  large = large_err,
+  ree = ree_table
+) %>% 
+  saveRDS("../data/processed/result_consistency.rds")
+```
 
 ```{r reesbox}
 ree_boxplt <- 

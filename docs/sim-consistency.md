@@ -1,30 +1,30 @@
 Simulation for Consistency
 ================
 Young Geun Kim
-15 Jun, 2022
+29 Apr, 2023
 
--   [Fit Models](#fit-models)
-    -   [BVHAR-S](#bvhar-s)
-        -   [SMALL](#small)
-        -   [MEDIUM](#medium)
-        -   [LARGE](#large)
-    -   [BVHAR-L](#bvhar-l)
-        -   [SMALL](#small-1)
-        -   [MEDIUM](#medium-1)
-        -   [LARGE](#large-1)
--   [Heatmap](#heatmap)
-    -   [BVHAR-S](#bvhar-s-1)
-        -   [SMALL](#small-2)
-        -   [MEDIUM](#medium-2)
-        -   [LARGE](#large-2)
-    -   [BVHAR-L](#bvhar-l-1)
-        -   [SMALL](#small-3)
-    -   [Save](#save)
--   [Iterations](#iterations)
-    -   [SMALL](#small-4)
-    -   [MEDIUM](#medium-3)
-    -   [LARGE](#large-3)
-    -   [Bind](#bind)
+- [Fit Models](#fit-models)
+  - [BVHAR-S](#bvhar-s)
+    - [SMALL](#small)
+    - [MEDIUM](#medium)
+    - [LARGE](#large)
+  - [BVHAR-L](#bvhar-l)
+    - [SMALL](#small-1)
+    - [MEDIUM](#medium-1)
+    - [LARGE](#large-1)
+- [Heatmap](#heatmap)
+  - [BVHAR-S](#bvhar-s-1)
+    - [SMALL](#small-2)
+    - [MEDIUM](#medium-2)
+    - [LARGE](#large-2)
+  - [BVHAR-L](#bvhar-l-1)
+    - [SMALL](#small-3)
+  - [Save](#save)
+- [Iterations](#iterations)
+  - [SMALL](#small-4)
+  - [MEDIUM](#medium-3)
+  - [LARGE](#large-3)
+  - [Bind](#bind)
 
 ``` r
 sim_data <- "../data/processed/dgp_bvhar_consistency.rds"
@@ -842,22 +842,32 @@ $k$ & $T = n + 22$ & BVHAR-S & BVHAR-L\\
 
  & \multicolumn{1}{c|}{80} & \makecell[c]{\num{.874}\\(\num{.0714})} & \makecell[c]{\num{.882}\\(\num{.0705})}\\
 
-\multirow[t]{-3}{*}{\centering\arraybackslash SMALL} & \multicolumn{1}{c|}{120} & \makecell[c]{\num{.840}\\(\num{.0782})} & \makecell[c]{\num{.852}\\(\num{.0781})}\\
+\multirow[t]{-3}{*}{\centering\arraybackslash SMALL} & \multicolumn{1}{c|}{120} & \makecell[c]{\num{.839}\\(\num{.0783})} & \makecell[c]{\num{.852}\\(\num{.0782})}\\
 \cmidrule{1-4}
- & \multicolumn{1}{c|}{200} & \makecell[c]{\num{.886}\\(\num{.1941})} & \makecell[c]{\num{.887}\\(\num{.1927})}\\
+ & \multicolumn{1}{c|}{200} & \makecell[c]{\num{.886}\\(\num{.1915})} & \makecell[c]{\num{.886}\\(\num{.1903})}\\
 
- & \multicolumn{1}{c|}{400} & \makecell[c]{\num{.844}\\(\num{.1416})} & \makecell[c]{\num{.844}\\(\num{.1415})}\\
+ & \multicolumn{1}{c|}{400} & \makecell[c]{\num{.846}\\(\num{.1467})} & \makecell[c]{\num{.846}\\(\num{.1464})}\\
 
-\multirow[t]{-3}{*}{\centering\arraybackslash MEDIUM} & \multicolumn{1}{c|}{600} & \makecell[c]{\num{.837}\\(\num{.1451})} & \makecell[c]{\num{.837}\\(\num{.1450})}\\
+\multirow[t]{-3}{*}{\centering\arraybackslash MEDIUM} & \multicolumn{1}{c|}{600} & \makecell[c]{\num{.838}\\(\num{.1456})} & \makecell[c]{\num{.837}\\(\num{.1455})}\\
 \cmidrule{1-4}
- & \multicolumn{1}{c|}{400} & \makecell[c]{\num{.978}\\(\num{.0124})} & \makecell[c]{\num{.984}\\(\num{.0108})}\\
+ & \multicolumn{1}{c|}{400} & \makecell[c]{\num{.978}\\(\num{.0126})} & \makecell[c]{\num{.985}\\(\num{.0110})}\\
 
- & \multicolumn{1}{c|}{800} & \makecell[c]{\num{.976}\\(\num{.0184})} & \makecell[c]{\num{.982}\\(\num{.0162})}\\
+ & \multicolumn{1}{c|}{800} & \makecell[c]{\num{.976}\\(\num{.0190})} & \makecell[c]{\num{.981}\\(\num{.0168})}\\
 
-\multirow[t]{-3}{*}{\centering\arraybackslash LARGE} & \multicolumn{1}{c|}{1200} & \makecell[c]{\num{.975}\\(\num{.0115})} & \makecell[c]{\num{.980}\\(\num{.0103})}\\
+\multirow[t]{-3}{*}{\centering\arraybackslash LARGE} & \multicolumn{1}{c|}{1200} & \makecell[c]{\num{.975}\\(\num{.0120})} & \makecell[c]{\num{.980}\\(\num{.0106})}\\
 \bottomrule
 \end{tabular}
 \end{table}
+```
+
+``` r
+list(
+  small = small_err,
+  medium = medium_err,
+  large = large_err,
+  ree = ree_table
+) %>% 
+  saveRDS("../data/processed/result_consistency.rds")
 ```
 
 ``` r
