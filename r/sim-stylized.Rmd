@@ -279,7 +279,17 @@ small_s_heatmap <-
       ordered = TRUE
     )
   ) %>% 
-  ggplot(aes(x = series_id, y = var_names)) +
+  separate(var_names, into = c("y_axis", "vhar")) %>% 
+  mutate(
+    vhar = case_when(
+      vhar == "day" ~ "Daily",
+      vhar == "week" ~ "Weekly",
+      vhar == "month" ~ "Monthly"
+    ),
+    vhar = factor(vhar, levels = c("Daily", "Weekly", "Monthly"))
+  ) %>% 
+  # ggplot(aes(x = series_id, y = var_names)) +
+  ggplot(aes(x = series_id, y = fct_rev(y_axis))) +
   geom_tile(aes(fill = values)) +
   scale_fill_gradient2(
     name = "Value",
@@ -290,6 +300,7 @@ small_s_heatmap <-
   theme_minimal() +
   theme(
     strip.text.x = element_text(size = heatmapfacet_size),
+    strip.text.y = element_blank(),
     axis.ticks = element_blank(),
     axis.text = element_blank(),
     axis.title = element_blank(),
@@ -300,7 +311,8 @@ small_s_heatmap <-
     legend.text = element_text(size = heatmaplegend_text),
     text = element_text(family = "serif")
   ) +
-  facet_wrap(model ~ .) +
+  # facet_wrap(model ~ .) +
+  facet_grid(vhar ~ model) +
   labs(title = "SMALL (k = 10)")
 small_s_heatmap
 ```
@@ -324,7 +336,17 @@ medium_s_heatmap <-
       ordered = TRUE
     )
   ) %>% 
-  ggplot(aes(x = series_id, y = var_names)) +
+  separate(var_names, into = c("y_axis", "vhar")) %>% 
+  mutate(
+    vhar = case_when(
+      vhar == "day" ~ "Daily",
+      vhar == "week" ~ "Weekly",
+      vhar == "month" ~ "Monthly"
+    ),
+    vhar = factor(vhar, levels = c("Daily", "Weekly", "Monthly"))
+  ) %>% 
+  # ggplot(aes(x = series_id, y = var_names)) +
+  ggplot(aes(x = series_id, y = fct_rev(y_axis))) +
   geom_tile(aes(fill = values)) +
   scale_fill_gradient2(
     name = "Value",
@@ -335,6 +357,7 @@ medium_s_heatmap <-
   theme_minimal() +
   theme(
     strip.text.x = element_text(size = heatmapfacet_size),
+    strip.text.y = element_blank(),
     axis.ticks = element_blank(),
     axis.text = element_blank(),
     axis.title = element_blank(),
@@ -345,7 +368,8 @@ medium_s_heatmap <-
     legend.text = element_text(size = heatmaplegend_text),
     text = element_text(family = "serif")
   ) +
-  facet_wrap(model ~ .) +
+  # facet_wrap(model ~ .) +
+  facet_grid(vhar ~ model) +
   labs(title = "MEDIUM (k = 50)")
 medium_s_heatmap
 ```
@@ -369,7 +393,17 @@ large_s_heatmap <-
       ordered = TRUE
     )
   ) %>% 
-  ggplot(aes(x = series_id, y = var_names)) +
+  separate(var_names, into = c("y_axis", "vhar")) %>% 
+  mutate(
+    vhar = case_when(
+      vhar == "day" ~ "Daily",
+      vhar == "week" ~ "Weekly",
+      vhar == "month" ~ "Monthly"
+    ),
+    vhar = factor(vhar, levels = c("Daily", "Weekly", "Monthly"))
+  ) %>% 
+  # ggplot(aes(x = series_id, y = var_names)) +
+  ggplot(aes(x = series_id, y = fct_rev(y_axis))) +
   geom_tile(aes(fill = values)) +
   scale_fill_gradient2(
     name = "Value",
@@ -380,6 +414,7 @@ large_s_heatmap <-
   theme_minimal() +
   theme(
     strip.text.x = element_text(size = heatmapfacet_size),
+    strip.text.y = element_text(size = heatmapfacet_size),
     axis.ticks = element_blank(),
     axis.text = element_blank(),
     axis.title = element_blank(),
@@ -390,7 +425,8 @@ large_s_heatmap <-
     legend.text = element_text(size = heatmaplegend_text),
     text = element_text(family = "serif")
   ) +
-  facet_wrap(model ~ .) +
+  # facet_wrap(model ~ .) +
+  facet_grid(vhar ~ model) +
   labs(title = "LARGE (k = 100)")
 large_s_heatmap
 ```
@@ -428,7 +464,17 @@ small_l_heatmap <-
       ordered = TRUE
     )
   ) %>% 
-  ggplot(aes(x = series_id, y = var_names)) +
+  separate(var_names, into = c("y_axis", "vhar")) %>% 
+  mutate(
+    vhar = case_when(
+      vhar == "day" ~ "Daily",
+      vhar == "week" ~ "Weekly",
+      vhar == "month" ~ "Monthly"
+    ),
+    vhar = factor(vhar, levels = c("Daily", "Weekly", "Monthly"))
+  ) %>% 
+  # ggplot(aes(x = series_id, y = var_names)) +
+  ggplot(aes(x = series_id, y = fct_rev(y_axis))) +
   geom_tile(aes(fill = values)) +
   scale_fill_gradient2(
     name = "Value",
@@ -439,6 +485,7 @@ small_l_heatmap <-
   theme_minimal() +
   theme(
     strip.text.x = element_text(size = heatmapfacet_size),
+    strip.text.y = element_blank(),
     axis.ticks = element_blank(),
     axis.text = element_blank(),
     axis.title = element_blank(),
@@ -449,7 +496,8 @@ small_l_heatmap <-
     legend.text = element_text(size = heatmaplegend_text),
     text = element_text(family = "serif")
   ) +
-  facet_wrap(model ~ .) +
+  # facet_wrap(model ~ .) +
+  facet_grid(vhar ~ model) +
   labs(title = "SMALL (k = 10)")
 small_l_heatmap
 ```
@@ -471,7 +519,17 @@ medium_l_heatmap <-
       ordered = TRUE
     )
   ) %>% 
-  ggplot(aes(x = series_id, y = var_names)) +
+  separate(var_names, into = c("y_axis", "vhar")) %>% 
+  mutate(
+    vhar = case_when(
+      vhar == "day" ~ "Daily",
+      vhar == "week" ~ "Weekly",
+      vhar == "month" ~ "Monthly"
+    ),
+    vhar = factor(vhar, levels = c("Daily", "Weekly", "Monthly"))
+  ) %>% 
+  # ggplot(aes(x = series_id, y = var_names)) +
+  ggplot(aes(x = series_id, y = fct_rev(y_axis))) +
   geom_tile(aes(fill = values)) +
   scale_fill_gradient2(
     name = "Value",
@@ -482,6 +540,7 @@ medium_l_heatmap <-
   theme_minimal() +
   theme(
     strip.text.x = element_text(size = heatmapfacet_size),
+    strip.text.y = element_blank(),
     axis.ticks = element_blank(),
     axis.text = element_blank(),
     axis.title = element_blank(),
@@ -492,7 +551,8 @@ medium_l_heatmap <-
     legend.text = element_text(size = heatmaplegend_text),
     text = element_text(family = "serif")
   ) +
-  facet_wrap(model ~ .) +
+  # facet_wrap(model ~ .) +
+  facet_grid(vhar ~ model) +
   labs(title = "MEDIUM (k = 50)")
 medium_l_heatmap
 ```
@@ -514,7 +574,17 @@ large_l_heatmap <-
       ordered = TRUE
     )
   ) %>% 
-  ggplot(aes(x = series_id, y = var_names)) +
+  separate(var_names, into = c("y_axis", "vhar")) %>% 
+  mutate(
+    vhar = case_when(
+      vhar == "day" ~ "Daily",
+      vhar == "week" ~ "Weekly",
+      vhar == "month" ~ "Monthly"
+    ),
+    vhar = factor(vhar, levels = c("Daily", "Weekly", "Monthly"))
+  ) %>% 
+  # ggplot(aes(x = series_id, y = var_names)) +
+  ggplot(aes(x = series_id, y = fct_rev(y_axis))) +
   geom_tile(aes(fill = values)) +
   scale_fill_gradient2(
     name = "Value",
@@ -525,6 +595,7 @@ large_l_heatmap <-
   theme_minimal() +
   theme(
     strip.text.x = element_text(size = heatmapfacet_size),
+    strip.text.y = element_text(size = heatmapfacet_size),
     axis.ticks = element_blank(),
     axis.text = element_blank(),
     axis.title = element_blank(),
@@ -535,7 +606,8 @@ large_l_heatmap <-
     legend.text = element_text(size = heatmaplegend_text),
     text = element_text(family = "serif")
   ) +
-  facet_wrap(model ~ .) +
+  # facet_wrap(model ~ .) +
+  facet_grid(vhar ~ model) +
   labs(title = "LARGE (k = 100)")
 large_l_heatmap
 ```
@@ -970,8 +1042,9 @@ ree_res %>%
     escape = FALSE,
     align = "c",
     col.names = c("$k$", "$T$", "BVHAR-S", "BVHAR-L", "BVHAR-S", "BVHAR-L"),
-    caption = "\\textcolor{red}{Relative Estimation Error and the standard error of $\\|\\widehat\\Phi\\|$ in parenthesis.}",
-    label = "simmvtconsistency"
+    # caption = "\\textcolor{red}{Relative Estimation Error and the standard error of $\\|\\widehat\\Phi\\|$ in parenthesis.}",
+    caption = "Relative Estimation Error and the standard error of $\\|\\widehat\\Phi\\|$ in parenthesis.",
+    label = "simconsistency"
   ) %>%
   add_header_above(c(" ", " ", "Normal" = 2, "MVT" = 2)) %>% 
   collapse_rows(

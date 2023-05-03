@@ -34,7 +34,7 @@ generate_bvharlist <- function(num_dim, num, burn, coef_mat, sig, t_df) {
         t_param = t_df
       ) %>% 
         as.data.frame() %>% 
-        setNames(paste("asset", sprintf(1:num_dim, fmt = "%02d"), sep = "_"))
+        setNames(paste0("asset", sprintf(1:num_dim, fmt = "%02d")))
     }
   )
 }

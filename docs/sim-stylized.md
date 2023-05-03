@@ -1,7 +1,7 @@
 Simulation for Consistency with MVT Innovations
 ================
 Young Geun Kim
-29 Apr, 2023
+03 May, 2023
 
 - [Fit Models](#fit-models)
   - [BVHAR-S](#bvhar-s)
@@ -260,7 +260,17 @@ small_s_heatmap <-
       ordered = TRUE
     )
   ) %>% 
-  ggplot(aes(x = series_id, y = var_names)) +
+  separate(var_names, into = c("y_axis", "vhar")) %>% 
+  mutate(
+    vhar = case_when(
+      vhar == "day" ~ "Daily",
+      vhar == "week" ~ "Weekly",
+      vhar == "month" ~ "Monthly"
+    ),
+    vhar = factor(vhar, levels = c("Daily", "Weekly", "Monthly"))
+  ) %>% 
+  # ggplot(aes(x = series_id, y = var_names)) +
+  ggplot(aes(x = series_id, y = fct_rev(y_axis))) +
   geom_tile(aes(fill = values)) +
   scale_fill_gradient2(
     name = "Value",
@@ -271,6 +281,7 @@ small_s_heatmap <-
   theme_minimal() +
   theme(
     strip.text.x = element_text(size = heatmapfacet_size),
+    strip.text.y = element_blank(),
     axis.ticks = element_blank(),
     axis.text = element_blank(),
     axis.title = element_blank(),
@@ -281,7 +292,8 @@ small_s_heatmap <-
     legend.text = element_text(size = heatmaplegend_text),
     text = element_text(family = "serif")
   ) +
-  facet_wrap(model ~ .) +
+  # facet_wrap(model ~ .) +
+  facet_grid(vhar ~ model) +
   labs(title = "SMALL (k = 10)")
 small_s_heatmap
 ```
@@ -307,7 +319,17 @@ medium_s_heatmap <-
       ordered = TRUE
     )
   ) %>% 
-  ggplot(aes(x = series_id, y = var_names)) +
+  separate(var_names, into = c("y_axis", "vhar")) %>% 
+  mutate(
+    vhar = case_when(
+      vhar == "day" ~ "Daily",
+      vhar == "week" ~ "Weekly",
+      vhar == "month" ~ "Monthly"
+    ),
+    vhar = factor(vhar, levels = c("Daily", "Weekly", "Monthly"))
+  ) %>% 
+  # ggplot(aes(x = series_id, y = var_names)) +
+  ggplot(aes(x = series_id, y = fct_rev(y_axis))) +
   geom_tile(aes(fill = values)) +
   scale_fill_gradient2(
     name = "Value",
@@ -318,6 +340,7 @@ medium_s_heatmap <-
   theme_minimal() +
   theme(
     strip.text.x = element_text(size = heatmapfacet_size),
+    strip.text.y = element_blank(),
     axis.ticks = element_blank(),
     axis.text = element_blank(),
     axis.title = element_blank(),
@@ -328,7 +351,8 @@ medium_s_heatmap <-
     legend.text = element_text(size = heatmaplegend_text),
     text = element_text(family = "serif")
   ) +
-  facet_wrap(model ~ .) +
+  # facet_wrap(model ~ .) +
+  facet_grid(vhar ~ model) +
   labs(title = "MEDIUM (k = 50)")
 medium_s_heatmap
 ```
@@ -354,7 +378,17 @@ large_s_heatmap <-
       ordered = TRUE
     )
   ) %>% 
-  ggplot(aes(x = series_id, y = var_names)) +
+  separate(var_names, into = c("y_axis", "vhar")) %>% 
+  mutate(
+    vhar = case_when(
+      vhar == "day" ~ "Daily",
+      vhar == "week" ~ "Weekly",
+      vhar == "month" ~ "Monthly"
+    ),
+    vhar = factor(vhar, levels = c("Daily", "Weekly", "Monthly"))
+  ) %>% 
+  # ggplot(aes(x = series_id, y = var_names)) +
+  ggplot(aes(x = series_id, y = fct_rev(y_axis))) +
   geom_tile(aes(fill = values)) +
   scale_fill_gradient2(
     name = "Value",
@@ -365,6 +399,7 @@ large_s_heatmap <-
   theme_minimal() +
   theme(
     strip.text.x = element_text(size = heatmapfacet_size),
+    strip.text.y = element_text(size = heatmapfacet_size),
     axis.ticks = element_blank(),
     axis.text = element_blank(),
     axis.title = element_blank(),
@@ -375,7 +410,8 @@ large_s_heatmap <-
     legend.text = element_text(size = heatmaplegend_text),
     text = element_text(family = "serif")
   ) +
-  facet_wrap(model ~ .) +
+  # facet_wrap(model ~ .) +
+  facet_grid(vhar ~ model) +
   labs(title = "LARGE (k = 100)")
 large_s_heatmap
 ```
@@ -415,7 +451,17 @@ small_l_heatmap <-
       ordered = TRUE
     )
   ) %>% 
-  ggplot(aes(x = series_id, y = var_names)) +
+  separate(var_names, into = c("y_axis", "vhar")) %>% 
+  mutate(
+    vhar = case_when(
+      vhar == "day" ~ "Daily",
+      vhar == "week" ~ "Weekly",
+      vhar == "month" ~ "Monthly"
+    ),
+    vhar = factor(vhar, levels = c("Daily", "Weekly", "Monthly"))
+  ) %>% 
+  # ggplot(aes(x = series_id, y = var_names)) +
+  ggplot(aes(x = series_id, y = fct_rev(y_axis))) +
   geom_tile(aes(fill = values)) +
   scale_fill_gradient2(
     name = "Value",
@@ -426,6 +472,7 @@ small_l_heatmap <-
   theme_minimal() +
   theme(
     strip.text.x = element_text(size = heatmapfacet_size),
+    strip.text.y = element_blank(),
     axis.ticks = element_blank(),
     axis.text = element_blank(),
     axis.title = element_blank(),
@@ -436,7 +483,8 @@ small_l_heatmap <-
     legend.text = element_text(size = heatmaplegend_text),
     text = element_text(family = "serif")
   ) +
-  facet_wrap(model ~ .) +
+  # facet_wrap(model ~ .) +
+  facet_grid(vhar ~ model) +
   labs(title = "SMALL (k = 10)")
 small_l_heatmap
 ```
@@ -460,7 +508,17 @@ medium_l_heatmap <-
       ordered = TRUE
     )
   ) %>% 
-  ggplot(aes(x = series_id, y = var_names)) +
+  separate(var_names, into = c("y_axis", "vhar")) %>% 
+  mutate(
+    vhar = case_when(
+      vhar == "day" ~ "Daily",
+      vhar == "week" ~ "Weekly",
+      vhar == "month" ~ "Monthly"
+    ),
+    vhar = factor(vhar, levels = c("Daily", "Weekly", "Monthly"))
+  ) %>% 
+  # ggplot(aes(x = series_id, y = var_names)) +
+  ggplot(aes(x = series_id, y = fct_rev(y_axis))) +
   geom_tile(aes(fill = values)) +
   scale_fill_gradient2(
     name = "Value",
@@ -471,6 +529,7 @@ medium_l_heatmap <-
   theme_minimal() +
   theme(
     strip.text.x = element_text(size = heatmapfacet_size),
+    strip.text.y = element_blank(),
     axis.ticks = element_blank(),
     axis.text = element_blank(),
     axis.title = element_blank(),
@@ -481,7 +540,8 @@ medium_l_heatmap <-
     legend.text = element_text(size = heatmaplegend_text),
     text = element_text(family = "serif")
   ) +
-  facet_wrap(model ~ .) +
+  # facet_wrap(model ~ .) +
+  facet_grid(vhar ~ model) +
   labs(title = "MEDIUM (k = 50)")
 medium_l_heatmap
 ```
@@ -505,7 +565,17 @@ large_l_heatmap <-
       ordered = TRUE
     )
   ) %>% 
-  ggplot(aes(x = series_id, y = var_names)) +
+  separate(var_names, into = c("y_axis", "vhar")) %>% 
+  mutate(
+    vhar = case_when(
+      vhar == "day" ~ "Daily",
+      vhar == "week" ~ "Weekly",
+      vhar == "month" ~ "Monthly"
+    ),
+    vhar = factor(vhar, levels = c("Daily", "Weekly", "Monthly"))
+  ) %>% 
+  # ggplot(aes(x = series_id, y = var_names)) +
+  ggplot(aes(x = series_id, y = fct_rev(y_axis))) +
   geom_tile(aes(fill = values)) +
   scale_fill_gradient2(
     name = "Value",
@@ -516,6 +586,7 @@ large_l_heatmap <-
   theme_minimal() +
   theme(
     strip.text.x = element_text(size = heatmapfacet_size),
+    strip.text.y = element_text(size = heatmapfacet_size),
     axis.ticks = element_blank(),
     axis.text = element_blank(),
     axis.title = element_blank(),
@@ -526,7 +597,8 @@ large_l_heatmap <-
     legend.text = element_text(size = heatmaplegend_text),
     text = element_text(family = "serif")
   ) +
-  facet_wrap(model ~ .) +
+  # facet_wrap(model ~ .) +
+  facet_grid(vhar ~ model) +
   labs(title = "LARGE (k = 100)")
 large_l_heatmap
 ```
@@ -866,21 +938,21 @@ $k$ & $T$ & BVHAR-S & BVHAR-L\\
 \midrule
  & \multicolumn{1}{c|}{40} & \makecell[c]{\num{.866}\\(\num{.2927})} & \makecell[c]{\num{.866}\\(\num{.2905})}\\
 
- & \multicolumn{1}{c|}{80} & \makecell[c]{\num{.766}\\(\num{.1698})} & \makecell[c]{\num{.765}\\(\num{.1704})}\\
+ & \multicolumn{1}{c|}{80} & \makecell[c]{\num{.765}\\(\num{.1684})} & \makecell[c]{\num{.764}\\(\num{.1689})}\\
 
-\multirow[t]{-3}{*}{\centering\arraybackslash SMALL} & \multicolumn{1}{c|}{120} & \makecell[c]{\num{.706}\\(\num{.1522})} & \makecell[c]{\num{.706}\\(\num{.1515})}\\
+\multirow[t]{-3}{*}{\centering\arraybackslash SMALL} & \multicolumn{1}{c|}{120} & \makecell[c]{\num{.707}\\(\num{.1520})} & \makecell[c]{\num{.706}\\(\num{.1511})}\\
 \cmidrule{1-4}
- & \multicolumn{1}{c|}{200} & \makecell[c]{\num{.888}\\(\num{.2345})} & \makecell[c]{\num{.890}\\(\num{.2341})}\\
+ & \multicolumn{1}{c|}{200} & \makecell[c]{\num{.883}\\(\num{.2989})} & \makecell[c]{\num{.885}\\(\num{.2981})}\\
 
- & \multicolumn{1}{c|}{400} & \makecell[c]{\num{.862}\\(\num{.2215})} & \makecell[c]{\num{.863}\\(\num{.2212})}\\
+ & \multicolumn{1}{c|}{400} & \makecell[c]{\num{.855}\\(\num{.3211})} & \makecell[c]{\num{.856}\\(\num{.3208})}\\
 
-\multirow[t]{-3}{*}{\centering\arraybackslash MEDIUM} & \multicolumn{1}{c|}{600} & \makecell[c]{\num{.851}\\(\num{.2533})} & \makecell[c]{\num{.853}\\(\num{.2532})}\\
+\multirow[t]{-3}{*}{\centering\arraybackslash MEDIUM} & \multicolumn{1}{c|}{600} & \makecell[c]{\num{.852}\\(\num{.2317})} & \makecell[c]{\num{.853}\\(\num{.2315})}\\
 \cmidrule{1-4}
- & \multicolumn{1}{c|}{400} & \makecell[c]{\num{.965}\\(\num{.0410})} & \makecell[c]{\num{.974}\\(\num{.0390})}\\
+ & \multicolumn{1}{c|}{400} & \makecell[c]{\num{.966}\\(\num{.0276})} & \makecell[c]{\num{.975}\\(\num{.0258})}\\
 
- & \multicolumn{1}{c|}{800} & \makecell[c]{\num{.948}\\(\num{.0281})} & \makecell[c]{\num{.957}\\(\num{.0266})}\\
+ & \multicolumn{1}{c|}{800} & \makecell[c]{\num{.947}\\(\num{.0271})} & \makecell[c]{\num{.956}\\(\num{.0256})}\\
 
-\multirow[t]{-3}{*}{\centering\arraybackslash LARGE} & \multicolumn{1}{c|}{1200} & \makecell[c]{\num{.933}\\(\num{.0264})} & \makecell[c]{\num{.942}\\(\num{.0253})}\\
+\multirow[t]{-3}{*}{\centering\arraybackslash LARGE} & \multicolumn{1}{c|}{1200} & \makecell[c]{\num{.933}\\(\num{.0490})} & \makecell[c]{\num{.942}\\(\num{.0481})}\\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -990,8 +1062,9 @@ ree_res %>%
     escape = FALSE,
     align = "c",
     col.names = c("$k$", "$T$", "BVHAR-S", "BVHAR-L", "BVHAR-S", "BVHAR-L"),
-    caption = "\\textcolor{red}{Relative Estimation Error and the standard error of $\\|\\widehat\\Phi\\|$ in parenthesis.}",
-    label = "simmvtconsistency"
+    # caption = "\\textcolor{red}{Relative Estimation Error and the standard error of $\\|\\widehat\\Phi\\|$ in parenthesis.}",
+    caption = "Relative Estimation Error and the standard error of $\\|\\widehat\\Phi\\|$ in parenthesis.",
+    label = "simconsistency"
   ) %>%
   add_header_above(c(" ", " ", "Normal" = 2, "MVT" = 2)) %>% 
   collapse_rows(
@@ -1002,7 +1075,7 @@ ree_res %>%
   writeLines()
 \begin{table}
 
-\caption{\label{tab:simmvtconsistency}\textcolor{red}{Relative Estimation Error and the standard error of $\|\widehat\Phi\|$ in parenthesis.}}
+\caption{\label{tab:simconsistency}Relative Estimation Error and the standard error of $\|\widehat\Phi\|$ in parenthesis.}
 \centering
 \begin{tabular}[t]{cccccc}
 \toprule
@@ -1012,21 +1085,21 @@ $k$ & $T$ & BVHAR-S & BVHAR-L & BVHAR-S & BVHAR-L\\
 \midrule
  & \multicolumn{1}{c|}{40} & \makecell[c]{\num{.936}\\(\num{.0705})} & \makecell[c]{\num{.944}\\(\num{.0706})} & \makecell[c]{\num{.866}\\(\num{.2927})} & \makecell[c]{\num{.866}\\(\num{.2905})}\\
 
- & \multicolumn{1}{c|}{80} & \makecell[c]{\num{.874}\\(\num{.0714})} & \makecell[c]{\num{.882}\\(\num{.0705})} & \makecell[c]{\num{.766}\\(\num{.1698})} & \makecell[c]{\num{.765}\\(\num{.1704})}\\
+ & \multicolumn{1}{c|}{80} & \makecell[c]{\num{.874}\\(\num{.0714})} & \makecell[c]{\num{.882}\\(\num{.0705})} & \makecell[c]{\num{.765}\\(\num{.1684})} & \makecell[c]{\num{.764}\\(\num{.1689})}\\
 
-\multirow[t]{-3}{*}{\centering\arraybackslash SMALL} & \multicolumn{1}{c|}{120} & \makecell[c]{\num{.839}\\(\num{.0783})} & \makecell[c]{\num{.852}\\(\num{.0782})} & \makecell[c]{\num{.706}\\(\num{.1522})} & \makecell[c]{\num{.706}\\(\num{.1515})}\\
+\multirow[t]{-3}{*}{\centering\arraybackslash SMALL} & \multicolumn{1}{c|}{120} & \makecell[c]{\num{.839}\\(\num{.0783})} & \makecell[c]{\num{.852}\\(\num{.0782})} & \makecell[c]{\num{.707}\\(\num{.1520})} & \makecell[c]{\num{.706}\\(\num{.1511})}\\
 \cmidrule{1-6}
- & \multicolumn{1}{c|}{200} & \makecell[c]{\num{.886}\\(\num{.1915})} & \makecell[c]{\num{.886}\\(\num{.1903})} & \makecell[c]{\num{.888}\\(\num{.2345})} & \makecell[c]{\num{.890}\\(\num{.2341})}\\
+ & \multicolumn{1}{c|}{200} & \makecell[c]{\num{.886}\\(\num{.1915})} & \makecell[c]{\num{.886}\\(\num{.1903})} & \makecell[c]{\num{.883}\\(\num{.2989})} & \makecell[c]{\num{.885}\\(\num{.2981})}\\
 
- & \multicolumn{1}{c|}{400} & \makecell[c]{\num{.846}\\(\num{.1467})} & \makecell[c]{\num{.846}\\(\num{.1464})} & \makecell[c]{\num{.862}\\(\num{.2215})} & \makecell[c]{\num{.863}\\(\num{.2212})}\\
+ & \multicolumn{1}{c|}{400} & \makecell[c]{\num{.846}\\(\num{.1467})} & \makecell[c]{\num{.846}\\(\num{.1464})} & \makecell[c]{\num{.855}\\(\num{.3211})} & \makecell[c]{\num{.856}\\(\num{.3208})}\\
 
-\multirow[t]{-3}{*}{\centering\arraybackslash MEDIUM} & \multicolumn{1}{c|}{600} & \makecell[c]{\num{.838}\\(\num{.1456})} & \makecell[c]{\num{.837}\\(\num{.1455})} & \makecell[c]{\num{.851}\\(\num{.2533})} & \makecell[c]{\num{.853}\\(\num{.2532})}\\
+\multirow[t]{-3}{*}{\centering\arraybackslash MEDIUM} & \multicolumn{1}{c|}{600} & \makecell[c]{\num{.838}\\(\num{.1456})} & \makecell[c]{\num{.837}\\(\num{.1455})} & \makecell[c]{\num{.852}\\(\num{.2317})} & \makecell[c]{\num{.853}\\(\num{.2315})}\\
 \cmidrule{1-6}
- & \multicolumn{1}{c|}{400} & \makecell[c]{\num{.978}\\(\num{.0126})} & \makecell[c]{\num{.985}\\(\num{.0110})} & \makecell[c]{\num{.965}\\(\num{.0410})} & \makecell[c]{\num{.974}\\(\num{.0390})}\\
+ & \multicolumn{1}{c|}{400} & \makecell[c]{\num{.978}\\(\num{.0126})} & \makecell[c]{\num{.985}\\(\num{.0110})} & \makecell[c]{\num{.966}\\(\num{.0276})} & \makecell[c]{\num{.975}\\(\num{.0258})}\\
 
- & \multicolumn{1}{c|}{800} & \makecell[c]{\num{.976}\\(\num{.0190})} & \makecell[c]{\num{.981}\\(\num{.0168})} & \makecell[c]{\num{.948}\\(\num{.0281})} & \makecell[c]{\num{.957}\\(\num{.0266})}\\
+ & \multicolumn{1}{c|}{800} & \makecell[c]{\num{.976}\\(\num{.0190})} & \makecell[c]{\num{.981}\\(\num{.0168})} & \makecell[c]{\num{.947}\\(\num{.0271})} & \makecell[c]{\num{.956}\\(\num{.0256})}\\
 
-\multirow[t]{-3}{*}{\centering\arraybackslash LARGE} & \multicolumn{1}{c|}{1200} & \makecell[c]{\num{.975}\\(\num{.0120})} & \makecell[c]{\num{.980}\\(\num{.0106})} & \makecell[c]{\num{.933}\\(\num{.0264})} & \makecell[c]{\num{.942}\\(\num{.0253})}\\
+\multirow[t]{-3}{*}{\centering\arraybackslash LARGE} & \multicolumn{1}{c|}{1200} & \makecell[c]{\num{.975}\\(\num{.0120})} & \makecell[c]{\num{.980}\\(\num{.0106})} & \makecell[c]{\num{.933}\\(\num{.0490})} & \makecell[c]{\num{.942}\\(\num{.0481})}\\
 \bottomrule
 \end{tabular}
 \end{table}
