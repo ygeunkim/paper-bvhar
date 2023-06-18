@@ -3,7 +3,7 @@
 
 <!-- badges: start -->
 
-[![STATUS](https://img.shields.io/badge/JSCS-Under%20review-brightgreen.svg)](https://img.shields.io/badge/JSCS-Under%20review-brightgreen)
+[![STATUS](https://img.shields.io/badge/Journal-Under%20review-brightgreen.svg)](https://img.shields.io/badge/Journal-Under%20review-brightgreen)
 <!-- badges: end -->
 
 ## Overview
@@ -40,6 +40,7 @@ This is a repository for researching Bayesian VHAR.
 - [parallel](https://stat.ethz.ch/R-manual/R-devel/library/parallel/doc/parallel.pdf)
 - [foreach](https://github.com/RevolutionAnalytics/foreach)
 - [gridExtra](https://cran.r-project.org/web/packages/gridExtra/index.html)
+- [qwraps2](https://cran.r-project.org/web/packages/qwraps2/index.html)
 
 ## Results
 
