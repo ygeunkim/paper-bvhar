@@ -3,11 +3,21 @@
 // [[Rcpp::depends(RcppEigen)]]
 
 // [[Rcpp::export]]
-Eigen::MatrixXd ldlt_lower(Eigen::MatrixXd x) {
-  return x.ldlt().matrixL();
+Eigen::MatrixXd ldlt_inv_lower(Eigen::MatrixXd x) {
+  return x.inverse().ldlt().matrixL();
 }
 
 // [[Rcpp::export]]
-Eigen::MatrixXd ldlt_upper(Eigen::MatrixXd x) {
-  return x.ldlt().matrixU();
+Eigen::MatrixXd llt_inv_lower(Eigen::MatrixXd x) {
+  return x.inverse().llt().matrixL();
+}
+
+// [[Rcpp::export]]
+Eigen::MatrixXd ldlt_inv_upper(Eigen::MatrixXd x) {
+  return x.inverse().ldlt().matrixU();
+}
+
+// [[Rcpp::export]]
+Eigen::MatrixXd llt_inv_upper(Eigen::MatrixXd x) {
+  return x.inverse().llt().matrixU();
 }

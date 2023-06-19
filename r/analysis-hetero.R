@@ -44,17 +44,15 @@ roll_shock <- function(y, bayes_spec, include_mean, step, y_test) {
   num_horizon <- nrow(y_test) - step + 1
   mat_roll <- y
   fit <- bvhar_minnesota(mat_roll, har = c(5, 22), bayes_spec = bayes_spec, include_mean = include_mean)
-  shock_mat <- ldlt_upper(solve(summary(fit, num_iter = 5000L)$covmat))
-  # pred_fit <- predict(fit, step)
+  shock_mat <- ldlt_inv_upper(summary(fit, num_iter = 5000L)$covmat)
   pred_fit <- bvhar:::forecast_bvharmn(fit, step, 1)
-  # y_pred <- pred_fit$posterior_mean
   res <- matrix(nrow = num_horizon, ncol = ncol(y_test))
   res[1,] <- last(pred_fit$posterior_mean %*% shock_mat)
   for (i in seq_len(num_horizon - 1)) {
     mat_roll[1:(nrow(y) - 1),] <- mat_roll[2:nrow(y),]
     mat_roll[nrow(y),] <- y_test[i,]
     fit <- bvhar_minnesota(mat_roll, har = c(5, 22), bayes_spec = bayes_spec, include_mean = include_mean)
-    shock_mat <- ldlt_upper(solve(summary(fit, num_iter = 5000L)$covmat))
+    shock_mat <- ldlt_inv_upper(summary(fit, num_iter = 5000L)$covmat)
     pred_fit <- bvhar:::forecast_bvharmn(fit, step, 1)
     res[i + 1,] <- last(pred_fit$posterior_mean %*% shock_mat)
   }
