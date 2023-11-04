@@ -3,7 +3,8 @@
 
 <!-- badges: start -->
 
-[![STATUS](https://img.shields.io/badge/Journal-Under%20review-brightgreen.svg)](https://img.shields.io/badge/Journal-Under%20review-brightgreen)
+[![STATUS](https://img.shields.io/badge/JSCS-Accepted-brightgreen.svg)](https://img.shields.io/badge/JSCS-Accepted-brightgreen)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.6814790.svg)](https://doi.org/10.5281/zenodo.6814790)
 <!-- badges: end -->
 
 ## Overview
@@ -32,8 +33,8 @@ This is a repository for researching Bayesian VHAR.
 ### Required R packages
 
 - [ygeunkim/bvhar](https://github.com/ygeunkim/bvhar)
-  - v0.9.0
-  - v0.12.0: for MVT generation
+  - v0.9.0: in [Zenodo](https://doi.org/10.5281/zenodo.6814790)
+  - v0.12.0: for revision (MVT generation)
 - [tidyverse](https://www.tidyverse.org)
 - [knitr](https://yihui.org/knitr/)
 - [kableExtra](https://haozhu233.github.io/kableExtra/)
