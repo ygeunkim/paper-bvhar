@@ -21,8 +21,7 @@ options(digits = 3)
 # Bayesian Vector Heterogeneous Autoregressive Modeling
 
 <!-- badges: start -->
-[![STATUS](https://img.shields.io/badge/JSCS-Accepted-brightgreen.svg)](https://img.shields.io/badge/JSCS-Accepted-brightgreen)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.6814790.svg)](https://doi.org/10.5281/zenodo.6814790)
+[![JSCS-DOI](https://img.shields.io/badge/JSCS-10.1080/00949655.2023.2281644-brightgreen.svg)](https://doi.org/10.1080/00949655.2023.2281644)
 <!-- badges: end -->
 
 ## Overview
@@ -50,6 +49,7 @@ This is a repository for researching Bayesian VHAR.
 - [ygeunkim/bvhar](https://github.com/ygeunkim/bvhar)
     - v0.9.0: in [Zenodo](https://doi.org/10.5281/zenodo.6814790)
     - v0.12.0: for revision (MVT generation)
+    - Also, available via [releases](https://github.com/ygeunkim/bvhar/releases) in the repo.
 - [tidyverse](https://www.tidyverse.org)
 - [knitr](https://yihui.org/knitr/)
 - [kableExtra](https://haozhu233.github.io/kableExtra/)
